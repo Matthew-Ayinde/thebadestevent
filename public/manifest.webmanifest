@@ -1,0 +1,17 @@
+{
+  "name": "RÌNWÁ Hospitality & Experiences",
+  "short_name": "RÌNWÁ",
+  "description": "Culture-first hospitality and experiences brand curating intentional moments.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07171a",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/globe.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

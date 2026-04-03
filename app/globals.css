@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --background: #07171a;
+  --foreground: #f5f0e8;
+  --teal: #0f766e;
+  --teal-soft: #7dd3cf;
+  --paper: #f4efe7;
+  --ink: #0c1214;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee 42s linear infinite;
+}
+
+.marquee-shell:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-image:
+    radial-gradient(circle at top, rgba(125, 211, 207, 0.15), transparent 34%),
+    radial-gradient(circle at 80% 20%, rgba(15, 118, 110, 0.16), transparent 22%),
+    linear-gradient(180deg, #07171a 0%, #041114 100%);
+}
+
+::selection {
+  background: rgba(125, 211, 207, 0.25);
+  color: white;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #041114;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(125, 211, 207, 0.32);
+  border-radius: 999px;
+}
