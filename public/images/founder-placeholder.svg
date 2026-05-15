@@ -1,0 +1,8 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#041114" />
+  <circle cx="300" cy="300" r="200" fill="#0f766e" opacity="0.08" />
+  <rect x="540" y="180" width="560" height="420" rx="18" fill="#072a28" />
+  <g fill="#7dd3cf" font-family="Arial, Helvetica, sans-serif" font-size="36">
+    <text x="80" y="700">Founder — placeholder image</text>
+  </g>
+</svg>

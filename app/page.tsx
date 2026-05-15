@@ -1,4 +1,5 @@
 import { BrandMarquee } from "@/components/rinwa/BrandMarquee";
+import AboutSections from "@/components/rinwa/AboutSections";
 import { ContactForm } from "@/components/rinwa/ContactForm";
 import { ExperienceSection } from "@/components/rinwa/ExperienceSection";
 import { FeaturedEvent } from "@/components/rinwa/FeaturedEvent";
@@ -66,6 +67,7 @@ export default function Page() {
 
       <HeroCarousel />
       <BrandMarquee />
+      <AboutSections />
       <ExperienceSection />
       <FeaturedEvent />
       <PastEventsGallery />
