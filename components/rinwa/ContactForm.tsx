@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { contactGoals, contactIndustries } from "./data";
+import toast from "react-hot-toast";
 
 /**
  * Refined inquiry form.
@@ -13,11 +14,79 @@ export function ContactForm() {
   const [step, setStep] = useState<1 | 2>(1);
   const [industry, setIndustry] = useState(contactIndustries[0]);
   const [goals, setGoals] = useState<string[]>([contactGoals[0]]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form state
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    company: "",
+    projectDate: "",
+    estimatedBudget: "",
+    description: "",
+  });
 
   const stepLabel = useMemo(() => (step === 1 ? "Tell us who you are" : "Share the shape of the project"), [step]);
 
   const toggleGoal = (goal: string) => {
     setGoals((current) => (current.includes(goal) ? current.filter((item) => item !== goal) : [...current, goal]));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.company || !formData.projectDate || !formData.estimatedBudget || !formData.description) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          projectDate: formData.projectDate,
+          estimatedBudget: parseInt(formData.estimatedBudget),
+          description: formData.description,
+          industry: industry,
+          goals: goals,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to submit");
+      }
+
+      toast.success("Thank you! We'll be in touch within 48 hours.");
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        company: "",
+        projectDate: "",
+        estimatedBudget: "",
+        description: "",
+      });
+      setStep(1);
+      setIndustry(contactIndustries[0]);
+      setGoals([contactGoals[0]]);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -47,7 +116,7 @@ export function ContactForm() {
           whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.85, ease: "easeOut" }}
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
           className="rounded-[2.25rem] border border-white/10 bg-white/4 p-5 shadow-[0_20px_90px_rgba(0,0,0,0.22)] sm:p-6"
         >
           <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
@@ -72,16 +141,42 @@ export function ContactForm() {
                 className="pt-6"
               >
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {[
-                    "Full Name",
-                    "Email",
-                    "Phone",
-                    "Company / Brand",
-                    "Project Timeline",
-                    "Budget (₦)",
-                  ].map((label) => (
-                    <FloatingField key={label} label={label} />
-                  ))}
+                  <FloatingField
+                    label="Full Name"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                  />
+                  <FloatingField
+                    label="Email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                  />
+                  <FloatingField
+                    label="Phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                  />
+                  <FloatingField
+                    label="Company / Brand"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleInputChange}
+                  />
+                  <FloatingField
+                    label="Project Timeline"
+                    name="projectDate"
+                    value={formData.projectDate}
+                    onChange={handleInputChange}
+                  />
+                  <FloatingField
+                    label="Budget (₦)"
+                    name="estimatedBudget"
+                    value={formData.estimatedBudget}
+                    onChange={handleInputChange}
+                  />
                 </div>
 
                 <div className="mt-6">
@@ -118,6 +213,9 @@ export function ContactForm() {
                   <span className="mb-2 block text-sm text-white/70">Description</span>
                   <textarea
                     rows={6}
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
                     placeholder="Tell us about the atmosphere, audience, and outcome you want to create."
                     className="w-full rounded-2xl border border-white/10 bg-[#041114]/60 px-4 py-3 text-white placeholder:text-white/28 outline-none transition focus:border-teal-300/50 focus:bg-[#07171a] focus:shadow-[0_0_0_4px_rgba(125,211,207,0.08)]"
                   />
@@ -144,9 +242,10 @@ export function ContactForm() {
                   </button>
                   <button
                     type="submit"
-                    className="rounded-full bg-teal-300 px-6 py-4 text-base font-semibold text-slate-950 transition duration-300 hover:bg-teal-200 hover:shadow-[0_0_35px_rgba(125,211,207,0.18)]"
+                    disabled={isSubmitting}
+                    className="rounded-full bg-teal-300 px-6 py-4 text-base font-semibold text-slate-950 transition duration-300 hover:bg-teal-200 hover:shadow-[0_0_35px_rgba(125,211,207,0.18)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    I’m Here, I’ve Arrived
+                    {isSubmitting ? "Submitting..." : "I’m Here, I’ve Arrived"}
                   </button>
                 </div>
               </motion.div>
@@ -158,13 +257,16 @@ export function ContactForm() {
   );
 }
 
-function FloatingField({ label }: { label: string }) {
-  const type = label.toLowerCase().includes("email") ? "email" : label.toLowerCase().includes("budget") ? "text" : "text";
+function FloatingField({ label, name, value, onChange }: { label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+  const type = label.toLowerCase().includes("email") ? "email" : label.toLowerCase().includes("budget") ? "number" : "text";
 
   return (
     <label className="relative block">
       <input
         type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
         placeholder=" "
         className="peer w-full rounded-2xl border border-white/10 bg-[#041114]/60 px-4 pb-3 pt-6 text-white placeholder:text-transparent outline-none transition focus:border-teal-300/50 focus:bg-[#07171a] focus:shadow-[0_0_0_4px_rgba(125,211,207,0.08)]"
       />

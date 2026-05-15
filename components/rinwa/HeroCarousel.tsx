@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useState } from "react";
-import { heroSlides } from "./data";
+import { useState, useEffect } from "react";
+import { heroSlides as fallbackSlides } from "./data";
 import { useAutoplayIndex } from "./use-autoplay-index";
 
 /**
@@ -12,9 +12,29 @@ import { useAutoplayIndex } from "./use-autoplay-index";
  */
 export function HeroCarousel() {
   const shouldReduceMotion = useReducedMotion();
+  const [slides, setSlides] = useState(fallbackSlides);
   const [paused, setPaused] = useState(false);
-  const { index, setIndex, next, prev } = useAutoplayIndex(heroSlides.length, 7200, paused);
-  const activeSlide = heroSlides[index];
+  const { index, setIndex, next, prev } = useAutoplayIndex(slides.length, 7200, paused);
+  const activeSlide = slides[index];
+
+  useEffect(() => {
+    fetch("/api/hero-slides")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mappedSlides = data.map((slide: any) => ({
+            type: slide.videoUrl ? "video" : "image",
+            src: slide.videoUrl || slide.imageUrl,
+            poster: slide.imageUrl,
+            alt: slide.title,
+            eyebrow: "RÌNWÁ Experience",
+            headline: slide.title,
+          }));
+          setSlides(mappedSlides);
+        }
+      })
+      .catch(() => setSlides(fallbackSlides));
+  }, []);
 
   return (
     <section

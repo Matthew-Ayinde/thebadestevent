@@ -1,13 +1,31 @@
 "use client";
 
-import { brandPartners } from "./data";
+import { useEffect, useState } from "react";
+import { brandPartners as fallbackPartners } from "./data";
 
 /**
  * Seamless brand marquee.
  * The array is duplicated to create an infinite loop without visible seams.
  */
 export function BrandMarquee() {
-  const loop = [...brandPartners, ...brandPartners];
+  const [partners, setPartners] = useState(fallbackPartners);
+
+  useEffect(() => {
+    fetch("/api/brand-partners")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const mapped = data.map((partner: any) => ({
+            label: partner.name,
+            region: partner.region,
+          }));
+          setPartners(mapped);
+        }
+      })
+      .catch(() => setPartners(fallbackPartners));
+  }, []);
+
+  const loop = [...partners, ...partners];
 
   return (
     <section className="border-y border-white/8 py-6 sm:py-8">
