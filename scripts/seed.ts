@@ -1,11 +1,12 @@
-import { connectDB } from './lib/mongodb';
-import { User } from './models/User';
-import { HeroSlide } from './models/HeroSlide';
-import { BrandPartner } from './models/BrandPartner';
-import { Event } from './models/Event';
-import { MediaItem } from './models/MediaItem';
-import { Settings } from './models/Settings';
-import { heroSlides, brandPartners, weekdayEvents, pastEvents, galleryItems } from './components/rinwa/data';
+import { connectDB } from '@/lib/mongodb';
+import { User } from '@/models/User';
+import { HeroSlide } from '@/models/HeroSlide';
+import { BrandPartner } from '@/models/BrandPartner';
+import { Event } from '@/models/Event';
+import { MediaItem } from '@/models/MediaItem';
+import { Settings } from '@/models/Settings';
+import type { HeroSlide as HeroSlideData, BrandItem, WeekdayEvent, PastEvent, GalleryItem } from '@/components/rinwa/data';
+import { heroSlides, brandPartners, weekdayEvents, pastEvents, galleryItems } from '@/components/rinwa/data';
 
 async function main() {
   try {
@@ -28,21 +29,21 @@ async function main() {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@rinwahospitality.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456';
 
-    const adminUser = await User.create({
+    await User.create({
       email: adminEmail,
       password: adminPassword,
       name: 'RÌNWÁ Admin',
       role: 'admin',
     });
-    console.log(`✓ Admin user created: ${adminUser.email}`);
+    console.log(`✓ Admin user created: ${adminEmail}`);
 
     // Seed Hero Slides
     console.log('Seeding hero slides...');
-    const heroSlidesData = heroSlides.map((slide, index) => ({
-      imageUrl: slide.imageUrl,
-      videoUrl: slide.videoUrl,
-      title: slide.title,
-      description: slide.description,
+    const heroSlidesData = (heroSlides as HeroSlideData[]).map((slide, index) => ({
+      imageUrl: slide.type === 'video' ? slide.poster : slide.src,
+      videoUrl: slide.type === 'video' ? slide.src : undefined,
+      title: slide.headline,
+      description: slide.alt,
       order: index,
       isActive: true,
     }));
@@ -51,58 +52,55 @@ async function main() {
 
     // Seed Brand Partners
     console.log('Seeding brand partners...');
-    const partnersData = brandPartners.map((partner, index) => ({
-      name: partner.name,
-      logoUrl: partner.logoUrl,
-      region: partner.region,
-      link: partner.link,
-      order: index,
-      isActive: true,
-    }));
+    const partnersData = (brandPartners as BrandItem[]).map((partner, index) => {
+      const regionMap: Record<string, 'Lagos' | 'Canada' | 'Hospitality' | 'Other'> = {
+        'Lagos': 'Lagos',
+        'Canada': 'Canada',
+        'Hospitality': 'Hospitality',
+        'Experiences': 'Other',
+      };
+      return {
+        name: partner.label,
+        logoUrl: `https://via.placeholder.com/200?text=${encodeURIComponent(partner.label)}`,
+        region: regionMap[partner.region] || 'Other',
+        order: index,
+        isActive: true,
+      };
+    });
     await BrandPartner.insertMany(partnersData);
     console.log(`✓ ${partnersData.length} brand partners created`);
 
-    // Seed Events (combine weekday and past events)
+    // Seed Events (from pastEvents as archived events)
     console.log('Seeding events...');
-    const weekdayEventsData = weekdayEvents.map((event, index) => ({
-      name: event.name,
-      description: event.description,
-      city: event.city,
-      weekday: event.weekday,
-      date: event.date,
-      time: event.time,
-      location: event.location,
-      rsvpLink: event.rsvpLink,
-      imageUrl: event.imageUrl,
-      eventType: event.eventType,
-      isFeatured: event.isFeatured || false,
-      isPast: false,
-      order: index,
-    }));
-
-    const pastEventsData = pastEvents.map((event, index) => ({
-      name: event.name,
-      description: event.description,
-      city: event.city,
-      weekday: event.weekday,
-      date: event.date,
-      time: event.time,
-      location: event.location,
-      rsvpLink: event.rsvpLink,
-      imageUrl: event.imageUrl,
-      eventType: event.eventType,
-      isFeatured: false,
+    const typeMap: Record<string, 'Dining' | 'Community' | 'Nightlife' | 'Creative' | 'Wellness'> = {
+      'Hospitality / Dining': 'Dining',
+      'Community': 'Community',
+      'Nightlife': 'Nightlife',
+      'Creative Strategy': 'Creative',
+      'Gathering': 'Community',
+    };
+    const eventsData = (pastEvents as PastEvent[]).map((event, index) => ({
+      name: event.title,
+      description: event.category,
+      city: 'Lagos' as const,
+      weekday: 'Wednesday' as const,
+      date: 'Upcoming',
+      time: '6pm - 9pm',
+      location: 'RÌNWÁ Venue',
+      rsvpLink: 'https://example.com/rsvp',
+      imageUrl: event.src,
+      eventType: typeMap[event.category] || 'Dining',
+      isFeatured: index === 0,
       isPast: true,
       order: index,
     }));
-
-    await Event.insertMany([...weekdayEventsData, ...pastEventsData]);
-    console.log(`✓ ${weekdayEventsData.length + pastEventsData.length} events created`);
+    await Event.insertMany(eventsData);
+    console.log(`✓ ${eventsData.length} events created`);
 
     // Seed Media Items
     console.log('Seeding media items...');
-    const mediaData = galleryItems.map((item, index) => ({
-      imageUrl: item.imageUrl,
+    const mediaData = (galleryItems as GalleryItem[]).map((item, index) => ({
+      imageUrl: item.src,
       caption: item.caption,
       order: index,
       isActive: true,

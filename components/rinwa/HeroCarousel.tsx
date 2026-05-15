@@ -23,12 +23,12 @@ export function HeroCarousel() {
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
           const mappedSlides = data.map((slide: any) => ({
-            type: slide.videoUrl ? "video" : "image",
-            src: slide.videoUrl || slide.imageUrl,
-            poster: slide.imageUrl,
-            alt: slide.title,
+            type: (slide.videoUrl ? "video" : "image") as "image" | "video",
+            src: (slide.videoUrl || slide.imageUrl) as string,
+            poster: slide.imageUrl as string,
+            alt: slide.title as string,
             eyebrow: "RÌNWÁ Experience",
-            headline: slide.title,
+            headline: slide.title as string,
           }));
           setSlides(mappedSlides);
         }
@@ -210,7 +210,7 @@ export function HeroCarousel() {
           </div>
 
           <div className="flex items-center gap-2">
-            {heroSlides.map((slide, slideIndex) => (
+            {slides.map((slide, slideIndex) => (
               <button
                 key={slide.poster}
                 type="button"

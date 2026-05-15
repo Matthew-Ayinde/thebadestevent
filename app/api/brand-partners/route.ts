@@ -1,6 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import { BrandPartner } from '@/models/BrandPartner';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session || (session.user as any).role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized', code: 'UNAUTHORIZED' },

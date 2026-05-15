@@ -1,18 +1,27 @@
-import { auth } from '@/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const session = await auth();
+  const { pathname } = request.nextUrl;
+  const token = await getToken({ req: request });
+
+  // If already authenticated, do not allow returning to login page.
+  if (pathname === "/admin/login") {
+    if (token && (token.role === "admin" || token.role === "editor")) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    return NextResponse.next();
+  }
 
   // Check if user is trying to access /admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+  if (pathname.startsWith("/admin")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
     }
 
-    // Optional: Check for specific role (admin only)
-    if (!(session.user as any).role === 'admin' && !(session.user as any).role === 'editor') {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+    // Optional: Check for specific role
+    if (token.role !== "admin" && token.role !== "editor") {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
 
@@ -20,5 +29,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ["/admin/:path*"],
 };
+
