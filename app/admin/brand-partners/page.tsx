@@ -46,6 +46,23 @@ export default function BrandPartnersPage() {
     fetchPartners();
   }, []);
 
+  useEffect(() => {
+    if (editingId && partners.length > 0) {
+      const partner = partners.find((p) => p._id === editingId);
+      if (partner) {
+        setTimeout(() => {
+          reset({
+            name: partner.name,
+            logoUrl: partner.logoUrl,
+            region: partner.region,
+            link: partner.link || '',
+            order: partner.order || 0,
+          });
+        }, 0);
+      }
+    }
+  }, [editingId, partners, reset]);
+
   async function fetchPartners() {
     try {
       setIsLoading(true);
@@ -106,11 +123,6 @@ export default function BrandPartnersPage() {
 
   function openEditModal(partner: any) {
     setEditingId(partner._id);
-    setValue('name', partner.name);
-    setValue('logoUrl', partner.logoUrl);
-    setValue('region', partner.region);
-    setValue('link', partner.link || '');
-    setValue('order', partner.order);
     setIsModalOpen(true);
   }
 

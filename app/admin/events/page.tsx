@@ -55,6 +55,30 @@ export default function EventsPage() {
     fetchEvents();
   }, [cityFilter]);
 
+  useEffect(() => {
+    if (editingId && events.length > 0) {
+      const event = events.find((e) => e._id === editingId);
+      if (event) {
+        setTimeout(() => {
+          reset({
+            name: event.name,
+            description: event.description,
+            city: event.city,
+            weekday: event.weekday,
+            date: event.date,
+            time: event.time,
+            location: event.location,
+            rsvpLink: event.rsvpLink,
+            imageUrl: event.imageUrl,
+            eventType: event.eventType,
+            isFeatured: event.isFeatured,
+            isPast: event.isPast,
+          });
+        }, 0);
+      }
+    }
+  }, [editingId, events, reset]);
+
   async function fetchEvents() {
     try {
       setIsLoading(true);
@@ -116,11 +140,6 @@ export default function EventsPage() {
 
   function openEditModal(event: any) {
     setEditingId(event._id);
-    Object.keys(event).forEach((key) => {
-      if (key !== '_id' && key !== '__v' && key !== 'createdAt' && key !== 'updatedAt') {
-        setValue(key as any, event[key]);
-      }
-    });
     setIsModalOpen(true);
   }
 

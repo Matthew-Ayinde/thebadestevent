@@ -47,6 +47,23 @@ export default function HeroSlidesPage() {
     fetchSlides();
   }, []);
 
+  useEffect(() => {
+    if (editingId && slides.length > 0) {
+      const slide = slides.find((s) => s._id === editingId);
+      if (slide) {
+        setTimeout(() => {
+          reset({
+            imageUrl: slide.imageUrl,
+            videoUrl: slide.videoUrl || '',
+            title: slide.title,
+            description: slide.description || '',
+            order: slide.order || 0,
+          });
+        }, 0);
+      }
+    }
+  }, [editingId, slides, reset]);
+
   async function fetchSlides() {
     try {
       setIsLoading(true);
@@ -107,11 +124,6 @@ export default function HeroSlidesPage() {
 
   function openEditModal(slide: any) {
     setEditingId(slide._id);
-    setValue('imageUrl', slide.imageUrl);
-    setValue('videoUrl', slide.videoUrl || '');
-    setValue('title', slide.title);
-    setValue('description', slide.description || '');
-    setValue('order', slide.order);
     setIsModalOpen(true);
   }
 

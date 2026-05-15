@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import AdminButton from '@/components/admin/AdminButton';
 import AdminInput from '@/components/admin/AdminInput';
 import AdminModal from '@/components/admin/AdminModal';
 import LoadingSpinner from '@/components/admin/LoadingSpinner';
 import ConfirmationDialog from '@/components/admin/ConfirmationDialog';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function MediaPage() {
   const [media, setMedia] = useState<any[]>([]);
@@ -18,6 +19,7 @@ export default function MediaPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [caption, setCaption] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMedia();
@@ -36,7 +38,7 @@ export default function MediaPage() {
     }
   }
 
-  async function handleAddMedia() {
+  async function handleSaveMedia() {
     if (!imageUrl) {
       toast.error('Image URL is required');
       return;
@@ -44,8 +46,11 @@ export default function MediaPage() {
 
     try {
       setIsSubmitting(true);
-      const res = await fetch('/api/media', {
-        method: 'POST',
+      const method = editingId ? 'PUT' : 'POST';
+      const url = editingId ? `/api/media/${editingId}` : '/api/media';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl,
@@ -54,11 +59,12 @@ export default function MediaPage() {
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to add media');
+      if (!res.ok) throw new Error('Failed to save media');
 
-      toast.success('Media added');
+      toast.success(editingId ? 'Media updated' : 'Media added');
       setImageUrl('');
       setCaption('');
+      setEditingId(null);
       setIsModalOpen(false);
       await fetchMedia();
     } catch (error) {
@@ -86,6 +92,20 @@ export default function MediaPage() {
     }
   }
 
+  function openEditModal(item: any) {
+    setEditingId(item._id);
+    setImageUrl(item.imageUrl);
+    setCaption(item.caption || '');
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditingId(null);
+    setImageUrl('');
+    setCaption('');
+  }
+
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8 flex justify-between items-center">
@@ -93,7 +113,7 @@ export default function MediaPage() {
           <h1 className="font-serif text-4xl text-white/90">Media Gallery</h1>
           <p className="text-white/50 mt-2">Manage gallery images</p>
         </div>
-        <AdminButton onClick={() => setIsModalOpen(true)} variant="primary">
+        <AdminButton onClick={() => { closeModal(); setIsModalOpen(true); }} variant="primary">
           <Plus size={18} className="inline mr-2" />
           Add Media
         </AdminButton>
@@ -114,12 +134,20 @@ export default function MediaPage() {
                   alt={item.caption}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                 />
-                <button
-                  onClick={() => setDeleteConfirm(item._id)}
-                  className="absolute top-2 right-2 p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                  <button
+                    onClick={() => openEditModal(item)}
+                    className="p-2 bg-teal-500/80 hover:bg-teal-500 text-white rounded-lg transition"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirm(item._id)}
+                    className="p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
               {item.caption && (
                 <div className="p-4">
@@ -133,20 +161,14 @@ export default function MediaPage() {
 
       <AdminModal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setImageUrl('');
-          setCaption('');
-        }}
-        title="Add New Media"
+        onClose={closeModal}
+        title={editingId ? 'Edit Media' : 'Add New Media'}
       >
         <div className="space-y-6">
-          <AdminInput
-            label="Image URL"
-            type="url"
+          <ImageUploader
+            label="Image"
             value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="https://example.com/image.jpg"
+            onChange={setImageUrl}
             required
           />
           <AdminInput
@@ -160,11 +182,7 @@ export default function MediaPage() {
             <AdminButton
               type="button"
               variant="secondary"
-              onClick={() => {
-                setIsModalOpen(false);
-                setImageUrl('');
-                setCaption('');
-              }}
+              onClick={closeModal}
               disabled={isSubmitting}
             >
               Cancel
@@ -172,10 +190,10 @@ export default function MediaPage() {
             <AdminButton
               type="button"
               variant="primary"
-              onClick={handleAddMedia}
+              onClick={handleSaveMedia}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Media'}
+              {isSubmitting ? 'Saving...' : editingId ? 'Update Media' : 'Add Media'}
             </AdminButton>
           </div>
         </div>
