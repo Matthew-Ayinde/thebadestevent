@@ -28,7 +28,9 @@ export default function AdminModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className={`bg-white/5 border border-white/10 rounded-[2.25rem] ${sizeClasses[size]} w-full backdrop-blur-sm`}>
+      <div
+        className={`bg-white/5 border border-white/10 rounded-[2.25rem] ${sizeClasses[size]} w-full backdrop-blur-sm`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-white/10">
           <h2 className="font-serif text-xl text-white/90">{title}</h2>

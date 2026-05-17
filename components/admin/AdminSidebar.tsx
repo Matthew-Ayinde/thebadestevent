@@ -13,6 +13,7 @@ const navItems = [
   { href: '/admin/events', label: 'Events', icon: Play },
   { href: '/admin/media', label: 'Media Gallery', icon: Image },
   { href: '/admin/submissions', label: 'Submissions', icon: MessageSquare },
+  { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -44,7 +45,9 @@ export default function AdminSidebar() {
       >
         {/* Logo */}
         <div className="px-6 py-8 border-b border-white/10">
+          <Link href="/" className="cursor-pointer">
           <h1 className="font-serif text-xl text-white/90">RÌNWÁ</h1>
+          </Link>
           <p className="text-xs text-white/40 uppercase tracking-[0.1em] mt-1">Admin</p>
         </div>
 

@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 export function ContactForm() {
   const shouldReduceMotion = useReducedMotion();
   const [step, setStep] = useState<1 | 2>(1);
-  const [industry, setIndustry] = useState(contactIndustries[0]);
+  const [industries, setIndustries] = useState<string[]>([contactIndustries[0]]);
   const [goals, setGoals] = useState<string[]>([contactGoals[0]]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,6 +33,12 @@ export function ContactForm() {
     setGoals((current) => (current.includes(goal) ? current.filter((item) => item !== goal) : [...current, goal]));
   };
 
+  const toggleIndustry = (industry: string) => {
+    setIndustries((current) =>
+      current.includes(industry) ? current.filter((item) => item !== industry) : [...current, industry]
+    );
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -41,7 +47,16 @@ export function ContactForm() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.company || !formData.projectDate || !formData.estimatedBudget || !formData.description) {
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.company ||
+      !formData.projectDate ||
+      !formData.estimatedBudget ||
+      !formData.description ||
+      industries.length === 0
+    ) {
       toast.error("Please fill all fields");
       return;
     }
@@ -59,7 +74,8 @@ export function ContactForm() {
           projectDate: formData.projectDate,
           estimatedBudget: parseInt(formData.estimatedBudget),
           description: formData.description,
-          industry: industry,
+            industries,
+            industry: industries,
           goals: goals,
         }),
       });
@@ -80,7 +96,7 @@ export function ContactForm() {
         description: "",
       });
       setStep(1);
-      setIndustry(contactIndustries[0]);
+      setIndustries([contactIndustries[0]]);
       setGoals([contactGoals[0]]);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An error occurred");
@@ -94,7 +110,7 @@ export function ContactForm() {
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12">
         <div className="max-w-xl">
           <p className="text-[0.72rem] uppercase tracking-[0.38em] text-teal-200/75">Contact / inquiry</p>
-          <h2 className="mt-4 font-serif text-[clamp(3rem,7vw,5.2rem)] leading-[0.94] tracking-[-0.05em] text-white">
+          <h2 className="mt-4 font-serif text-[clamp(3rem,7vw,5.2rem)] leading-[0.94] tracking-tighter text-white">
             Have a vision? We’re listening.
           </h2>
           <p className="mt-5 text-lg leading-8 text-white/68">
@@ -105,7 +121,7 @@ export function ContactForm() {
             <p className="text-xs uppercase tracking-[0.28em] text-teal-100/70">Project pulse</p>
             <div className="mt-4 space-y-2 text-sm text-white/72">
               <p>Step: {stepLabel}</p>
-              <p>Industry: {industry}</p>
+              <p>Industries: {industries.join(" • ")}</p>
               <p>Goals: {goals.join(" • ")}</p>
             </div>
           </div>
@@ -140,50 +156,59 @@ export function ContactForm() {
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 className="pt-6"
               >
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FloatingField
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <FormField
                     label="Full Name"
                     name="fullName"
+                    type="text"
                     value={formData.fullName}
                     onChange={handleInputChange}
                   />
-                  <FloatingField
+                  <FormField
                     label="Email"
                     name="email"
+                    type="email"
                     value={formData.email}
                     onChange={handleInputChange}
                   />
-                  <FloatingField
+                  <FormField
                     label="Phone"
                     name="phone"
+                    type="tel"
                     value={formData.phone}
                     onChange={handleInputChange}
                   />
-                  <FloatingField
+                  <FormField
                     label="Company / Brand"
                     name="company"
+                    type="text"
                     value={formData.company}
                     onChange={handleInputChange}
                   />
-                  <FloatingField
+                  <FormField
                     label="Project Timeline"
                     name="projectDate"
+                    type="text"
                     value={formData.projectDate}
                     onChange={handleInputChange}
                   />
-                  <FloatingField
+                  <FormField
                     label="Budget (₦)"
                     name="estimatedBudget"
+                    type="number"
                     value={formData.estimatedBudget}
                     onChange={handleInputChange}
                   />
                 </div>
 
-                <div className="mt-6">
-                  <p className="text-sm text-white/70">Industry</p>
+                <div className="mt-7">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-white/70">Industries</p>
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/35">Select one or more</p>
+                  </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {contactIndustries.map((option) => (
-                      <ChipButton key={option} active={industry === option} onClick={() => setIndustry(option)}>
+                      <ChipButton key={option} active={industries.includes(option)} onClick={() => toggleIndustry(option)}>
                         {option}
                       </ChipButton>
                     ))}
@@ -209,15 +234,15 @@ export function ContactForm() {
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 className="pt-6"
               >
-                <label className="block">
-                  <span className="mb-2 block text-sm text-white/70">Description</span>
+                <label className="block space-y-3">
+                  <span className="block text-xs uppercase tracking-[0.24em] text-white/50">Description</span>
                   <textarea
                     rows={6}
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder="Tell us about the atmosphere, audience, and outcome you want to create."
-                    className="w-full rounded-2xl border border-white/10 bg-[#041114]/60 px-4 py-3 text-white placeholder:text-white/28 outline-none transition focus:border-teal-300/50 focus:bg-[#07171a] focus:shadow-[0_0_0_4px_rgba(125,211,207,0.08)]"
+                    className="w-full rounded-2xl border border-white/10 bg-[#041114]/60 px-4 py-4 text-white placeholder:text-white/28 outline-none transition focus:border-teal-300/50 focus:bg-[#07171a] focus:shadow-[0_0_0_4px_rgba(125,211,207,0.08)]"
                   />
                 </label>
 
@@ -257,22 +282,30 @@ export function ContactForm() {
   );
 }
 
-function FloatingField({ label, name, value, onChange }: { label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
-  const type = label.toLowerCase().includes("email") ? "email" : label.toLowerCase().includes("budget") ? "number" : "text";
-
+function FormField({
+  label,
+  name,
+  type,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  type: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
   return (
-    <label className="relative block">
+    <label className="block space-y-3">
+      <span className="block text-xs uppercase tracking-[0.24em] text-white/50">{label}</span>
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
-        placeholder=" "
-        className="peer w-full rounded-2xl border border-white/10 bg-[#041114]/60 px-4 pb-3 pt-6 text-white placeholder:text-transparent outline-none transition focus:border-teal-300/50 focus:bg-[#07171a] focus:shadow-[0_0_0_4px_rgba(125,211,207,0.08)]"
+        placeholder={label}
+        className="w-full min-h-[56px] rounded-2xl border border-white/10 bg-[#041114]/60 px-4 py-4 text-white placeholder:text-white/28 outline-none transition focus:border-teal-300/50 focus:bg-[#07171a] focus:shadow-[0_0_0_4px_rgba(125,211,207,0.08)]"
       />
-      <span className="pointer-events-none absolute left-4 top-4 origin-left text-sm text-white/48 transition-all duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-focus:top-4 peer-focus:translate-y-0 peer-focus:text-sm peer-focus:text-teal-100">
-        {label}
-      </span>
     </label>
   );
 }

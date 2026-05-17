@@ -8,7 +8,8 @@ export interface IContactSubmission extends Document {
   projectDate: string;
   estimatedBudget: number;
   description: string;
-  industry: string;
+  industries: string[];
+  industry?: string;
   goals: string[];
   isRead: boolean;
   createdAt: Date;
@@ -46,9 +47,9 @@ const ContactSubmissionSchema = new Schema<IContactSubmission>(
       type: String,
       required: true,
     },
-    industry: {
-      type: String,
-      required: true,
+    industries: {
+      type: [String],
+      default: [],
     },
     goals: {
       type: [String],

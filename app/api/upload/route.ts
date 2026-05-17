@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const resourceType = (formData.get('resourceType') as string) || 'auto';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'rinwa-admin',
-          resource_type: 'auto',
+          resource_type: resourceType === 'auto' ? 'auto' : resourceType,
         },
         (error, result) => {
           if (error) reject(error);

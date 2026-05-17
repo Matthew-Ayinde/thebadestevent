@@ -1,15 +1,13 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 
-/**
- * Social presence section.
- * This is designed like a curated media wall rather than a list of icons.
- */
 const platforms = [
   {
     name: "Instagram",
     handle: "@rinwahospitality",
+    link: "https://www.instagram.com/rinwahospitality",
     followers: "18.4K",
     cta: "Follow",
     gradient: "from-[#0f766e]/40 via-[#111827]/20 to-[#042c2b]",
@@ -18,6 +16,7 @@ const platforms = [
   {
     name: "X / Twitter",
     handle: "@rinwahospitality",
+    link: "https://twitter.com/rinwahospitality",
     followers: "6.1K",
     cta: "Read",
     gradient: "from-[#0f172a]/40 via-[#111827]/20 to-[#08161b]",
@@ -26,6 +25,7 @@ const platforms = [
   {
     name: "TikTok",
     handle: "@rinwahospitality",
+    link: "https://www.tiktok.com/@rinwahospitality",
     followers: "22.7K",
     cta: "Watch",
     gradient: "from-[#7c2d12]/30 via-[#111827]/20 to-[#120b0a]",
@@ -34,6 +34,7 @@ const platforms = [
   {
     name: "YouTube",
     handle: "RÌNWÁ Stories",
+    link: "https://www.youtube.com/@thebadestevents",
     followers: "9.8K",
     cta: "Join",
     gradient: "from-[#0c4a6e]/35 via-[#111827]/20 to-[#08131f]",
@@ -56,14 +57,14 @@ function SocialIcon({ platform }: { platform: string }) {
     case "X / Twitter":
       return (
         <svg viewBox="0 0 24 24" fill="none" className={common} aria-hidden="true">
-          <path
-            d="M5 5L18.5 19M16.5 5H19L13.3 11.7M5 19H7.4L13 12.7"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+  <path
+    d="M4 4.5h4.5L12 9.5l3.8-5H20l-6 7.8L20 19.5h-4.6L12 14l-4 5.5H4l6.3-8.2L4 4.5Z"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinejoin="round"
+    fill="none"
+  />
+</svg>
       );
     case "TikTok":
       return (
@@ -74,13 +75,9 @@ function SocialIcon({ platform }: { platform: string }) {
     default:
       return (
         <svg viewBox="0 0 24 24" fill="none" className={common} aria-hidden="true">
-          <path
-            d="M4 8.5a8 8 0 0 1 16 0v7a8 8 0 0 1-16 0v-7Z"
-            stroke="currentColor"
-            strokeWidth="1.6"
-          />
-          <path d="M9 10.5h6M9 14h4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        </svg>
+  <rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" strokeWidth="1.6" />
+  <path d="M10 9.5l5 2.5-5 2.5V9.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" fill="currentColor" />
+</svg>
       );
   }
 }
@@ -119,28 +116,20 @@ export function SocialPresence() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-black/20">
-                      <SocialIcon platform={platform.name} />
+                      <SocialIcon platform={platform.name} />  {/* ✅ Fixed */}
                     </div>
                     <div>
-                      <p className="text-lg font-medium text-white">{platform.name}</p>
                       <p className="text-sm text-white/65">{platform.handle}</p>
                     </div>
-                  </div>
-                  <div className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-right">
-                    <p className="text-[0.62rem] uppercase tracking-[0.24em] text-white/45">Followers</p>
-                    <p className="mt-1 text-sm text-white">{platform.followers}</p>
                   </div>
                 </div>
 
                 <div className="mt-8 space-y-5">
                   <p className="max-w-xs text-sm leading-7 text-white/72">{platform.preview}</p>
                   <div className="flex flex-wrap gap-2">
-                    <button className="rounded-full bg-teal-300 px-4 py-2 text-sm font-semibold text-slate-950 transition duration-300 hover:bg-teal-200">
-                      {platform.cta}
-                    </button>
-                    <button className="rounded-full border border-white/12 bg-white/5 px-4 py-2 text-sm text-white/80 transition duration-300 hover:border-teal-300/40 hover:bg-white/10">
+                    <Link href={platform.link} target="_blank" className="rounded-full cursor-pointer bg-teal-300 px-4 py-2 text-sm font-semibold text-slate-950 transition duration-300 hover:bg-teal-200">
                       View profile
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -154,8 +143,8 @@ export function SocialPresence() {
               <p className="text-xs uppercase tracking-[0.32em] text-teal-100/70">Community invitation</p>
               <p className="mt-2 text-lg text-white/82">Join the community for behind-the-scenes stories, event drops, and curated invites.</p>
             </div>
-            <a
-              href="#contact"
+            
+             <a href="#contact"
               className="inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition duration-300 hover:bg-teal-200"
             >
               Join the Community

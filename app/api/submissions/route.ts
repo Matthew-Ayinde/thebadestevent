@@ -1,9 +1,13 @@
 import { connectDB } from '@/lib/mongodb';
 import { ContactSubmission } from '@/models/ContactSubmission';
+import { Settings } from '@/models/Settings';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { sendInquiryEmails } from '@/lib/email';
+
+export const runtime = 'nodejs';
 
 const ContactSubmissionSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -13,7 +17,8 @@ const ContactSubmissionSchema = z.object({
   projectDate: z.string().min(1, 'Project date is required'),
   estimatedBudget: z.number().min(0, 'Budget must be positive'),
   description: z.string().min(1, 'Description is required'),
-  industry: z.string().min(1, 'Industry is required'),
+  industries: z.array(z.string().min(1)).optional(),
+  industry: z.union([z.string().min(1), z.array(z.string().min(1))]).optional(),
   goals: z.array(z.string()).optional(),
 });
 
@@ -21,12 +26,45 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = ContactSubmissionSchema.parse(body);
+    const industries = validated.industries?.length
+      ? validated.industries
+      : Array.isArray(validated.industry)
+        ? validated.industry
+        : validated.industry
+          ? [validated.industry]
+          : [];
+
+    if (industries.length === 0) {
+      return NextResponse.json(
+        { error: 'At least one industry is required', code: 'VALIDATION_ERROR' },
+        { status: 400 }
+      );
+    }
 
     await connectDB();
-    const submission = await ContactSubmission.create(validated);
+    const submission = await ContactSubmission.create({
+      ...validated,
+      industries,
+    });
+
+    const settings = await Settings.findOne().select('partnershipEmail');
+    const adminEmail = settings?.partnershipEmail || process.env.ADMIN_EMAIL || 'rinwahospitality@gmail.com';
+    const emailResult = await sendInquiryEmails({
+      submission: {
+        ...validated,
+        industries,
+      },
+      adminEmail,
+    });
 
     return NextResponse.json(
-      { success: true, message: 'Submission received', id: submission._id },
+      {
+        success: true,
+        message: 'Submission received',
+        id: submission._id,
+        emailDelivered: emailResult.sent,
+        emailWarnings: emailResult.warnings,
+      },
       { status: 201 }
     );
   } catch (error) {

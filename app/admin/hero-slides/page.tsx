@@ -13,6 +13,8 @@ import AdminModal from '@/components/admin/AdminModal';
 import AdminTable from '@/components/admin/AdminTable';
 import LoadingSpinner from '@/components/admin/LoadingSpinner';
 import ConfirmationDialog from '@/components/admin/ConfirmationDialog';
+import ImageUploader from '@/components/admin/ImageUploader';
+import VideoUploader from '@/components/admin/VideoUploader';
 
 const HeroSlideSchema = z.object({
   imageUrl: z.string().url('Invalid image URL'),
@@ -38,10 +40,16 @@ export default function HeroSlidesPage() {
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    watch,
   } = useForm<HeroSlideFormData>({
     resolver: zodResolver(HeroSlideSchema),
     defaultValues: { order: 0 },
   });
+
+  const imageUrlValue = watch('imageUrl');
+  const videoUrlValue = watch('videoUrl');
+  const titleValue = watch('title');
+  const descriptionValue = watch('description');
 
   useEffect(() => {
     fetchSlides();
@@ -63,6 +71,18 @@ export default function HeroSlidesPage() {
       }
     }
   }, [editingId, slides, reset]);
+
+  async function fetchSlideById(id: string) {
+    try {
+      const res = await fetch(`/api/hero-slides/${id}`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const slide = await res.json();
+      return slide;
+    } catch (error) {
+      console.error('Error fetching slide:', error);
+      return null;
+    }
+  }
 
   async function fetchSlides() {
     try {
@@ -172,7 +192,14 @@ export default function HeroSlidesPage() {
           <h1 className="font-serif text-4xl text-white/90">Hero Slides</h1>
           <p className="text-white/50 mt-2">Manage carousel slides on the homepage</p>
         </div>
-        <AdminButton onClick={() => { reset(); setEditingId(null); setIsModalOpen(true); }} variant="primary">
+        <AdminButton
+          onClick={() => {
+            reset({ imageUrl: '', videoUrl: '', title: '', description: '', order: '' });
+            setEditingId(null);
+            setIsModalOpen(true);
+          }}
+          variant="primary"
+        >
           <Plus size={18} className="inline mr-2" />
           Add Slide
         </AdminButton>
@@ -192,29 +219,31 @@ export default function HeroSlidesPage() {
         title={editingId ? 'Edit Slide' : 'Add New Slide'}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <AdminInput
-            label="Image URL"
-            type="url"
-            {...register('imageUrl')}
+          <ImageUploader
+            label="Image"
+            value={imageUrlValue || ''} 
+            onChange={(url) => setValue('imageUrl', url)}
             error={errors.imageUrl?.message}
             required
           />
-          <AdminInput
-            label="Video URL (optional)"
-            type="url"
-            {...register('videoUrl')}
+          <VideoUploader
+            label="Video (Optional)"
+            value={videoUrlValue || ''}
+            onChange={(url) => setValue('videoUrl', url)}
             error={errors.videoUrl?.message}
           />
           <AdminInput
             label="Title"
-            {...register('title')}
+              value={titleValue || ''}
+              {...register('title')}
             error={errors.title?.message}
             required
           />
           <AdminTextarea
             label="Description"
             rows={3}
-            {...register('description')}
+              value={descriptionValue || ''}
+              {...register('description')}
             error={errors.description?.message}
           />
           <AdminInput

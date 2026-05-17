@@ -56,6 +56,11 @@ export default function SubmissionsPage() {
     { key: 'fullName', label: 'Name', sortable: true },
     { key: 'email', label: 'Email' },
     { key: 'company', label: 'Company', sortable: true },
+    {
+      key: 'industry',
+      label: 'Industry',
+      render: (_: any, row: any) => (row.industries?.length ? row.industries.join(', ') : row.industry || '—'),
+    },
     { key: 'estimatedBudget', label: 'Budget (₦)' },
     {
       key: 'actions',
@@ -107,42 +112,53 @@ export default function SubmissionsPage() {
         {selectedSubmission && (
           <div className="space-y-4">
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Full Name</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Full Name</p>
               <p className="text-white/90">{selectedSubmission.fullName}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Email</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Email</p>
               <a href={`mailto:${selectedSubmission.email}`} className="text-teal-300 hover:text-teal-200">
                 {selectedSubmission.email}
               </a>
             </div>
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Phone</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Phone</p>
               <p className="text-white/90">{selectedSubmission.phone}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Company</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Company</p>
               <p className="text-white/90">{selectedSubmission.company}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Industry</p>
-              <p className="text-white/90">{selectedSubmission.industry}</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Industry</p>
+              <div className="flex flex-wrap gap-2">
+                {(selectedSubmission.industries?.length
+                  ? selectedSubmission.industries
+                  : selectedSubmission.industry
+                    ? [selectedSubmission.industry]
+                    : []
+                ).map((item: string) => (
+                  <span key={item} className="px-3 py-1 bg-teal-300/15 text-teal-200 rounded-full text-sm">
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Project Date</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Project Date</p>
               <p className="text-white/90">{selectedSubmission.projectDate}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Budget</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Budget</p>
               <p className="text-white/90">₦{selectedSubmission.estimatedBudget.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-1">Description</p>
+              <p className="text-xs uppercase text-white/50 tracking-widest mb-1">Description</p>
               <p className="text-white/90">{selectedSubmission.description}</p>
             </div>
             {selectedSubmission.goals && selectedSubmission.goals.length > 0 && (
               <div>
-                <p className="text-xs uppercase text-white/50 tracking-[0.1em] mb-2">Goals</p>
+                <p className="text-xs uppercase text-white/50 tracking-widest mb-2">Goals</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedSubmission.goals.map((goal: string, idx: number) => (
                     <span key={idx} className="px-3 py-1 bg-teal-300/15 text-teal-200 rounded-full text-sm">

@@ -14,6 +14,40 @@ const UpdateHeroSlideSchema = z.object({
   order: z.number().min(0, 'Order must be a positive number').optional(),
 });
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: 'Invalid ID format', code: 'INVALID_ID' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+    const slide = await HeroSlide.findById(id);
+
+    if (!slide) {
+      return NextResponse.json(
+        { error: 'Hero slide not found', code: 'NOT_FOUND' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(slide, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching hero slide:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch hero slide', code: 'FETCH_ERROR' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
