@@ -384,7 +384,7 @@ function qSection(title: string, rows: string) {
 function buildAdminQuestionnaireEmailHtml(s: Record<string, any>) {
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Inquiry</title></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Questionnaire</title></head>
 <body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
     <tr><td align="center">
@@ -398,7 +398,7 @@ function buildAdminQuestionnaireEmailHtml(s: Record<string, any>) {
                 <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.32em;color:#8fa8a5;margin-top:3px;">Event Logistics Discovery</div>
               </td>
               <td align="right">
-                <span style="display:inline-block;background:#7dd3cf;color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">New Inquiry</span>
+                <span style="display:inline-block;background:#7dd3cf;color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">New Questionnaire</span>
               </td>
             </tr>
           </table>
@@ -637,8 +637,8 @@ export async function sendQuestionnaireEmails({
       from,
       to: adminEmail,
       replyTo: submission.email,
-      subject: `[Questionnaire] ${submission.fullName} · ${submission.company}${eventLabel}`,
-      text: `New Inquiry from ${submission.fullName} (${submission.email}) at ${submission.company}.`,
+      subject: `[New Inquiry] ${submission.fullName} · ${submission.company}${eventLabel}`,
+      text: `New inquiry from ${submission.fullName} (${submission.email}) at ${submission.company}.`,
       html: buildAdminQuestionnaireEmailHtml(submission),
     });
     if (error) {
