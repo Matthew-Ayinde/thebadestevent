@@ -87,7 +87,7 @@ export default function QuestionnairePage() {
 
       const headers = [
         'Submitted At','Full Name','Email','Phone','Organization',
-        'Event Name','Event Purpose','Objectives','Event Date','City & Venue','Format','Attendee Count','Target Audience',
+        'Event Name','Event Purpose','Objectives','Event Date','Host City','Venue Location','Official Hashtags','Format','Attendee Count','Target Audience',
         'Responsibilities','Managing Scope','Existing Vendors','Vendor Details','Internal Team','Team Details',
         'Venue Secured','Venue Preferences','Required Spaces','Production Needs','Special Production',
         'Registration Method','Ticketing Support','VIP Guests','VIP Details','Accessibility Required','Accessibility Details','Guest Touchpoints','Speaker Count','Travel Coordination','Speaker Management',
@@ -99,7 +99,7 @@ export default function QuestionnairePage() {
       const csvRows = rows.map(r => [
         cell(new Date(r.createdAt).toLocaleDateString('en-GB')),
         cell(r.fullName), cell(r.email), cell(r.phone), cell(r.company),
-        cell(r.eventName), cell(r.eventPurpose), cell(r.objectives), cell(r.eventDate), cell(r.cityVenue), cell(r.eventFormat), cell(r.attendeeCount), cell(r.targetAudience),
+        cell(r.eventName), cell(r.eventPurpose), cell(r.objectives), cell(r.eventDate), cell(r.hostCity), cell(r.venueLocation), cell(r.eventHashtags), cell(r.eventFormat), cell(r.attendeeCount), cell(r.targetAudience),
         cell(r.responsibilities), cell(r.managingScope), cell(r.existingVendors), cell(r.existingVendorDetails), cell(r.internalTeam), cell(r.internalTeamDetails),
         cell(r.venueSecured), cell(r.venuePreferences), cell(r.requiredSpaces), cell(r.productionNeeds), cell(r.specialProduction),
         cell(r.registrationMethod), cell(r.ticketingSupport), cell(r.vipGuests), cell(r.vipDetails), cell(r.accessibilityRequired), cell(r.accessibilityDetails), cell(r.guestTouchpoints), cell(r.speakerCount), cell(r.travelCoordination), cell(r.speakerManagement),
@@ -257,10 +257,13 @@ export default function QuestionnairePage() {
             </Section>
 
             <Section title="Event Overview">
-              <Detail label="Event Name & Purpose" value={selected.eventName} />
+              <Detail label="Event Name" value={selected.eventName} />
+              <Detail label="Event Purpose" value={selected.eventPurpose} />
               <Detail label="Objectives & Success Metrics" value={selected.objectives} />
               <Detail label="Event Date(s)" value={selected.eventDate} />
-              <Detail label="City & Venue" value={selected.cityVenue} />
+              <Detail label="Host City" value={selected.hostCity} />
+              <Detail label="Venue Location" value={selected.venueLocation} />
+              <Detail label="Official Hashtags" value={selected.eventHashtags} />
               <Detail label="Format" value={selected.eventFormat} />
               <Detail label="Attendee Count" value={selected.attendeeCount} />
               <Detail label="Target Audience" value={selected.targetAudience} />

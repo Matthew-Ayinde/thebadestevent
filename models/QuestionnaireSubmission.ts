@@ -9,7 +9,9 @@ export interface IQuestionnaireSubmission extends Document {
   eventPurpose?: string;
   objectives?: string;
   eventDate?: string;
-  cityVenue?: string;
+  hostCity?: string;
+  venueLocation?: string;
+  eventHashtags?: string[];
   eventFormat?: string;
   attendeeCount?: string;
   targetAudience?: string;
@@ -79,7 +81,9 @@ const QuestionnaireSubmissionSchema = new Schema<IQuestionnaireSubmission>(
     eventPurpose: str,
     objectives: str,
     eventDate: str,
-    cityVenue: str,
+    hostCity: str,
+    venueLocation: str,
+    eventHashtags: arr,
     eventFormat: str,
     attendeeCount: str,
     targetAudience: str,

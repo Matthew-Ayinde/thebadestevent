@@ -11,7 +11,8 @@ import { ArrowRight, ChevronLeft, ChevronRight, Check } from "lucide-react";
 interface FormData {
   fullName: string; email: string; phone: string; company: string;
   eventName: string; eventPurpose: string; objectives: string; eventDate: string;
-  cityVenue: string; eventFormat: string; attendeeCount: string; targetAudience: string;
+  hostCity: string; venueLocation: string; eventHashtags: string[];
+  eventFormat: string; attendeeCount: string; targetAudience: string;
   responsibilities: string; managingScope: string;
   existingVendors: string; existingVendorDetails: string;
   internalTeam: string; internalTeamDetails: string;
@@ -35,7 +36,8 @@ interface FormData {
 const BLANK: FormData = {
   fullName: "", email: "", phone: "", company: "",
   eventName: "", eventPurpose: "", objectives: "", eventDate: "",
-  cityVenue: "", eventFormat: "", attendeeCount: "", targetAudience: "",
+  hostCity: "", venueLocation: "", eventHashtags: [],
+  eventFormat: "", attendeeCount: "", targetAudience: "",
   responsibilities: "", managingScope: "",
   existingVendors: "", existingVendorDetails: "",
   internalTeam: "", internalTeamDetails: "",
@@ -86,6 +88,10 @@ export default function Questions() {
       const arr = prev[field] as string[];
       return { ...prev, [field]: arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value] };
     });
+  }
+
+  function setArr(field: keyof FormData, value: string[]) {
+    setData(prev => ({ ...prev, [field]: value }));
   }
 
   function next() {
@@ -183,7 +189,7 @@ export default function Questions() {
                 isLast={step === TOTAL}
               >
                 {step === 1 && <S1 data={data} set={set} />}
-                {step === 2 && <S2 data={data} set={set} toggle={toggle} />}
+                {step === 2 && <S2 data={data} set={set} toggle={toggle} setArr={setArr} />}
                 {step === 3 && <S3 data={data} set={set} />}
                 {step === 4 && <S4 data={data} set={set} toggle={toggle} />}
                 {step === 5 && <S5 data={data} set={set} />}
@@ -225,18 +231,18 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
           className="font-serif text-[clamp(3.2rem,9vw,6.5rem)] leading-[0.88] tracking-tight text-white mb-8"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          You've&nbsp;Rinwa'd.
+          Welcome Home
         </h1>
 
         <div className="max-w-lg space-y-4 text-[0.95rem] sm:text-base text-white/55 leading-relaxed mb-14">
-          <p>Thank you for reaching out and welcome home.</p>
+          <p>Thank you for reaching out.</p>
           <p>
-            We're excited to learn more about your vision and how we can support your experience.
+            We're excited to learn more about your vision and bring clarity to your thoughts.
             To ensure the most accurate recommendations and a tailored quote, please take a few
             moments to answer the questions below.
           </p>
           <p>
-            Your responses will help us understand your goals, logistics, preferences, and the level
+            Your responses will help us understand your goals, preferences, and the level
             of support required, allowing us to design the experience that aligns with your needs.
           </p>
           <p className="text-white/35 text-sm italic">We look forward to bringing your vision to life.</p>
@@ -246,7 +252,7 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
           onClick={onBegin}
           className="group inline-flex items-center gap-3 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#7dd3cf] transition-all hover:border-[#7dd3cf]/60 hover:bg-[#7dd3cf]/18"
         >
-          Begin Your Journey
+          Tell Us More
           <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
         </button>
       </motion.div>
@@ -268,8 +274,8 @@ function SuccessScreen() {
         </div>
 
         <Image src="/images/logo.png" alt="RÌNWÁ" width={46} height={46} className="mx-auto mb-4 opacity-85" />
-        <p className="text-[0.6rem] uppercase tracking-[0.45em] text-[#7dd3cf]/60 mb-12">
-          RÌNWÁ Hospitality
+        <p className="text-[0.6rem] tracking-[0.45em] text-[#7dd3cf]/60 mb-12">
+          You&apos;ve&nbsp;Rinwa&apos;d
         </p>
 
         <h2
@@ -503,6 +509,98 @@ function Reveal({ show, children }: { show: boolean; children: React.ReactNode }
   );
 }
 
+// ─── Hashtag Input ─────────────────────────────────────────────────────────────
+
+function HashtagInput({
+  values,
+  onChange,
+}: {
+  values: string[];
+  onChange: (tags: string[]) => void;
+}) {
+  const [input, setInput] = useState("");
+
+  function addTag() {
+    const raw = input.trim().replace(/^#+/, "").replace(/\s+/g, "");
+    if (!raw) return;
+    const tag = `#${raw}`;
+    if (!values.includes(tag)) onChange([...values, tag]);
+    setInput("");
+  }
+
+  function removeTag(tag: string) {
+    onChange(values.filter(t => t !== tag));
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(); }
+    if (e.key === "Backspace" && !input && values.length > 0) onChange(values.slice(0, -1));
+  }
+
+  return (
+    <div>
+      <Label>Official Event Hashtag(s)</Label>
+      <p className="text-[0.63rem] text-white/25 -mt-1.5 mb-3 leading-relaxed">
+        Press <span className="text-white/40">Enter</span> or{" "}
+        <span className="text-white/40">comma</span> to add each tag. Backspace removes the last one.
+      </p>
+      <AnimatePresence>
+        {values.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="flex flex-wrap gap-2 mb-3 overflow-hidden"
+          >
+            {values.map(tag => (
+              <motion.span
+                key={tag}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.18 }}
+                className="inline-flex items-center gap-1 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 pl-3 pr-2 py-1.5"
+              >
+                <span className="font-mono text-[#7dd3cf]/50 text-xs select-none">#</span>
+                <span className="text-sm text-[#7dd3cf] font-medium">{tag.slice(1)}</span>
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  aria-label={`Remove ${tag}`}
+                  className="ml-1 w-4 h-4 flex items-center justify-center rounded-full hover:bg-[#7dd3cf]/25 transition-colors text-[#7dd3cf]/45 hover:text-[#7dd3cf] text-sm leading-none"
+                >
+                  ×
+                </button>
+              </motion.span>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7dd3cf]/40 font-mono text-sm pointer-events-none select-none">#</span>
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value.replace(/^#+/, ""))}
+            onKeyDown={handleKeyDown}
+            placeholder="YourHashtag"
+            className={`${inputCls} pl-8`}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={addTag}
+          className="flex-shrink-0 px-5 rounded-2xl border border-[#7dd3cf]/25 bg-[#7dd3cf]/8 text-[#7dd3cf] text-sm font-medium hover:bg-[#7dd3cf]/18 hover:border-[#7dd3cf]/45 transition-all"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Sections ──────────────────────────────────────────────────────────────────
 
 function S1({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
@@ -518,30 +616,36 @@ function S1({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
 }
 
 function S2({
-  data, set, toggle,
+  data, set, toggle, setArr,
 }: {
   data: FormData;
   set: (f: keyof FormData, v: string) => void;
   toggle: (f: keyof FormData, v: string) => void;
+  setArr: (f: keyof FormData, v: string[]) => void;
 }) {
   const f = (k: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => set(k, e.target.value);
   const a = (k: keyof FormData) => (e: React.ChangeEvent<HTMLTextAreaElement>) => set(k, e.target.value);
   return (
     <div className="space-y-6">
-      <Field label="What is the name and purpose of the event?" name="eventName" value={data.eventName} onChange={f("eventName")} placeholder="Event name and its core purpose" />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Event Name" name="eventName" value={data.eventName} onChange={f("eventName")} placeholder="What is this event called?" />
+        <Field label="Host City" name="hostCity" value={data.hostCity} onChange={f("hostCity")} placeholder="e.g. Lagos, Toronto, Vancouver" />
+      </div>
+      <Area label="Event Purpose" name="eventPurpose" value={data.eventPurpose} onChange={a("eventPurpose")} rows={2} placeholder="What is the purpose or theme of this event?" />
       <Area label="Primary objectives and success metrics" name="objectives" value={data.objectives} onChange={a("objectives")} placeholder="What does a successful event look like to you?" />
+      <Area label="Who is the target audience?" name="targetAudience" value={data.targetAudience} onChange={a("targetAudience")} rows={3} placeholder="Who is this event designed for?" />
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Event date(s)" name="eventDate" value={data.eventDate} onChange={f("eventDate")} placeholder="Confirmed or proposed dates" />
-        <Field label="City and venue" name="cityVenue" value={data.cityVenue} onChange={f("cityVenue")} placeholder="City and venue being considered" />
+        <Field label="Venue Location" name="venueLocation" value={data.venueLocation} onChange={f("venueLocation")} placeholder="Specific venue being considered" />
         <Field label="Expected attendee count" name="attendeeCount" value={data.attendeeCount} onChange={f("attendeeCount")} placeholder="Approximate number" />
       </div>
+      <HashtagInput values={data.eventHashtags} onChange={tags => setArr("eventHashtags", tags)} />
       <Chips
         label="Event format"
         options={["In-Person", "Virtual", "Hybrid"]}
         values={data.eventFormat}
         onToggle={v => set("eventFormat", data.eventFormat === v ? "" : v)}
       />
-      <Area label="Who is the target audience?" name="targetAudience" value={data.targetAudience} onChange={a("targetAudience")} rows={3} placeholder="Who is this event designed for?" />
     </div>
   );
 }

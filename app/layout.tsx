@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s | RÌNWÁ Hospitality & Experiences",
   },
   description:
-    "RÌNWÁ Hospitality & Experiences curates culture-first hospitality, brand experiences, and storytelling-led gatherings for modern audiences.",
+    "RÌNWÁ Hospitality & Experiences specialises in strategic brand positioning, cultural matchmaking, and media relations for high-net-worth individuals. We curate high-profile experiences rooted in African hospitality across Lagos, Africa, and Canada.",
   applicationName: "RÌNWÁ Hospitality & Experiences",
   alternates: {
     canonical: "/",
@@ -43,6 +43,17 @@ export const metadata: Metadata = {
     "luxury hospitality",
     "culture-driven experiences",
     "Lagos events",
+    "strategic brand positioning",
+    "cultural matchmaking",
+    "media relations",
+    "high-profile experiences",
+    "high net worth individuals",
+    "African hospitality",
+    "tourism in Lagos",
+    "Africa",
+    "Canada",
+    "luxury events Africa",
+    "Lagos tourism",
   ],
   authors: [{ name: "RÌNWÁ Hospitality & Experiences" }],
   creator: "RÌNWÁ Hospitality & Experiences",
@@ -54,7 +65,7 @@ export const metadata: Metadata = {
     siteName: "RÌNWÁ Hospitality & Experiences",
     title: "RÌNWÁ Hospitality & Experiences",
     description:
-      "A culture-first hospitality and experiences brand curating intentional moments for hospitality-led brands, creative founders, and tourism ecosystems.",
+      "A culture-first hospitality brand offering strategic brand positioning, cultural matchmaking, and high-profile experiences for high-net-worth individuals across Lagos, Africa, and Canada.",
     images: [
       {
         url: "https://res.cloudinary.com/matthew-ayinde/image/upload/v1780477515/rinwa-green_iu1he9.png",
@@ -68,7 +79,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "RÌNWÁ Hospitality & Experiences",
     description:
-      "Culture-first hospitality, brand experiences, and storytelling-led gatherings.",
+      "Strategic brand positioning, cultural matchmaking, and high-profile experiences rooted in African hospitality — serving high-net-worth individuals across Lagos, Africa, and Canada.",
     images: [
       "https://res.cloudinary.com/matthew-ayinde/image/upload/v1780477515/rinwa-green_iu1he9.png",
     ],

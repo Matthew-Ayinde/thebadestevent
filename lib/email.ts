@@ -431,7 +431,10 @@ function buildAdminQuestionnaireEmailHtml(s: Record<string, any>) {
                 ${escapeHtml(s.fullName)}<br>
                 <span style="color:#8fa8a5;font-size:17px;">from ${escapeHtml(s.company)}</span>
               </h1>
-              ${s.eventName ? `<p style="margin:12px 0 0;font-size:13px;color:#7dd3cf;font-style:italic;">${escapeHtml(s.eventName)}</p>` : ''}
+              ${s.eventName ? `<p style="margin:12px 0 2px;font-size:14px;color:#7dd3cf;font-style:italic;">${escapeHtml(s.eventName)}</p>` : ''}
+              ${s.eventPurpose ? `<p style="margin:0 0 0;font-size:12px;color:#8fa8a5;">${escapeHtml(s.eventPurpose)}</p>` : ''}
+              ${(s.hostCity || s.venueLocation) ? `<p style="margin:6px 0 0;font-size:11px;letter-spacing:0.08em;color:#7dd3cf/80;">${[s.hostCity, s.venueLocation].filter(Boolean).map(escapeHtml).join(' · ')}</p>` : ''}
+              ${(s.eventHashtags && s.eventHashtags.length > 0) ? `<div style="margin-top:8px;">${(s.eventHashtags as string[]).map(tag => `<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 9px;border-radius:100px;border:1px solid rgba(125,211,207,0.3);background:rgba(125,211,207,0.08);font-size:11px;color:#7dd3cf;">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
             <tr><td style="padding:4px 16px 8px;">
@@ -443,10 +446,13 @@ function buildAdminQuestionnaireEmailHtml(s: Record<string, any>) {
                   qRow('Organization', s.company),
                 ].join(''))}
                 ${qSection('Event Overview', [
-                  qRow('Event Name & Purpose', s.eventName || s.eventPurpose),
+                  qRow('Event Name', s.eventName),
+                  qRow('Event Purpose', s.eventPurpose),
                   qRow('Objectives & Success Metrics', s.objectives),
                   qRow('Event Date(s)', s.eventDate),
-                  qRow('City & Venue', s.cityVenue),
+                  qRow('Host City', s.hostCity),
+                  qRow('Venue Location', s.venueLocation),
+                  qRow('Official Hashtags', s.eventHashtags),
                   qRow('Format', s.eventFormat),
                   qRow('Attendee Count', s.attendeeCount),
                   qRow('Target Audience', s.targetAudience),
@@ -559,11 +565,14 @@ function buildUserQuestionnaireEmailHtml(s: Record<string, any>) {
               </p>
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
-            ${s.eventName ? `
+            ${(s.eventName || s.eventPurpose || s.hostCity || s.venueLocation || (s.eventHashtags && s.eventHashtags.length > 0)) ? `
             <tr><td style="padding:22px 32px;">
-              <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">Your event</p>
-              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#f5f0e8;">${escapeHtml(s.eventName)}</p>
-              ${s.eventDate ? `<p style="margin:4px 0 0;font-size:13px;color:#8fa8a5;">${escapeHtml(s.eventDate)}</p>` : ''}
+              <p style="margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">Your event</p>
+              ${s.eventName ? `<p style="margin:0 0 4px;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#f5f0e8;">${escapeHtml(s.eventName)}</p>` : ''}
+              ${s.eventPurpose ? `<p style="margin:0 0 8px;font-size:13px;color:#8fa8a5;line-height:1.5;">${escapeHtml(s.eventPurpose)}</p>` : ''}
+              ${(s.hostCity || s.venueLocation) ? `<p style="margin:0 0 8px;font-size:12px;color:#7dd3cf;letter-spacing:0.04em;">${[s.hostCity, s.venueLocation].filter(Boolean).map(escapeHtml).join(' · ')}</p>` : ''}
+              ${s.eventDate ? `<p style="margin:0 0 10px;font-size:13px;color:#8fa8a5;">${escapeHtml(s.eventDate)}</p>` : ''}
+              ${(s.eventHashtags && s.eventHashtags.length > 0) ? `<div style="margin-top:6px;">${(s.eventHashtags as string[]).map(tag => `<span style="display:inline-block;margin:2px 4px 2px 0;padding:3px 11px;border-radius:100px;border:1px solid rgba(125,211,207,0.35);background:rgba(125,211,207,0.1);font-size:12px;color:#7dd3cf;font-weight:500;">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
             ` : ''}
