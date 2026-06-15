@@ -740,7 +740,7 @@ function S6({
   const a = (k: keyof FormData) => (e: React.ChangeEvent<HTMLTextAreaElement>) => set(k, e.target.value);
   return (
     <div className="space-y-6">
-      <Area label="What event-day staffing is required?" name="staffingRequired" value={data.staffingRequired} onChange={a("staffingRequired")} rows={3} placeholder="Roles, estimated numbers, responsibilities…" />
+      <Area label="What event-day staffing is needed?" name="staffingRequired" value={data.staffingRequired} onChange={a("staffingRequired")} rows={3} placeholder="Roles, estimated numbers, responsibilities…" />
       <YesNo label="Will volunteers be used?" value={data.volunteersNeeded} onToggle={v => set("volunteersNeeded", v)} />
       <Field label="Who is responsible for recruiting, training, and scheduling staff?" name="staffingRecruitment" value={data.staffingRecruitment} onChange={f("staffingRecruitment")} placeholder="Us, your team, or shared responsibility?" />
       <Divider />
