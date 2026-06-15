@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 type InquiryEmailPayload = {
   submission: {
@@ -32,27 +32,10 @@ function escapeHtml(value: string) {
     .replaceAll("'", '&#39;');
 }
 
-function logoSrc(): string {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://rinwahospitality.com';
-  return `${base}/images/logo-home.png`;
-}
-
-function buildTransporter() {
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = Number(process.env.SMTP_PORT || 465);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!user || !pass) {
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  });
+function buildResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+  return new Resend(apiKey);
 }
 
 function formatList(items: string[]) {
@@ -96,7 +79,7 @@ function buildAdminEmailHtml(submission: InquiryEmailPayload['submission']) {
             <tr>
               <td>
                 <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="44" height="44" style="display:block;margin-bottom:7px;" />
-                
+
               </td>
               <td align="right">
                 <span style="display:inline-block;background:#7dd3cf;color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.24em;padding:5px 12px;border-radius:100px;">New Inquiry</span>
@@ -286,77 +269,74 @@ function buildUserEmailHtml(submission: InquiryEmailPayload['submission']) {
 }
 
 export async function sendInquiryEmails({ submission, adminEmail }: InquiryEmailPayload): Promise<EmailResult> {
-  const transporter = buildTransporter();
+  const resend = buildResendClient();
   const warnings: string[] = [];
 
-  if (!transporter) {
-    warnings.push('SMTP credentials are not configured');
+  if (!resend) {
+    warnings.push('RESEND_API_KEY is not configured');
     return { sent: false, warnings };
   }
 
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
-
+  const from = process.env.RESEND_FROM;
   if (!from) {
-    warnings.push('SMTP_FROM is missing');
+    warnings.push('RESEND_FROM is not configured');
     return { sent: false, warnings };
   }
 
   const sendAdminEmail = async () => {
-    try {
-      await transporter.sendMail({
-        from,
-        to: adminEmail,
-        replyTo: submission.email,
-        subject: `[New Inquiry] ${submission.fullName} — ${submission.company}`,
-        text: [
-          `Name: ${submission.fullName}`,
-          `Email: ${submission.email}`,
-          `Phone: ${submission.phone}`,
-          `Company: ${submission.company}`,
-          `Location: ${submission.location}`,
-          `Project Date: ${submission.projectDate}`,
-          `Budget: ${formatBudget(submission.estimatedBudget, submission.currency)}`,
-          `Industries: ${formatList(submission.industries)}`,
-          `Goals: ${formatList(submission.goals || [])}`,
-          `Feelings: ${formatList(submission.feelings || [])}`,
-          '',
-          submission.description,
-        ].join('\n'),
-        html: buildAdminEmailHtml(submission),
-      });
-      return true;
-    } catch (error) {
+    const { error } = await resend.emails.send({
+      from,
+      to: adminEmail,
+      replyTo: submission.email,
+      subject: `[New Inquiry] ${submission.fullName} — ${submission.company}`,
+      text: [
+        `Name: ${submission.fullName}`,
+        `Email: ${submission.email}`,
+        `Phone: ${submission.phone}`,
+        `Company: ${submission.company}`,
+        `Location: ${submission.location}`,
+        `Project Date: ${submission.projectDate}`,
+        `Budget: ${formatBudget(submission.estimatedBudget, submission.currency)}`,
+        `Industries: ${formatList(submission.industries)}`,
+        `Goals: ${formatList(submission.goals || [])}`,
+        `Feelings: ${formatList(submission.feelings || [])}`,
+        '',
+        submission.description,
+      ].join('\n'),
+      html: buildAdminEmailHtml(submission),
+    });
+    if (error) {
       console.error('Failed to send admin inquiry email:', error);
       warnings.push('Failed to send admin notification email');
       return false;
     }
+    return true;
   };
 
   const sendUserEmail = async () => {
-    try {
-      await transporter.sendMail({
-        from,
-        to: submission.email,
-        subject: 'Your vision has been received — RINWA',
-        text: [
-          `Thanks ${submission.fullName},`,
-          '',
-          'We received your inquiry and will respond within 48 hours.',
-          '',
-          `Location: ${submission.location}`,
-          `Industries: ${formatList(submission.industries)}`,
-          `Feelings: ${formatList(submission.feelings || [])}`,
-          `Project Date: ${submission.projectDate}`,
-          `Budget: ${formatBudget(submission.estimatedBudget, submission.currency)}`,
-        ].join('\n'),
-        html: buildUserEmailHtml(submission),
-      });
-      return true;
-    } catch (error) {
+    const { error } = await resend.emails.send({
+      from,
+      to: submission.email,
+      subject: 'Your vision has been received — RINWA',
+      text: [
+        `Thanks ${submission.fullName},`,
+        '',
+        'We received your inquiry and will respond within 48 hours.',
+        '',
+        `Location: ${submission.location}`,
+        `Industries: ${formatList(submission.industries)}`,
+        `Feelings: ${formatList(submission.feelings || [])}`,
+        `Project Date: ${submission.projectDate}`,
+        `Budget: ${formatBudget(submission.estimatedBudget, submission.currency)}`,
+      ].join('\n'),
+      html: buildUserEmailHtml(submission),
+    });
+    if (error) {
       console.error('Failed to send user inquiry email:', error);
       warnings.push('Failed to send confirmation email to the submitter');
       return false;
     }
+    return true;
   };
 
   const adminSent = await sendAdminEmail();
@@ -636,55 +616,53 @@ export async function sendQuestionnaireEmails({
   submission,
   adminEmail,
 }: QuestionnairePayload): Promise<EmailResult> {
-  const transporter = buildTransporter();
+  const resend = buildResendClient();
   const warnings: string[] = [];
 
-  if (!transporter) {
-    warnings.push('SMTP credentials are not configured');
+  if (!resend) {
+    warnings.push('RESEND_API_KEY is not configured');
     return { sent: false, warnings };
   }
 
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const from = process.env.RESEND_FROM;
   if (!from) {
-    warnings.push('SMTP_FROM is missing');
+    warnings.push('RESEND_FROM is not configured');
     return { sent: false, warnings };
   }
 
   const eventLabel = submission.eventName ? ` — ${submission.eventName}` : '';
 
   const sendAdmin = async () => {
-    try {
-      await transporter.sendMail({
-        from,
-        to: adminEmail,
-        replyTo: submission.email,
-        subject: `[Questionnaire] ${submission.fullName} · ${submission.company}${eventLabel}`,
-        text: `New questionnaire from ${submission.fullName} (${submission.email}) at ${submission.company}.`,
-        html: buildAdminQuestionnaireEmailHtml(submission),
-      });
-      return true;
-    } catch (err) {
-      console.error('Admin questionnaire email failed:', err);
+    const { error } = await resend.emails.send({
+      from,
+      to: adminEmail,
+      replyTo: submission.email,
+      subject: `[Questionnaire] ${submission.fullName} · ${submission.company}${eventLabel}`,
+      text: `New questionnaire from ${submission.fullName} (${submission.email}) at ${submission.company}.`,
+      html: buildAdminQuestionnaireEmailHtml(submission),
+    });
+    if (error) {
+      console.error('Admin questionnaire email failed:', error);
       warnings.push('Failed to send admin notification');
       return false;
     }
+    return true;
   };
 
   const sendUser = async () => {
-    try {
-      await transporter.sendMail({
-        from,
-        to: submission.email,
-        subject: "You've Rinwa'd — Your questionnaire has been received",
-        text: `Hi ${submission.fullName}, we've received your questionnaire and will be in touch within 48 hours.`,
-        html: buildUserQuestionnaireEmailHtml(submission),
-      });
-      return true;
-    } catch (err) {
-      console.error('User questionnaire email failed:', err);
+    const { error } = await resend.emails.send({
+      from,
+      to: submission.email,
+      subject: "You've Rinwa'd — Your questionnaire has been received",
+      text: `Hi ${submission.fullName}, we've received your questionnaire and will be in touch within 48 hours.`,
+      html: buildUserQuestionnaireEmailHtml(submission),
+    });
+    if (error) {
+      console.error('User questionnaire email failed:', error);
       warnings.push('Failed to send confirmation email to submitter');
       return false;
     }
+    return true;
   };
 
   const [adminSent, userSent] = await Promise.all([sendAdmin(), sendUser()]);
@@ -700,32 +678,33 @@ type GenericEmailPayload = {
 };
 
 export async function sendEmail({ to, subject, text, html, from }: GenericEmailPayload): Promise<EmailResult> {
-  const transporter = buildTransporter();
+  const resend = buildResendClient();
   const warnings: string[] = [];
 
-  if (!transporter) {
-    warnings.push('SMTP credentials are not configured');
+  if (!resend) {
+    warnings.push('RESEND_API_KEY is not configured');
     return { sent: false, warnings };
   }
 
-  const _from = from || process.env.SMTP_FROM || process.env.SMTP_USER;
-
+  const _from = from || process.env.RESEND_FROM;
   if (!_from) {
-    warnings.push('SMTP_FROM is missing');
+    warnings.push('RESEND_FROM is not configured');
     return { sent: false, warnings };
   }
 
-  try {
-    await transporter.sendMail({
-      from: _from,
-      to,
-      subject,
-      text: text || '',
-      html: html || text || '',
-    });
-    return { sent: true, warnings };
-  } catch (err) {
+  const { error } = await resend.emails.send({
+    from: _from,
+    to,
+    subject,
+    text: text || '',
+    html: html || text || '',
+  });
+
+  if (error) {
+    console.error('Failed to send email:', error);
     warnings.push('Failed to send email');
     return { sent: false, warnings };
   }
+
+  return { sent: true, warnings };
 }
