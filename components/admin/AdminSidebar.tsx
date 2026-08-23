@@ -18,6 +18,7 @@ import {
   MessageSquareQuote,
   Settings2,
   LogOut,
+  Home,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -30,6 +31,7 @@ const navItems = [
   // { href: '/admin/job-postings', label: 'Job Postings', icon: Briefcase },
   // { href: '/admin/submissions', label: 'Submissions', icon: Inbox },
   { href: '/admin/questionnaire', label: 'Questionnaire', icon: ClipboardList },
+  { href: '/admin/homecoming', label: 'Homecoming', icon: Home },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },
 ];

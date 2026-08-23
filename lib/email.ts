@@ -669,6 +669,238 @@ export async function sendQuestionnaireEmails({
   return { sent: adminSent && userSent, warnings };
 }
 
+// ─── Homecoming Check-In Emails ────────────────────────────────────────────────
+
+const GOLD = '#e8c07a';
+
+type HomecomingPayload = {
+  submission: Record<string, any>;
+  adminEmail: string;
+};
+
+function hRow(label: string, value: any) {
+  const val = qs(value);
+  if (val === '—') return '';
+  return `
+    <tr>
+      <td style="padding:10px 16px;width:38%;vertical-align:top;font-size:11px;text-transform:uppercase;letter-spacing:0.16em;color:#8fa8a5;border-bottom:1px solid rgba(255,255,255,0.05);">${label}</td>
+      <td style="padding:10px 16px;vertical-align:top;font-size:13px;color:#e8f0ef;line-height:1.6;border-bottom:1px solid rgba(255,255,255,0.05);">${escapeHtml(val).replace(/\n/g, '<br>')}</td>
+    </tr>`;
+}
+
+function hSection(title: string, rows: string) {
+  const filtered = rows.trim();
+  if (!filtered) return '';
+  return `
+    <tr><td colspan="2" style="padding:20px 16px 6px;">
+      <p style="margin:0;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:${GOLD};">${title}</p>
+    </td></tr>
+    ${filtered}`;
+}
+
+function buildAdminHomecomingEmailHtml(s: Record<string, any>) {
+  const firstName = escapeHtml((s.name || '').split(' ')[0] || 'Someone');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Homecoming Check-In</title></head>
+<body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;">
+        <tr><td style="padding-bottom:24px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="44" height="44" style="display:block;margin-bottom:7px;" />
+                <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.12em;color:#f5f0e8;">RÌNWÁ</div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.32em;color:#8fa8a5;margin-top:3px;">Diaspora Week Lagos — Check-In</div>
+              </td>
+              <td align="right">
+                <span style="display:inline-block;background:${GOLD};color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">New Check-In</span>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="height:2px;background:${GOLD};"></td></tr>
+            <tr><td style="padding:28px 32px 20px;">
+              <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.28em;color:${GOLD};">Home is calling</p>
+              <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.2;color:#f5f0e8;font-weight:normal;">
+                ${escapeHtml(s.name)}
+              </h1>
+              <p style="margin:10px 0 0;font-size:12px;letter-spacing:0.04em;color:#8fa8a5;">
+                ${escapeHtml(s.visitorType || '—')} · ${escapeHtml(s.timeframe || '—')}
+              </p>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:4px 16px 8px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${hSection('Contact', [
+                  hRow('Name', s.name),
+                  hRow('Reach via', s.contactMethod),
+                  hRow('Contact Detail', s.contactValue),
+                ].join(''))}
+                ${hSection('Trip Details', [
+                  hRow('First Time or Returning', s.visitorType),
+                  hRow('Timeframe', s.timeframe),
+                  hRow('Family / Friends Aware', s.familyAware),
+                ].join(''))}
+                ${hSection('Motivation', [
+                  hRow('Reason for Coming', s.reason === 'Other' ? s.reasonOther : s.reason),
+                ].join(''))}
+                ${hSection('Friction Points', [
+                  hRow('Trip Challenges', s.challenges),
+                  hRow('Other Challenge', s.challengesOther),
+                  hRow('Wants On-Ground Help', s.wantsHelp),
+                ].join(''))}
+                ${hSection('Excitement', [
+                  hRow('Excited To Experience', s.excitedFor),
+                  hRow('Other Excitement', s.excitedForOther),
+                ].join(''))}
+                ${hSection('Awareness', [
+                  hRow('Heard of Diaspora Week Lagos', s.heardOfDWL),
+                ].join(''))}
+              </table>
+            </td></tr>
+            <tr><td style="padding:24px 32px 28px;text-align:center;">
+              <a href="mailto:${escapeHtml(s.contactMethod === 'Email' ? s.contactValue : '')}?subject=Re: Your RÌNWÁ Homecoming Check-In"
+                 style="display:inline-block;background:${GOLD};color:#041114;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;text-decoration:none;padding:13px 28px;border-radius:100px;">
+                Reach out to ${firstName}
+              </a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 0 0;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#3d5a58;letter-spacing:0.1em;">RÌNWÁ Hospitality · Internal notification · Do not forward</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildUserHomecomingEmailHtml(s: Record<string, any>) {
+  const firstName = escapeHtml((s.name || '').split(' ')[0] || 'there');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>You're checked in</title></head>
+<body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+        <tr><td style="text-align:center;padding-bottom:28px;">
+          <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="54" height="54" style="display:block;margin:0 auto 10px;" />
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;letter-spacing:0.14em;color:#f5f0e8;">RÌNWÁ</div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.38em;color:#8fa8a5;margin-top:4px;">Diaspora Week Lagos</div>
+        </td></tr>
+        <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="height:2px;background:${GOLD};"></td></tr>
+            <tr><td style="padding:36px 32px 28px;">
+              <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.30em;color:${GOLD};">Check-in received</p>
+              <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;color:#f5f0e8;font-weight:normal;">
+                Thank you for your time, ${firstName}.<br>
+                <span style="color:#8fa8a5;font-size:19px;">We'd get to you soon.</span>
+              </h1>
+              <p style="margin:0;font-size:15px;line-height:1.78;color:#a0bcba;">
+                We've received your details and our team will review everything carefully. Expect a personal follow-up soon on <strong style="color:#f5f0e8;">${escapeHtml(s.contactValue || '')}</strong>.
+              </p>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:22px 32px;">
+              <p style="margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:${GOLD};">What you told us</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${[
+                  hRow('Timeframe', s.timeframe),
+                  hRow('First Time or Returning', s.visitorType),
+                  hRow('Reason for Coming', s.reason === 'Other' ? s.reasonOther : s.reason),
+                ].join('')}
+              </table>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:28px 32px;text-align:center;">
+              <p style="margin:0 0 10px;font-size:13px;line-height:1.7;color:#8fa8a5;">
+                Before that — we bet you'd have at least one person coming home this holiday.
+                Help spread the word by sharing RÌNWÁ with them directly or on your stories.
+              </p>
+            </td></tr>
+            <tr><td style="padding:0 32px 4px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:28px 32px 36px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:13px;color:#8fa8a5;">Until then,</p>
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:20px;color:#f5f0e8;letter-spacing:0.06em;">The RÌNWÁ Team</p>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 0 0;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#3d5a58;">You received this because you checked in for Diaspora Week Lagos on the RÌNWÁ website.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendHomecomingEmails({
+  submission,
+  adminEmail,
+}: HomecomingPayload): Promise<EmailResult> {
+  const resend = buildResendClient();
+  const warnings: string[] = [];
+
+  if (!resend) {
+    warnings.push('RESEND_API_KEY is not configured');
+    return { sent: false, warnings };
+  }
+
+  const from = process.env.RESEND_FROM;
+  if (!from) {
+    warnings.push('RESEND_FROM is not configured');
+    return { sent: false, warnings };
+  }
+
+  const userEmail = submission.contactMethod === 'Email' ? submission.contactValue : null;
+
+  const sendAdmin = async () => {
+    const { error } = await resend.emails.send({
+      from,
+      to: adminEmail,
+      replyTo: userEmail || undefined,
+      subject: `[Homecoming Check-In] ${submission.name}`,
+      text: `${submission.name} checked in via ${submission.contactMethod} (${submission.contactValue}). Coming ${submission.timeframe} as a ${submission.visitorType}.`,
+      html: buildAdminHomecomingEmailHtml(submission),
+    });
+    if (error) {
+      console.error('Admin homecoming email failed:', error);
+      warnings.push('Failed to send admin notification');
+      return false;
+    }
+    return true;
+  };
+
+  const sendUser = async () => {
+    if (!userEmail) return true;
+    const { error } = await resend.emails.send({
+      from,
+      to: userEmail,
+      subject: "You're checked in — RÌNWÁ Homecoming",
+      text: `Thank you for your time, ${submission.name}! We'd get to you soon.`,
+      html: buildUserHomecomingEmailHtml(submission),
+    });
+    if (error) {
+      console.error('User homecoming email failed:', error);
+      warnings.push('Failed to send confirmation email to submitter');
+      return false;
+    }
+    return true;
+  };
+
+  const [adminSent, userSent] = await Promise.all([sendAdmin(), sendUser()]);
+  return { sent: adminSent && userSent, warnings };
+}
+
 type GenericEmailPayload = {
   to: string;
   subject: string;
