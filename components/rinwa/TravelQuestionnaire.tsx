@@ -7,7 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import {
   ArrowRight, ChevronLeft, ChevronRight, Check,
   MessageCircle, Instagram, Facebook, Twitter, Music2, Link as LinkIcon,
-  Plane, PlaneTakeoff, PlaneLanding, Compass, Globe2, Luggage, MapPin, Ticket, Navigation,
+  Compass, Globe2, Luggage, MapPin, Ticket, Navigation,
 } from "lucide-react";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────────
@@ -93,10 +93,20 @@ const FLIGHT_NODES: [number, number][] = [
   [200, 40], [1680, 700],
 ];
 
+// A proper solid airplane silhouette (the classic aviation glyph, nose to the
+// right at rotate 0) — unlike lucide's thin open-line plane icons, this reads
+// cleanly as "an airplane" at any size and any rotation.
+function AirplaneIcon({ size = 48 }: { size?: number }) {
+  return (
+    <svg width={size} height={size * (512 / 576)} viewBox="0 0 576 512" fill="currentColor">
+      <path d="M482.3 192c34.2 0 93.7 29 93.7 64c0 36-59.5 64-93.7 64l-116.6 0L265.2 495.9c-5.7 10-16.3 16.1-27.8 16.1l-56.2 0c-10.6 0-18.3-10.2-15.4-20.4l49-171.6L112 320 68.8 377.6c-3 4-7.8 6.4-12.8 6.4l-42 0c-7.8 0-14-6.3-14-14c0-1.3 .2-2.6 .5-3.9L32 256 .5 145.9c-.3-1.3-.5-2.6-.5-3.9c0-7.8 6.3-14 14-14l42 0c5 0 9.8 2.4 12.8 6.4L112 192l102.9 0-49-171.6C162.9 10.2 170.6 0 181.2 0l56.2 0c11.5 0 22.1 6.1 27.8 16.1L365.7 192l116.6 0z" />
+    </svg>
+  );
+}
+
 function FlyingPlane({
-  Icon, reduced, from, to, rotate, size, color, opacity, duration, delay,
+  reduced, from, to, rotate, size, color, opacity, duration, delay,
 }: {
-  Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
   reduced: boolean | null;
   from: { left: string; top: string };
   to: { left: string; top: string };
@@ -108,10 +118,13 @@ function FlyingPlane({
         className="absolute"
         style={{ left: from.left, top: from.top, color, opacity: opacity * 0.8, transform: `rotate(${rotate}deg)` }}
       >
-        <Icon size={size} strokeWidth={0.9} />
+        <AirplaneIcon size={size} />
       </div>
     );
   }
+  // from → to is linear in both left% and top%, so the pixel-space path is a
+  // straight line — the nose angle is held fixed at that line's true heading
+  // for the whole flight, so the plane always visibly flies where it points.
   return (
     <motion.div
       className="absolute"
@@ -120,13 +133,9 @@ function FlyingPlane({
       animate={{ left: [from.left, to.left], top: [from.top, to.top] }}
       transition={{ duration, repeat: Infinity, ease: "linear", delay }}
     >
-      <motion.div
-        initial={{ rotate }}
-        animate={{ rotate: [rotate - 4, rotate + 4, rotate - 4] }}
-        transition={{ duration: duration / 6, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <Icon size={size} strokeWidth={0.9} />
-      </motion.div>
+      <div style={{ transform: `rotate(${rotate}deg)` }}>
+        <AirplaneIcon size={size} />
+      </div>
     </motion.div>
   );
 }
@@ -211,21 +220,24 @@ function TravelBackdrop({ reduced }: { reduced: boolean | null }) {
         <Navigation size={56} strokeWidth={0.7} />
       </div>
 
-      {/* Planes — departing, arriving home, and one passing overhead */}
+      {/* Planes — departing, arriving home, and one passing overhead.
+          The icon's nose points left at rotate 0, so each angle below is
+          the actual bearing of travel — the icon's nose points right at
+          rotate 0, so this is just atan2(dy, dx) of each flight line. */}
       <FlyingPlane
-        Icon={PlaneTakeoff} reduced={reduced}
+        reduced={reduced}
         from={{ left: "-8%", top: "78%" }} to={{ left: "108%", top: "6%" }}
-        rotate={-38} size={54} color={GOLD} opacity={0.4} duration={34} delay={0}
+        rotate={-32} size={54} color={GOLD} opacity={0.4} duration={34} delay={0}
       />
       <FlyingPlane
-        Icon={PlaneLanding} reduced={reduced}
+        reduced={reduced}
         from={{ left: "106%", top: "14%" }} to={{ left: "-6%", top: "62%" }}
-        rotate={148} size={46} color={CREAM} opacity={0.28} duration={29} delay={6}
+        rotate={157} size={46} color={CREAM} opacity={0.28} duration={29} delay={6}
       />
       <FlyingPlane
-        Icon={Plane} reduced={reduced}
+        reduced={reduced}
         from={{ left: "-6%", top: "24%" }} to={{ left: "106%", top: "16%" }}
-        rotate={8} size={26} color={CREAM} opacity={0.18} duration={44} delay={12}
+        rotate={-4} size={26} color={CREAM} opacity={0.18} duration={44} delay={12}
       />
 
       {/* Contrast wash — keeps text legible over the art without hiding it */}
