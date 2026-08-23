@@ -7,6 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import {
   ArrowRight, ChevronLeft, ChevronRight, Check,
   MessageCircle, Instagram, Facebook, Twitter, Music2, Link as LinkIcon,
+  Plane, PlaneTakeoff, PlaneLanding, Compass, Globe2, Luggage, MapPin, Ticket, Navigation,
 } from "lucide-react";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────────
@@ -15,6 +16,7 @@ import {
 // instead of teal — to give this flow its own identity. No gradients.
 
 const GOLD = "#e8c07a";
+const CREAM = "#f5f0e8";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -69,6 +71,168 @@ const SECTIONS = [
 ];
 
 const TOTAL = SECTIONS.length;
+
+// ─── Travel Backdrop ────────────────────────────────────────────────────────────
+// A bold, code-drawn travel motif standing in for the missing photo: a faint
+// world-map dot field, animated flight-route arcs between "cities", a slow
+// turning compass and drifting globe, scattered travel iconography, and a few
+// large planes drifting across the whole viewport — one departing, one
+// arriving home, one distant overhead. Everything sits well under the
+// foreground card's own opacity, and drops to a static, non-looping frame
+// under prefers-reduced-motion.
+
+const FLIGHT_ROUTES = [
+  "M -60 620 C 300 420, 700 500, 1000 280 S 1500 120, 1700 60",
+  "M 1660 780 C 1300 700, 950 760, 650 560 S 150 260, -60 180",
+  "M 200 40 C 500 190, 850 150, 1150 340 S 1500 630, 1680 700",
+];
+
+const FLIGHT_NODES: [number, number][] = [
+  [-60, 620], [1000, 280], [1700, 60],
+  [1660, 780], [-60, 180],
+  [200, 40], [1680, 700],
+];
+
+function FlyingPlane({
+  Icon, reduced, from, to, rotate, size, color, opacity, duration, delay,
+}: {
+  Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+  reduced: boolean | null;
+  from: { left: string; top: string };
+  to: { left: string; top: string };
+  rotate: number; size: number; color: string; opacity: number; duration: number; delay: number;
+}) {
+  if (reduced) {
+    return (
+      <div
+        className="absolute"
+        style={{ left: from.left, top: from.top, color, opacity: opacity * 0.8, transform: `rotate(${rotate}deg)` }}
+      >
+        <Icon size={size} strokeWidth={0.9} />
+      </div>
+    );
+  }
+  return (
+    <motion.div
+      className="absolute"
+      style={{ color, opacity }}
+      initial={{ left: from.left, top: from.top }}
+      animate={{ left: [from.left, to.left], top: [from.top, to.top] }}
+      transition={{ duration, repeat: Infinity, ease: "linear", delay }}
+    >
+      <motion.div
+        initial={{ rotate }}
+        animate={{ rotate: [rotate - 4, rotate + 4, rotate - 4] }}
+        transition={{ duration: duration / 6, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Icon size={size} strokeWidth={0.9} />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function TravelBackdrop({ reduced }: { reduced: boolean | null }) {
+  return (
+    <>
+      {/* Ground */}
+      <div
+        className="absolute inset-0"
+        style={{ background: "radial-gradient(ellipse 120% 70% at 50% -8%, #0d2a2f 0%, #051519 45%, #030d0f 100%)" }}
+      />
+
+      {/* World dot-map texture */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `radial-gradient(${GOLD}88 1px, transparent 1.5px)`,
+          backgroundSize: "28px 28px",
+          opacity: 0.16,
+          WebkitMaskImage: "radial-gradient(ellipse 65% 55% at 50% 38%, black 0%, transparent 72%)",
+          maskImage: "radial-gradient(ellipse 65% 55% at 50% 38%, black 0%, transparent 72%)",
+        }}
+      />
+
+      {/* Flight routes + waypoints */}
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" fill="none">
+        {FLIGHT_ROUTES.map((d, i) => (
+          <motion.path
+            key={i}
+            d={d}
+            stroke={GOLD}
+            strokeWidth={1.25}
+            strokeDasharray="2 14"
+            strokeLinecap="round"
+            opacity={0.22}
+            animate={reduced ? undefined : { strokeDashoffset: [0, -320] }}
+            transition={reduced ? undefined : { duration: 26 + i * 6, repeat: Infinity, ease: "linear" }}
+          />
+        ))}
+        {FLIGHT_NODES.map(([x, y], i) => (
+          <motion.circle
+            key={i} cx={x} cy={y} r={3.5} fill={GOLD}
+            initial={{ opacity: 0.35 }}
+            animate={reduced ? undefined : { opacity: [0.25, 0.7, 0.25], scale: [1, 1.6, 1] }}
+            transition={reduced ? undefined : { duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.6 }}
+          />
+        ))}
+      </svg>
+
+      {/* Slow-turning compass */}
+      <motion.div
+        className="absolute -top-24 -right-24 sm:-top-16 sm:-right-16"
+        style={{ color: GOLD, opacity: 0.07 }}
+        animate={reduced ? undefined : { rotate: 360 }}
+        transition={reduced ? undefined : { duration: 90, repeat: Infinity, ease: "linear" }}
+      >
+        <Compass size={420} strokeWidth={0.6} />
+      </motion.div>
+
+      {/* Drifting globe */}
+      <motion.div
+        className="absolute -bottom-20 -left-16 sm:-bottom-24 sm:-left-20"
+        style={{ color: CREAM, opacity: 0.06 }}
+        animate={reduced ? undefined : { y: [0, -14, 0] }}
+        transition={reduced ? undefined : { duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Globe2 size={340} strokeWidth={0.6} />
+      </motion.div>
+
+      {/* Scattered travel iconography */}
+      <div className="hidden sm:block absolute top-[14%] left-[8%] -rotate-12" style={{ color: GOLD, opacity: 0.08 }}>
+        <Ticket size={90} strokeWidth={0.7} />
+      </div>
+      <div className="hidden sm:block absolute bottom-[10%] right-[10%] rotate-[8deg]" style={{ color: CREAM, opacity: 0.07 }}>
+        <Luggage size={90} strokeWidth={0.7} />
+      </div>
+      <div className="hidden lg:block absolute top-[55%] left-[4%]" style={{ color: GOLD, opacity: 0.06 }}>
+        <MapPin size={64} strokeWidth={0.7} />
+      </div>
+      <div className="hidden lg:block absolute top-[20%] right-[24%] rotate-15" style={{ color: CREAM, opacity: 0.06 }}>
+        <Navigation size={56} strokeWidth={0.7} />
+      </div>
+
+      {/* Planes — departing, arriving home, and one passing overhead */}
+      <FlyingPlane
+        Icon={PlaneTakeoff} reduced={reduced}
+        from={{ left: "-8%", top: "78%" }} to={{ left: "108%", top: "6%" }}
+        rotate={-38} size={54} color={GOLD} opacity={0.4} duration={34} delay={0}
+      />
+      <FlyingPlane
+        Icon={PlaneLanding} reduced={reduced}
+        from={{ left: "106%", top: "14%" }} to={{ left: "-6%", top: "62%" }}
+        rotate={148} size={46} color={CREAM} opacity={0.28} duration={29} delay={6}
+      />
+      <FlyingPlane
+        Icon={Plane} reduced={reduced}
+        from={{ left: "-6%", top: "24%" }} to={{ left: "106%", top: "16%" }}
+        rotate={8} size={26} color={CREAM} opacity={0.18} duration={44} delay={12}
+      />
+
+      {/* Contrast wash — keeps text legible over the art without hiding it */}
+      <div className="absolute inset-0 bg-[#030d0f]/38" />
+    </>
+  );
+}
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
@@ -157,18 +321,9 @@ export default function Questions() {
     <div className="relative">
       <Toaster position="top-center" toastOptions={{ style: { background: "#07171a", color: "#f5f0e8", border: `1px solid ${GOLD}33` } }} />
 
-      {/* Fixed background image */}
+      {/* Fixed travel-themed background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/images/questionnaire-bg.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center top",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
-        <div className="absolute inset-0 bg-[#041114]/83" />
+        <TravelBackdrop reduced={reduced} />
       </div>
 
       {/* Progress bar */}
