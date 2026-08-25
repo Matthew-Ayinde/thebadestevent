@@ -21,15 +21,20 @@ export default function ExperienceHub() {
   const reduced = useReducedMotion();
 
   return (
-    <div className="relative min-h-screen bg-[#030f12]">
+    <div className="relative flex flex-col min-h-screen md:h-screen bg-[#030f12]">
       {/* Shared brand lockup, sitting over both panels */}
-      <div className="relative z-30 flex flex-col items-center pt-12 pb-9 sm:pt-14 sm:pb-11 px-6 text-center">
+      <div className="relative z-30 flex flex-col items-center shrink-0 pt-12 pb-9 sm:pt-14 sm:pb-11 px-6 text-center">
         <Image src="/images/logo.png" alt="RÌNWÁ" width={68} height={68} className="opacity-90 mb-3" />
         <p className="mt-2 text-[0.6rem] uppercase tracking-[0.42em] text-white/35">Choose Your Moment</p>
       </div>
 
-      {/* Two panels */}
-      <div className="relative grid md:grid-cols-2">
+      {/* Two panels — flex-1 fills exactly what's left under the lockup on
+          md+, so the page fits the viewport with no trailing scroll gap.
+          No min-h-0 override here on purpose: if a panel's content ever
+          needs more room than that leftover space (longer copy, a bigger
+          font, a tiny viewport), it keeps its natural height and the page
+          scrolls normally instead of the text getting squeezed or clipped. */}
+      <div className="relative grid md:grid-cols-2 flex-1">
         <div className="hidden md:block absolute inset-y-0 left-1/2 w-px bg-white/10 z-20" />
 
         <Panel
@@ -70,7 +75,7 @@ function Panel({
   return (
     <Link
       href={href}
-      className="group relative flex flex-col items-center justify-center text-center px-8 py-20 sm:py-28 md:py-0 md:min-h-[calc(100vh-172px)] overflow-hidden border-b border-white/10 md:border-b-0"
+      className="group relative flex flex-col items-center justify-center text-center px-8 py-20 sm:py-28 md:py-0 md:h-full overflow-hidden border-b border-white/10 md:border-b-0"
     >
       <div className="absolute inset-0">
         <Backdrop reduced={reduced} />

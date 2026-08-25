@@ -37,9 +37,9 @@ const BLANK: FormData = {
 const SECTIONS = [
   { tag: "01 — First Impressions", title: "Did you feel welcomed the moment you walked in?", desc: "" },
   { tag: "02 — The Little Things",  title: "Was there a moment tonight someone anticipated something you needed, before you asked?", desc: "" },
-  { tag: "03 — Beyond The Run Of Show", title: "How cared for did you feel tonight — beyond just “the event ran smoothly”?", desc: "1 is barely, 5 is completely." },
-  { tag: "04 — The Honest Part",     title: "Was there any moment you felt overlooked, or unsure what to do?", desc: "Totally fine if the answer is no — this just helps us fix real gaps." },
-  { tag: "05 — Last Thing",          title: "Would you come back specifically because of how you were treated — not just the lineup or venue?", desc: "" },
+  { tag: "03 — Beyond The Run Of Show", title: "How cared for did you feel tonight; beyond just “the event ran smoothly”?", desc: "1 is barely, 5 is completely." },
+  { tag: "04 — The Honest Part",     title: "Was there any moment you felt overlooked, or unsure what to do?", desc: "Totally fine if the answer is no. This just helps us fix real gaps." },
+  { tag: "05 — Last Thing",          title: "Would you come back specifically because of how you were treated, not just the lineup or venue?", desc: "" },
 ];
 
 const TOTAL = SECTIONS.length;
@@ -258,7 +258,7 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
         </h1>
 
         <div className="max-w-lg space-y-4 text-[0.95rem] sm:text-base text-white/55 leading-relaxed mb-14">
-          <p>Not just how it ran — how it felt.</p>
+          <p>Not just how it ran, how it felt.</p>
           <p>Five quick questions. Under two minutes. Completely honest, please.</p>
         </div>
 
@@ -364,7 +364,7 @@ function S4({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
     <Area
       label="In your own words" name="overlookedMoment"
       value={data.overlookedMoment} onChange={e => set("overlookedMoment", e.target.value)}
-      rows={4} placeholder="If nothing comes to mind, that's a good sign — leave this blank."
+      rows={4} placeholder="If nothing comes to mind, that's a good sign, leave this blank."
     />
   );
 }
