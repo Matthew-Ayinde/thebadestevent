@@ -672,6 +672,7 @@ export async function sendQuestionnaireEmails({
 // ─── Homecoming Check-In Emails ────────────────────────────────────────────────
 
 const GOLD = '#e8c07a';
+const TEAL = '#7dd3cf';
 
 type HomecomingPayload = {
   submission: Record<string, any>;
@@ -899,6 +900,103 @@ export async function sendHomecomingEmails({
 
   const [adminSent, userSent] = await Promise.all([sendAdmin(), sendUser()]);
   return { sent: adminSent && userSent, warnings };
+}
+
+// ─── Guest Experience feedback ──────────────────────────────────────────────
+
+type GuestExperiencePayload = {
+  submission: Record<string, any>;
+  adminEmail: string;
+};
+
+function buildAdminGuestExperienceEmailHtml(s: Record<string, any>) {
+  const score = escapeHtml(qs(s.caredForScore));
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Guest Experience Feedback</title></head>
+<body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;">
+        <tr><td style="padding-bottom:24px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="44" height="44" style="display:block;margin-bottom:7px;" />
+                <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.12em;color:#f5f0e8;">RÌNWÁ</div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.32em;color:#8fa8a5;margin-top:3px;">Guest Experience Feedback</div>
+              </td>
+              <td align="right">
+                <span style="display:inline-block;background:${TEAL};color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">${score} / 5 Cared For</span>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="height:2px;background:${TEAL};"></td></tr>
+            <tr><td style="padding:28px 32px 20px;">
+              <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.28em;color:${TEAL};">Someone rated tonight</p>
+              <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.2;color:#f5f0e8;font-weight:normal;">
+                A new anonymous response just came in
+              </h1>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:4px 16px 8px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${hRow('Felt welcomed', s.welcomed)}
+                ${hRow('Anticipated moment', s.anticipatedMoment)}
+                ${hRow('What happened', s.anticipatedMomentDetail)}
+                ${hRow('Cared for (1–5)', s.caredForScore)}
+                ${hRow('Felt overlooked / unsure', s.overlookedMoment)}
+                ${hRow('Would return for the treatment', s.wouldReturn)}
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 0 0;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#3d5a58;letter-spacing:0.1em;">RÌNWÁ Hospitality · Internal notification · Do not forward</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendGuestExperienceEmails({
+  submission,
+  adminEmail,
+}: GuestExperiencePayload): Promise<EmailResult> {
+  const resend = buildResendClient();
+  const warnings: string[] = [];
+
+  if (!resend) {
+    warnings.push('RESEND_API_KEY is not configured');
+    return { sent: false, warnings };
+  }
+
+  const from = process.env.RESEND_FROM;
+  if (!from) {
+    warnings.push('RESEND_FROM is not configured');
+    return { sent: false, warnings };
+  }
+
+  const { error } = await resend.emails.send({
+    from,
+    to: adminEmail,
+    subject: `[Guest Experience] ${submission.caredForScore}/5 cared-for rating`,
+    text: `Felt welcomed: ${submission.welcomed}. Cared for: ${submission.caredForScore}/5. Would return: ${submission.wouldReturn}.`,
+    html: buildAdminGuestExperienceEmailHtml(submission),
+  });
+
+  if (error) {
+    console.error('Admin guest experience email failed:', error);
+    warnings.push('Failed to send admin notification');
+    return { sent: false, warnings };
+  }
+
+  return { sent: true, warnings };
 }
 
 type GenericEmailPayload = {

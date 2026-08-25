@@ -19,6 +19,7 @@ import {
   Settings2,
   LogOut,
   Home,
+  Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -32,6 +33,7 @@ const navItems = [
   // { href: '/admin/submissions', label: 'Submissions', icon: Inbox },
   { href: '/admin/questionnaire', label: 'Questionnaire', icon: ClipboardList },
   { href: '/admin/homecoming', label: 'Homecoming', icon: Home },
+  { href: '/admin/experience', label: 'Guest Experience', icon: Sparkles },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },
 ];
