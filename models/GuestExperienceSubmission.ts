@@ -7,6 +7,7 @@ export interface IGuestExperienceSubmission extends Document {
   caredForScore: string;
   overlookedMoment?: string;
   wouldReturn: string;
+  email?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,6 +20,7 @@ const GuestExperienceSubmissionSchema = new Schema<IGuestExperienceSubmission>(
     caredForScore: { type: String, required: true },
     overlookedMoment: { type: String },
     wouldReturn: { type: String, required: true },
+    email: { type: String },
   },
   { timestamps: true }
 );

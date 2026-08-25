@@ -16,6 +16,7 @@ const Schema = z.object({
   caredForScore: z.string().min(1, 'Please pick a number from 1 to 5'),
   overlookedMoment: z.string().optional(),
   wouldReturn: z.string().min(1, 'Please answer this question'),
+  email: z.string().email('Please enter a valid email').optional().or(z.literal('')),
 });
 
 export async function POST(request: NextRequest) {

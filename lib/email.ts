@@ -964,6 +964,48 @@ function buildAdminGuestExperienceEmailHtml(s: Record<string, any>) {
 </html>`;
 }
 
+function buildUserGuestExperienceEmailHtml(s: Record<string, any>) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thanks for the feedback</title></head>
+<body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+        <tr><td style="text-align:center;padding-bottom:28px;">
+          <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="54" height="54" style="display:block;margin:0 auto 10px;" />
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;letter-spacing:0.14em;color:#f5f0e8;">RÌNWÁ</div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.38em;color:#8fa8a5;margin-top:4px;">Guest Experience</div>
+        </td></tr>
+        <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="height:2px;background:${TEAL};"></td></tr>
+            <tr><td style="padding:36px 32px 28px;">
+              <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.30em;color:${TEAL};">Feedback received</p>
+              <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;color:#f5f0e8;font-weight:normal;">
+                That&#8217;s exactly what<br>we needed to hear.
+              </h1>
+              <p style="margin:0;font-size:15px;line-height:1.78;color:#a0bcba;">
+                Thank you for taking a couple of minutes to tell us how tonight felt. Every answer goes straight to the people who plan the next one.
+              </p>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:28px 32px 36px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:13px;color:#8fa8a5;">See you at the next one,</p>
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:20px;color:#f5f0e8;letter-spacing:0.06em;">The RÌNWÁ Team</p>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 0 0;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#3d5a58;">You received this because you shared feedback on a RÌNWÁ evening and left your email.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 export async function sendGuestExperienceEmails({
   submission,
   adminEmail,
@@ -982,21 +1024,44 @@ export async function sendGuestExperienceEmails({
     return { sent: false, warnings };
   }
 
-  const { error } = await resend.emails.send({
-    from,
-    to: adminEmail,
-    subject: `[Guest Experience] ${submission.caredForScore}/5 cared-for rating`,
-    text: `Felt welcomed: ${submission.welcomed}. Cared for: ${submission.caredForScore}/5. Would return: ${submission.wouldReturn}.`,
-    html: buildAdminGuestExperienceEmailHtml(submission),
-  });
+  const userEmail = submission.email && submission.email.trim() ? submission.email.trim() : null;
 
-  if (error) {
-    console.error('Admin guest experience email failed:', error);
-    warnings.push('Failed to send admin notification');
-    return { sent: false, warnings };
-  }
+  const sendAdmin = async () => {
+    const { error } = await resend.emails.send({
+      from,
+      to: adminEmail,
+      replyTo: userEmail || undefined,
+      subject: `[Guest Experience] ${submission.caredForScore}/5 cared-for rating`,
+      text: `Felt welcomed: ${submission.welcomed}. Cared for: ${submission.caredForScore}/5. Would return: ${submission.wouldReturn}.`,
+      html: buildAdminGuestExperienceEmailHtml(submission),
+    });
+    if (error) {
+      console.error('Admin guest experience email failed:', error);
+      warnings.push('Failed to send admin notification');
+      return false;
+    }
+    return true;
+  };
 
-  return { sent: true, warnings };
+  const sendUser = async () => {
+    if (!userEmail) return true;
+    const { error } = await resend.emails.send({
+      from,
+      to: userEmail,
+      subject: "Thanks for the feedback — RÌNWÁ",
+      text: "Thank you for taking a couple of minutes to tell us how tonight felt.",
+      html: buildUserGuestExperienceEmailHtml(submission),
+    });
+    if (error) {
+      console.error('User guest experience email failed:', error);
+      warnings.push('Failed to send confirmation email to submitter');
+      return false;
+    }
+    return true;
+  };
+
+  const [adminSent, userSent] = await Promise.all([sendAdmin(), sendUser()]);
+  return { sent: adminSent && userSent, warnings };
 }
 
 type GenericEmailPayload = {

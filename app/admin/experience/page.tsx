@@ -75,13 +75,13 @@ export default function GuestExperiencePage() {
 
       const headers = [
         'Submitted At', 'Felt Welcomed', 'Anticipated Moment', 'What Happened',
-        'Cared For (1-5)', 'Felt Overlooked / Unsure', 'Would Return',
+        'Cared For (1-5)', 'Felt Overlooked / Unsure', 'Would Return', 'Email',
       ];
 
       const csvRows = rows.map(r => [
         cell(new Date(r.createdAt).toLocaleDateString('en-GB')),
         cell(r.welcomed), cell(r.anticipatedMoment), cell(r.anticipatedMomentDetail),
-        cell(r.caredForScore), cell(r.overlookedMoment), cell(r.wouldReturn),
+        cell(r.caredForScore), cell(r.overlookedMoment), cell(r.wouldReturn), cell(r.email),
       ].join(','));
 
       const csv = [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
@@ -242,6 +242,12 @@ export default function GuestExperiencePage() {
             <Section title="Would They Return">
               <Detail label="Would come back for the treatment, not just the lineup/venue" value={selected.wouldReturn} />
             </Section>
+
+            {selected.email && (
+              <Section title="Contact">
+                <Detail label="Email (left for a confirmation copy)" value={selected.email} />
+              </Section>
+            )}
           </div>
         )}
       </AdminModal>

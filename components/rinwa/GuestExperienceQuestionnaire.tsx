@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import toast, { Toaster } from "react-hot-toast";
 import { ArrowRight, Check, Wine, Sparkles, Disc3 } from "lucide-react";
-import { Area, SegButtons, Reveal, Shell, ScoreScale } from "./questionnaire-ui";
+import { Area, SegButtons, Reveal, Shell, ScoreScale, Field } from "./questionnaire-ui";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────────
 // Same flat, hairline-bordered system as the rest of the site, using the
@@ -24,6 +24,7 @@ interface FormData {
   caredForScore: string;
   overlookedMoment: string;
   wouldReturn: string;
+  email: string;
 }
 
 const BLANK: FormData = {
@@ -32,6 +33,7 @@ const BLANK: FormData = {
   caredForScore: "",
   overlookedMoment: "",
   wouldReturn: "",
+  email: "",
 };
 
 const SECTIONS = [
@@ -371,6 +373,16 @@ function S4({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
 
 function S5({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
-    <SegButtons options={["Yes", "Maybe", "No"]} value={data.wouldReturn} onPick={v => set("wouldReturn", v)} />
+    <div>
+      <SegButtons options={["Yes", "Maybe", "No"]} value={data.wouldReturn} onPick={v => set("wouldReturn", v)} />
+      <div className="mt-6 pt-6 border-t border-white/10">
+        <Field
+          label="Want a copy of your answers? Leave your email (optional)"
+          name="email" type="email"
+          value={data.email} onChange={e => set("email", e.target.value)}
+          placeholder="your@email.com"
+        />
+      </div>
+    </div>
   );
 }

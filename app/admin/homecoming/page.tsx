@@ -165,7 +165,7 @@ export default function HomecomingPage() {
         <div>
           <h1 className="font-serif text-2xl sm:text-4xl text-white/90">Homecoming Check-Ins</h1>
           <p className="text-white/50 mt-1 md:mt-2 text-sm md:text-base">
-            Diaspora Week Lagos — holiday travel intake responses
+            Diaspora Week Lagos, holiday travel intake responses
           </p>
         </div>
         {total > 0 && (
