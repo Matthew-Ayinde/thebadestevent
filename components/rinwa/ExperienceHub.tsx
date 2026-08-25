@@ -17,6 +17,18 @@ const TEAL = "#7dd3cf";
 const GOLD = "#e8c07a";
 const INK = "#04100f";
 
+// The JourneyBackdrop plane travels in a single straight line (lower-left to
+// upper-right, a "climbing away" departure) rather than bouncing back and
+// forth — a back-and-forth path would need the nose to snap 180° at each
+// turnaround to keep pointing where it's actually going, which reads as
+// flying sideways. One fixed heading, computed from the same two points the
+// motion animates between, keeps the nose honestly pointed the whole time.
+// Lucide's Plane icon faces right (0°, +x) at rest, so this is a plain
+// atan2 of the travel vector — no fudged rotation value to keep in sync.
+const PLANE_FROM = { x: -64, y: 42 };
+const PLANE_TO = { x: 64, y: -42 };
+const PLANE_ANGLE = Math.atan2(PLANE_TO.y - PLANE_FROM.y, PLANE_TO.x - PLANE_FROM.x) * (180 / Math.PI);
+
 export default function ExperienceHub() {
   const reduced = useReducedMotion();
 
@@ -83,12 +95,18 @@ function Panel({
       {/* Scrim for text legibility over the backdrop art */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#030f12] via-[#030f12]/45 to-transparent" />
 
-      <div className="relative z-10 max-w-md flex flex-col items-center">
+      {/* @container: the title is sized off THIS box's own width (via cqw),
+          not the viewport's — a plain vw-based size doesn't know a panel is
+          only half the screen once the two-column grid kicks in, so on
+          medium windows it can size the headline for the full viewport and
+          wrap onto a third line, which is what was pushing the page into
+          overflow. Sizing off the actual box fixes that at every width. */}
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center @container">
         <p className="text-[0.6rem] uppercase tracking-[0.4em] mb-5" style={{ color: `${accent}b3` }}>
           {eyebrow}
         </p>
         <h2
-          className="font-serif uppercase text-[clamp(2rem,5.2vw,3.4rem)] leading-[1.06] tracking-tight text-white mb-5"
+          className="font-serif uppercase text-[clamp(1.7rem,10cqw,3rem)] leading-[1.06] tracking-tight text-white mb-5"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {title[0]}<br />{title[1]}
@@ -177,10 +195,19 @@ function JourneyBackdrop({ reduced }: { reduced: boolean | null }) {
       <motion.div
         className="hidden lg:block absolute"
         style={{ color: GOLD, opacity: 0.16, right: "18%", top: "58%" }}
-        animate={reduced ? undefined : { x: [0, 18, 0], y: [0, -8, 0] }}
-        transition={reduced ? undefined : { duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        animate={reduced ? undefined : {
+          x: [PLANE_FROM.x, PLANE_FROM.x, PLANE_TO.x, PLANE_TO.x],
+          y: [PLANE_FROM.y, PLANE_FROM.y, PLANE_TO.y, PLANE_TO.y],
+          // Fade in, hold through the straight run, fade out before the
+          // loop resets — masks the jump back to the start so it never
+          // visibly "teleports".
+          opacity: [0, 0.16, 0.16, 0],
+        }}
+        transition={reduced ? undefined : {
+          duration: 10, repeat: Infinity, ease: "easeInOut", times: [0, 0.15, 0.85, 1],
+        }}
       >
-        <Plane size={34} className="-rotate-45" />
+        <Plane size={34} style={{ transform: `rotate(${PLANE_ANGLE}deg)` }} />
       </motion.div>
     </>
   );
