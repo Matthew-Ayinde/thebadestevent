@@ -412,7 +412,7 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
       >
         <Image src="/images/logo.png" alt="RÌNWÁ" width={56} height={56} className="mx-auto mb-5 opacity-90" />
         <p className="text-[0.6rem] uppercase tracking-[0.5em] mb-12" style={{ color: `${GOLD}a6` }}>
-          Diaspora Week Lagos · December 2026
+          Ember to Remember 2026
         </p>
 
         <h1
