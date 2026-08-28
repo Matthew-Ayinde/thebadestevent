@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Eye, Trash2, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Eye, Trash2, ChevronLeft, ChevronRight, Mail, Download } from 'lucide-react';
 import AdminButton from '@/components/admin/AdminButton';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminTable from '@/components/admin/AdminTable';
@@ -11,12 +11,20 @@ import ConfirmationDialog from '@/components/admin/ConfirmationDialog';
 
 const PAGE_SIZE = 20;
 
-function Detail({ label, value }: { label: string; value?: string }) {
-  if (!value) return null;
+function Detail({ label, value }: { label: string; value?: string | string[] }) {
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
   return (
     <div>
       <p className="text-xs uppercase text-white/40 tracking-widest mb-1">{label}</p>
-      <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{value}</p>
+      {Array.isArray(value) ? (
+        <div className="flex flex-wrap gap-2 mt-1">
+          {value.map((v, i) => (
+            <span key={i} className="px-3 py-1 bg-[#e8c07a]/12 text-[#e8c07a] rounded-full text-sm">{v}</span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{value}</p>
+      )}
     </div>
   );
 }
@@ -28,13 +36,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   if (!hasContent) return null;
   return (
     <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
-      <p className="text-[0.6rem] uppercase tracking-[0.28em] text-[#7dd3cf]/70 mb-4">{title}</p>
+      <p className="text-[0.6rem] uppercase tracking-[0.28em] text-[#e8c07a]/70 mb-4">{title}</p>
       <div className="space-y-4">{children}</div>
     </div>
   );
 }
 
-export default function GuestExperiencePage() {
+export default function OurDiasporaAdminPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [isLoading, setIsLoading]     = useState(true);
   const [selected, setSelected]       = useState<any | null>(null);
@@ -49,7 +57,7 @@ export default function GuestExperiencePage() {
   async function fetch_(p = 1) {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/experience?page=${p}&limit=${PAGE_SIZE}`);
+      const res = await fetch(`/api/homecoming?page=${p}&limit=${PAGE_SIZE}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setSubmissions(data.submissions || []);
@@ -57,7 +65,7 @@ export default function GuestExperiencePage() {
       setTotalPages(data.totalPages || 1);
       setTotal(data.total || 0);
     } catch {
-      toast.error('Failed to load feedback');
+      toast.error('Failed to load check-ins');
     } finally {
       setIsLoading(false);
     }
@@ -65,23 +73,31 @@ export default function GuestExperiencePage() {
 
   async function exportCsv() {
     try {
-      const res = await fetch(`/api/experience?page=1&limit=10000`);
+      const res = await fetch(`/api/homecoming?page=1&limit=10000`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       const rows: any[] = data.submissions || [];
-      if (rows.length === 0) { toast.error('No feedback to export'); return; }
+      if (rows.length === 0) { toast.error('No check-ins to export'); return; }
 
-      const cell = (v: any) => `"${String(v || '').replace(/"/g, '""')}"`;
+      const arr = (v: any) => Array.isArray(v) ? v.join(' | ') : (v || '');
+      const cell = (v: any) => {
+        const s = arr(v);
+        return `"${String(s).replace(/"/g, '""')}"`;
+      };
 
       const headers = [
-        'Submitted At', 'Felt Welcomed', 'Anticipated Moment', 'What Happened',
-        'Cared For (1-5)', 'Felt Overlooked / Unsure', 'Would Return', 'Email',
+        'Submitted At', 'Name', 'Contact Method', 'Contact Detail',
+        'First Time or Returning', 'Timeframe', 'Family/Friends Aware',
+        'Reason', 'Reason (Other)', 'Challenges', 'Challenges (Other)', 'Wants Help',
+        'Excited For', 'Excited For (Other)', 'Heard of Diaspora Week Lagos',
       ];
 
       const csvRows = rows.map(r => [
         cell(new Date(r.createdAt).toLocaleDateString('en-GB')),
-        cell(r.welcomed), cell(r.anticipatedMoment), cell(r.anticipatedMomentDetail),
-        cell(r.caredForScore), cell(r.overlookedMoment), cell(r.wouldReturn), cell(r.email),
+        cell(r.name), cell(r.contactMethod), cell(r.contactValue),
+        cell(r.visitorType), cell(r.timeframe), cell(r.familyAware),
+        cell(r.reason), cell(r.reasonOther), cell(r.challenges), cell(r.challengesOther), cell(r.wantsHelp),
+        cell(r.excitedFor), cell(r.excitedForOther), cell(r.heardOfDWL),
       ].join(','));
 
       const csv = [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
@@ -89,12 +105,12 @@ export default function GuestExperiencePage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `rinwa-guest-experience-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `rinwa-homecoming-checkins-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success(`Exported ${rows.length} response${rows.length !== 1 ? 's' : ''}`);
+      toast.success(`Exported ${rows.length} check-in${rows.length !== 1 ? 's' : ''}`);
     } catch {
       toast.error('Export failed');
     }
@@ -104,22 +120,23 @@ export default function GuestExperiencePage() {
     if (!deleteId) return;
     try {
       setIsDeleting(true);
-      const res = await fetch(`/api/experience/${deleteId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/homecoming/${deleteId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
-      toast.success('Response deleted');
+      toast.success('Check-in deleted');
       setDeleteId(null);
       await fetch_(page);
     } catch {
-      toast.error('Failed to delete response');
+      toast.error('Failed to delete check-in');
     } finally {
       setIsDeleting(false);
     }
   }
 
   const columns = [
-    { key: 'welcomed', label: 'Welcomed' },
-    { key: 'caredForScore', label: 'Cared For', render: (_: any, row: any) => `${row.caredForScore} / 5` },
-    { key: 'wouldReturn', label: 'Would Return' },
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'contactValue', label: 'Contact', render: (_: any, row: any) => `${row.contactValue} (${row.contactMethod})` },
+    { key: 'visitorType', label: 'Type' },
+    { key: 'timeframe', label: 'Timeframe' },
     {
       key: 'createdAt',
       label: 'Submitted',
@@ -131,7 +148,7 @@ export default function GuestExperiencePage() {
       label: 'Actions',
       render: (_: any, row: any) => (
         <div className="flex gap-2">
-          <button onClick={() => setSelected(row)} className="p-2 hover:bg-[#7dd3cf]/20 text-[#7dd3cf] rounded-lg transition">
+          <button onClick={() => setSelected(row)} className="p-2 hover:bg-[#e8c07a]/20 text-[#e8c07a] rounded-lg transition">
             <Eye size={16} />
           </button>
           <button onClick={() => setDeleteId(row._id)} className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition">
@@ -146,15 +163,15 @@ export default function GuestExperiencePage() {
     <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
       <div className="mb-6 md:mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl sm:text-4xl text-white/90">Guest Experience Feedback</h1>
+          <h1 className="font-serif text-2xl sm:text-4xl text-white/90">Diaspora Check-Ins</h1>
           <p className="text-white/50 mt-1 md:mt-2 text-sm md:text-base">
-            Anonymous post-event responses — how tonight felt, not just how it ran
+            Diaspora Week Lagos, holiday travel intake responses
           </p>
         </div>
         {total > 0 && (
           <button
             onClick={exportCsv}
-            className="flex items-center gap-2 rounded-full border border-[#7dd3cf]/30 bg-[#7dd3cf]/10 px-5 py-2.5 text-sm font-medium text-[#7dd3cf] transition hover:border-[#7dd3cf]/50 hover:bg-[#7dd3cf]/18"
+            className="flex items-center gap-2 rounded-full border border-[#e8c07a]/30 bg-[#e8c07a]/10 px-5 py-2.5 text-sm font-medium text-[#e8c07a] transition hover:border-[#e8c07a]/50 hover:bg-[#e8c07a]/18"
           >
             <Download size={15} />
             Export CSV
@@ -166,7 +183,7 @@ export default function GuestExperiencePage() {
         <LoadingSpinner />
       ) : submissions.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-white/40 text-sm">No feedback yet</p>
+          <p className="text-white/40 text-sm">No check-ins yet</p>
         </div>
       ) : (
         <div className="bg-white/5 border border-white/10 rounded-[1.8rem] p-4 md:p-6 backdrop-blur-sm">
@@ -176,12 +193,12 @@ export default function GuestExperiencePage() {
               <div key={row._id} className="bg-white/5 border border-white/10 rounded-2xl p-4">
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-white/90 font-medium truncate">Welcomed: {row.welcomed}</p>
-                    <p className="text-[#7dd3cf]/80 text-xs mt-0.5 truncate">Cared for: {row.caredForScore} / 5</p>
-                    <p className="text-white/55 text-xs mt-1">Would return: {row.wouldReturn}</p>
+                    <p className="text-white/90 font-medium truncate">{row.name}</p>
+                    <p className="text-[#e8c07a]/80 text-xs mt-0.5 truncate">{row.contactValue} ({row.contactMethod})</p>
+                    <p className="text-white/55 text-xs mt-1">{row.visitorType} · {row.timeframe}</p>
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={() => setSelected(row)} className="p-2 hover:bg-[#7dd3cf]/20 text-[#7dd3cf] rounded-lg transition">
+                    <button onClick={() => setSelected(row)} className="p-2 hover:bg-[#e8c07a]/20 text-[#e8c07a] rounded-lg transition">
                       <Eye size={16} />
                     </button>
                     <button onClick={() => setDeleteId(row._id)} className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition">
@@ -202,7 +219,7 @@ export default function GuestExperiencePage() {
           <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-white/50">
               {total === 0
-                ? 'No responses'
+                ? 'No check-ins'
                 : `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} of ${total}`}
             </p>
             <div className="flex items-center gap-2">
@@ -219,34 +236,48 @@ export default function GuestExperiencePage() {
       )}
 
       {/* Detail Modal */}
-      <AdminModal isOpen={!!selected} onClose={() => setSelected(null)} title="Guest Experience Response">
+      <AdminModal isOpen={!!selected} onClose={() => setSelected(null)} title="Diaspora Check-In">
         {selected && (
           <div className="space-y-4">
-            <Section title="First Impressions">
-              <Detail label="Felt welcomed the moment they walked in" value={selected.welcomed} />
+            <Section title="Contact">
+              <Detail label="Name" value={selected.name} />
+              <Detail label="Reach via" value={selected.contactMethod} />
+              <Detail label="Contact Detail" value={selected.contactValue} />
             </Section>
 
-            <Section title="The Little Things">
-              <Detail label="A moment someone anticipated a need" value={selected.anticipatedMoment} />
-              <Detail label="What happened" value={selected.anticipatedMomentDetail} />
+            <Section title="Trip Details">
+              <Detail label="First Time or Returning" value={selected.visitorType} />
+              <Detail label="Timeframe" value={selected.timeframe} />
+              <Detail label="Family / Friends Aware" value={selected.familyAware} />
             </Section>
 
-            <Section title="Beyond The Run Of Show">
-              <Detail label="How cared for they felt (1–5)" value={String(selected.caredForScore)} />
+            <Section title="Motivation">
+              <Detail label="Reason for Coming" value={selected.reason} />
+              <Detail label="Other Reason" value={selected.reasonOther} />
             </Section>
 
-            <Section title="The Honest Part">
-              <Detail label="Felt overlooked or unsure what to do" value={selected.overlookedMoment} />
+            <Section title="Friction Points">
+              <Detail label="Trip Challenges" value={selected.challenges} />
+              <Detail label="Other Challenge" value={selected.challengesOther} />
+              <Detail label="Wants On-Ground Help" value={selected.wantsHelp} />
             </Section>
 
-            <Section title="Would They Return">
-              <Detail label="Would come back for the treatment, not just the lineup/venue" value={selected.wouldReturn} />
+            <Section title="Excitement">
+              <Detail label="Excited To Experience" value={selected.excitedFor} />
+              <Detail label="Other Excitement" value={selected.excitedForOther} />
             </Section>
 
-            {selected.email && (
-              <Section title="Contact">
-                <Detail label="Email (left for a confirmation copy)" value={selected.email} />
-              </Section>
+            <Section title="Awareness">
+              <Detail label="Heard of Diaspora Week Lagos" value={selected.heardOfDWL} />
+            </Section>
+
+            {selected.contactMethod === 'Email' && (
+              <div className="pt-2">
+                <AdminButton onClick={() => window.open(`mailto:${selected.contactValue}?subject=Re: Your RÌNWÁ Homecoming Check-In`)} variant="primary" className="w-full">
+                  <Mail size={17} className="inline mr-2" />
+                  Reply via Email
+                </AdminButton>
+              </div>
             )}
           </div>
         )}
@@ -254,8 +285,8 @@ export default function GuestExperiencePage() {
 
       <ConfirmationDialog
         isOpen={!!deleteId}
-        title="Delete Response"
-        message="Are you sure you want to delete this response? This cannot be undone."
+        title="Delete Check-In"
+        message="Are you sure you want to delete this check-in? This cannot be undone."
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
         isLoading={isDeleting}

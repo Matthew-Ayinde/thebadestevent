@@ -32,8 +32,8 @@ const navItems = [
   // { href: '/admin/job-postings', label: 'Job Postings', icon: Briefcase },
   // { href: '/admin/submissions', label: 'Submissions', icon: Inbox },
   { href: '/admin/questionnaire', label: 'Questionnaire', icon: ClipboardList },
-  { href: '/admin/homecoming', label: 'Homecoming', icon: Home },
-  { href: '/admin/experience', label: 'Guest Experience', icon: Sparkles },
+  { href: '/admin/ourdiaspora', label: 'Homecoming', icon: Home },
+  { href: '/admin/ourguests', label: 'Guest Experience', icon: Sparkles },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },
 ];

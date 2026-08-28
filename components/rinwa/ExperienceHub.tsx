@@ -37,7 +37,7 @@ export default function ExperienceHub() {
       {/* Shared brand lockup, sitting over both panels */}
       <div className="relative z-30 flex flex-col items-center shrink-0 pt-12 pb-9 sm:pt-14 sm:pb-11 px-6 text-center">
         <Image src="/images/logo.png" alt="RÌNWÁ" width={68} height={68} className="opacity-90 mb-3" />
-        <p className="mt-2 text-[0.6rem] uppercase tracking-[0.42em] text-white/35">Choose Your Moment</p>
+        <p className="mt-2 text-[0.6rem] uppercase tracking-[0.42em] text-white/35">What's on your mind?</p>
       </div>
 
       {/* Two panels — flex-1 fills exactly what's left under the lockup on
@@ -50,23 +50,23 @@ export default function ExperienceHub() {
         <div className="hidden md:block absolute inset-y-0 left-1/2 w-px bg-white/10 z-20" />
 
         <Panel
-          href="/experience"
+          href="/ourguests"
           accent={TEAL}
           reduced={reduced}
           Backdrop={NightBackdrop}
           eyebrow="Guest Experience"
-          title={["Your Guest", "Experience"]}
+          title={["My Guest", "Experience"]}
           body="Tell us how tonight felt, not just how it ran. Rate the moments that matter in under two minutes, honestly :)"
           cta="Rate Tonight"
         />
 
         <Panel
-          href="/homecoming"
+          href="/ourdiaspora"
           accent={GOLD}
           reduced={reduced}
           Backdrop={JourneyBackdrop}
           eyebrow="Homecoming"
-          title={["Your Homecoming", "Experience"]}
+          title={["My Homecoming", "Experience"]}
           body="Coming home this holiday or still making plans? Loop in the diaspora. If Nigeria is on the group chat's mind this ember season, this is where your plans come together. Share this with your people."
           cta="Plan Your Homecoming"
         />

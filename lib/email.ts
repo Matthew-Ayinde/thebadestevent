@@ -703,7 +703,7 @@ function buildAdminHomecomingEmailHtml(s: Record<string, any>) {
   const firstName = escapeHtml((s.name || '').split(' ')[0] || 'Someone');
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Homecoming Check-In</title></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Diaspora Check-In</title></head>
 <body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
     <tr><td align="center">
@@ -765,7 +765,7 @@ function buildAdminHomecomingEmailHtml(s: Record<string, any>) {
               </table>
             </td></tr>
             <tr><td style="padding:24px 32px 28px;text-align:center;">
-              <a href="mailto:${escapeHtml(s.contactMethod === 'Email' ? s.contactValue : '')}?subject=Re: Your RÌNWÁ Homecoming Check-In"
+              <a href="mailto:${escapeHtml(s.contactMethod === 'Email' ? s.contactValue : '')}?subject=Re: Your RÌNWÁ Diaspora Check-In"
                  style="display:inline-block;background:${GOLD};color:#041114;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;text-decoration:none;padding:13px 28px;border-radius:100px;">
                 Reach out to ${firstName}
               </a>
@@ -869,7 +869,7 @@ export async function sendHomecomingEmails({
       from,
       to: adminEmail,
       replyTo: userEmail || undefined,
-      subject: `[Homecoming Check-In] ${submission.name}`,
+      subject: `[Diaspora Check-In] ${submission.name}`,
       text: `${submission.name} checked in via ${submission.contactMethod} (${submission.contactValue}). Coming ${submission.timeframe} as a ${submission.visitorType}.`,
       html: buildAdminHomecomingEmailHtml(submission),
     });

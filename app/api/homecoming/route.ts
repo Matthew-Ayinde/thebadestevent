@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const emailResult = await sendHomecomingEmails({ submission: validated, adminEmail });
 
     if (!emailResult.sent) {
-      console.warn('Homecoming check-in saved but emails failed:', emailResult.warnings);
+      console.warn('Diaspora check-in saved but emails failed:', emailResult.warnings);
     }
 
     return NextResponse.json(

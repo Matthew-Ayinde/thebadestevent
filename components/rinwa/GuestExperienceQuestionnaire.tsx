@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { ArrowRight, Check, Wine, Sparkles, Disc3 } from "lucide-react";
 import { Area, SegButtons, Reveal, Shell, ScoreScale, Field } from "./questionnaire-ui";
@@ -249,7 +250,7 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
       >
         <Image src="/images/logo.png" alt="RÌNWÁ" width={56} height={56} className="mx-auto mb-5 opacity-90" />
         <p className="text-[0.6rem] uppercase tracking-[0.5em] mb-12" style={{ color: `${TEAL}a6` }}>
-          Your Guest Experience
+          My Guest Experience
         </p>
 
         <h1
@@ -301,16 +302,35 @@ function SuccessScreen() {
           className="font-serif text-[clamp(2.2rem,6.5vw,4rem)] leading-[1.05] tracking-tight text-white mb-6 max-w-2xl"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          That&apos;s exactly what we needed to hear.
+          Your feedback matters.
         </h2>
         <p className="text-base sm:text-lg text-white/55 leading-relaxed max-w-md mb-3">
-          Every answer here goes straight to the people who plan the next one.
+          Follow us along to see highlights from tonight!
         </p>
         <p className="text-sm text-white/40 leading-relaxed max-w-md mb-10">
-          See you at the next RÌNWÁ evening.
+          See you at the next RÌNWÁ experience.
         </p>
 
-        <div className="flex flex-col items-center gap-4 mt-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <Link
+            href="/"
+            className="group inline-flex items-center gap-3 rounded-md border px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] transition-colors"
+            style={{ borderColor: `${TEAL}59`, background: `${TEAL}1a`, color: TEAL }}
+          >
+            Back to Home
+            <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+          </Link>
+          <a
+            href="https://instagram.com/rinwahospitality"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-md border border-white/15 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-white/60 transition-colors hover:text-white hover:border-white/30"
+          >
+            Follow Us
+          </a>
+        </div>
+
+        <div className="flex flex-col items-center gap-4 mt-14">
           <p className="text-[0.58rem] uppercase tracking-[0.4em]" style={{ color: `${TEAL}80` }}>The RÌNWÁ Team</p>
           <div className="flex items-center gap-4">
             <div className="h-px w-14" style={{ background: `${TEAL}40` }} />

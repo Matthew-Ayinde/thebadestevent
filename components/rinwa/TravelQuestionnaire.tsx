@@ -451,7 +451,7 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
 }
 
 function ShareRow() {
-  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "https://rinwahospitality.com")}/homecoming`;
+  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "https://rinwahospitality.com")}/ourdiaspora`;
   const shareText = "Home is calling — I just checked in with RÌNWÁ for the holidays in Lagos. You should too:";
 
   async function copyLink(label: string) {
@@ -555,10 +555,10 @@ function SuccessScreen() {
           Thank you for your time!<br />We&apos;d get to you soon.
         </h2>
         <p className="text-base sm:text-lg text-white/55 leading-relaxed max-w-md mb-3">
-          Before that, we bet you&apos;d have at least one person coming home this holiday.
+          Before that, we bet you&apos;d know at least one person from the diaspora coming back home this holiday.
         </p>
         <p className="text-sm text-white/40 leading-relaxed max-w-md mb-10">
-          Help spread the word by sharing this link with them directly, or on your stories.
+          Help spread the word by sharing this link with them directly or on your stories.
         </p>
 
         <ShareRow />
