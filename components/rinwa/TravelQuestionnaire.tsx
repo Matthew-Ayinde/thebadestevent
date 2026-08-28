@@ -451,7 +451,7 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
 }
 
 function ShareRow() {
-  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "https://rinwahospitality.com")}/ourdiaspora`;
+  const shareUrl = "https://homecoming.rinwahospitality.com/ourdiaspora";
   const shareText = "Home is calling — I just checked in with RÌNWÁ for the holidays in Lagos. You should too:";
 
   async function copyLink(label: string) {
