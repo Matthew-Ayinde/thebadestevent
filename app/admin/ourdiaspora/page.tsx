@@ -89,7 +89,7 @@ export default function OurDiasporaAdminPage() {
         'Submitted At', 'Name', 'Contact Method', 'Contact Detail',
         'First Time or Returning', 'Timeframe', 'Family/Friends Aware',
         'Reason', 'Reason (Other)', 'Challenges', 'Challenges (Other)', 'Wants Help',
-        'Excited For', 'Excited For (Other)', 'Heard of Diaspora Week Lagos',
+        'Excited For', 'Excited For (Other)', 'Heard of Ember to Remember 2026',
       ];
 
       const csvRows = rows.map(r => [
@@ -165,7 +165,7 @@ export default function OurDiasporaAdminPage() {
         <div>
           <h1 className="font-serif text-2xl sm:text-4xl text-white/90">Diaspora Check-Ins</h1>
           <p className="text-white/50 mt-1 md:mt-2 text-sm md:text-base">
-            Diaspora Week Lagos, holiday travel intake responses
+            Ember to Remember 2026, holiday travel intake responses
           </p>
         </div>
         {total > 0 && (
@@ -268,7 +268,7 @@ export default function OurDiasporaAdminPage() {
             </Section>
 
             <Section title="Awareness">
-              <Detail label="Heard of Diaspora Week Lagos" value={selected.heardOfDWL} />
+              <Detail label="Heard of Ember to Remember" value={selected.heardOfDWL} />
             </Section>
 
             {selected.contactMethod === 'Email' && (

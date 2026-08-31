@@ -24,6 +24,7 @@ const CREAM = "#f5f0e8";
 interface FormData {
   name: string;
   contactMethod: string; contactValue: string;
+  residence: string; residenceOther: string;
   visitorType: string;
   timeframe: string;
   familyAware: string;
@@ -37,6 +38,7 @@ interface FormData {
 const BLANK: FormData = {
   name: "",
   contactMethod: "", contactValue: "",
+  residence: "", residenceOther: "",
   visitorType: "",
   timeframe: "",
   familyAware: "",
@@ -47,6 +49,7 @@ const BLANK: FormData = {
   heardOfDWL: "",
 };
 
+const RESIDENCES = ["Canada", "UK", "USA", "Other"];
 const REASONS = ["Reconnect with family", "Explore the city", "Business opportunities", "Wedding celebrations", "Relocating decisions", "Other"];
 const CHALLENGES = [
   "Getting from the airport without hassle", "Traffic / getting around", "Eating well consistently",
@@ -61,14 +64,15 @@ const EXCITEMENTS = [
 const SECTIONS = [
   { tag: "01 — Let's Start",        title: "What should we call you?",                                            desc: "" },
   { tag: "02 — Stay In Touch",      title: "How can we reach you?",                                               desc: "Pick whichever works best for you." },
-  { tag: "03 — Your Journey",       title: "Is this your first time visiting, or are you a returner?",           desc: "" },
-  { tag: "04 — Timing",             title: "Roughly what timeframe are you thinking?",                            desc: "An estimate is fine, nothing's locked in." },
-  { tag: "05 — The Surprise",       title: "Does your family or friends here know you're coming?",                desc: "Or is this a surprise for them?" },
-  { tag: "06 — The Why",            title: "Why are you coming?",                                                 desc: "" },
-  { tag: "07 — The Friction",       title: "What might make your trip harder than it needs to be?",              desc: "Pick as many as apply." },
-  { tag: "08 — A Little Help",      title: "Would you want help with things like airport pickup or getting around?", desc: "" },
-  { tag: "09 — The Fun Part",       title: "What are you excited to experience?",                                 desc: "Pick as many as apply." },
-  { tag: "10 — Last Thing",         title: "Have you heard of Diaspora Week Lagos?",                              desc: "" },
+  { tag: "03 — Home Base",          title: "Where do you live?",                                                  desc: "" },
+  { tag: "04 — Your Journey",       title: "Is this your first time visiting, or are you a returner?",           desc: "" },
+  { tag: "05 — Timing",             title: "Roughly what timeframe are you thinking?",                            desc: "An estimate is fine, nothing's locked in." },
+  { tag: "06 — The Surprise",       title: "Do your family or friends here know you're coming?",                desc: "Or is this a surprise for them?" },
+  { tag: "07 — The Why",            title: "Why are you coming?",                                                 desc: "" },
+  { tag: "08 — The Friction",       title: "What might make your trip harder than it needs to be?",              desc: "Pick as many as apply." },
+  { tag: "09 — A Little Help",      title: "Would you want help with things like airport pickup or getting around?", desc: "" },
+  { tag: "10 — The Fun Part",       title: "What are you excited to experience?",                                 desc: "Pick as many as apply." },
+  { tag: "11 — Last Thing",         title: "Have you heard of Ember to Remember?",                              desc: "" },
 ];
 
 const TOTAL = SECTIONS.length;
@@ -270,14 +274,15 @@ export default function Questions() {
     switch (s) {
       case 1: return data.name.trim() ? null : "Let us know what to call you.";
       case 2: return data.contactMethod && data.contactValue.trim() ? null : "Please choose how to reach you and share the detail.";
-      case 3: return data.visitorType ? null : "Please pick one.";
-      case 4: return data.timeframe ? null : "Please pick a rough timeframe.";
-      case 5: return data.familyAware ? null : "Please pick one.";
-      case 6: return data.reason && (data.reason !== "Other" || data.reasonOther.trim()) ? null : "Please tell us why you're coming.";
-      case 7: return data.challenges.length && (!data.challenges.includes("Other") || data.challengesOther.trim()) ? null : "Pick at least one, or tell us more.";
-      case 8: return data.wantsHelp ? null : "Please pick one.";
-      case 9: return data.excitedFor.length && (!data.excitedFor.includes("Other") || data.excitedForOther.trim()) ? null : "Pick at least one, or tell us more.";
-      case 10: return data.heardOfDWL ? null : "Please pick one.";
+      case 3: return data.residence && (data.residence !== "Other" || data.residenceOther.trim()) ? null : "Please let us know where you live.";
+      case 4: return data.visitorType ? null : "Please pick one.";
+      case 5: return data.timeframe ? null : "Please pick a rough timeframe.";
+      case 6: return data.familyAware ? null : "Please pick one.";
+      case 7: return data.reason && (data.reason !== "Other" || data.reasonOther.trim()) ? null : "Please tell us why you're coming.";
+      case 8: return data.challenges.length && (!data.challenges.includes("Other") || data.challengesOther.trim()) ? null : "Pick at least one, or tell us more.";
+      case 9: return data.wantsHelp ? null : "Please pick one.";
+      case 10: return data.excitedFor.length && (!data.excitedFor.includes("Other") || data.excitedForOther.trim()) ? null : "Pick at least one, or tell us more.";
+      case 11: return data.heardOfDWL ? null : "Please pick one.";
       default: return null;
     }
   }
@@ -380,10 +385,11 @@ export default function Questions() {
                 {step === 4 && <S4 data={data} set={set} />}
                 {step === 5 && <S5 data={data} set={set} />}
                 {step === 6 && <S6 data={data} set={set} />}
-                {step === 7 && <S7 data={data} set={set} toggle={toggle} />}
-                {step === 8 && <S8 data={data} set={set} />}
-                {step === 9 && <S9 data={data} set={set} toggle={toggle} />}
-                {step === 10 && <S10 data={data} set={set} />}
+                {step === 7 && <S7 data={data} set={set} />}
+                {step === 8 && <S8 data={data} set={set} toggle={toggle} />}
+                {step === 9 && <S9 data={data} set={set} />}
+                {step === 10 && <S10 data={data} set={set} toggle={toggle} />}
+                {step === 11 && <S11 data={data} set={set} />}
               </Shell>
             </motion.div>
           )}
@@ -616,11 +622,22 @@ function S2({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
 
 function S3({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
-    <SegButtons options={["First timer", "Returnee"]} value={data.visitorType} onPick={v => set("visitorType", v)} />
+    <div>
+      <Chips options={RESIDENCES} values={data.residence} onToggle={v => set("residence", data.residence === v ? "" : v)} />
+      <Reveal show={data.residence === "Other"}>
+        <Area label="Tell us more" name="residenceOther" value={data.residenceOther} onChange={e => set("residenceOther", e.target.value)} rows={2} placeholder="Where do you live?" />
+      </Reveal>
+    </div>
   );
 }
 
 function S4({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+  return (
+    <SegButtons options={["First timer", "Returnee"]} value={data.visitorType} onPick={v => set("visitorType", v)} />
+  );
+}
+
+function S5({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
     <Chips
       options={["September", "October", "November", "December", "Still deciding"]}
@@ -630,7 +647,7 @@ function S4({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
   );
 }
 
-function S5({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+function S6({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
     <SegButtons
       options={["They know", "It's a surprise", "Some know, not all"]}
@@ -640,7 +657,7 @@ function S5({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
   );
 }
 
-function S6({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+function S7({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
     <div>
       <Chips options={REASONS} values={data.reason} onToggle={v => set("reason", data.reason === v ? "" : v)} />
@@ -651,7 +668,7 @@ function S6({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
   );
 }
 
-function S7({
+function S8({
   data, set, toggle,
 }: {
   data: FormData;
@@ -668,13 +685,13 @@ function S7({
   );
 }
 
-function S8({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+function S9({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
     <SegButtons options={["Yes", "No", "Maybe"]} value={data.wantsHelp} onPick={v => set("wantsHelp", v)} />
   );
 }
 
-function S9({
+function S10({
   data, set, toggle,
 }: {
   data: FormData;
@@ -691,7 +708,7 @@ function S9({
   );
 }
 
-function S10({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+function S11({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
     <SegButtons options={["Yes", "No"]} value={data.heardOfDWL} onPick={v => set("heardOfDWL", v)} />
   );

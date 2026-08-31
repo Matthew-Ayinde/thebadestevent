@@ -37,7 +37,7 @@ export default function ExperienceHub() {
       {/* Shared brand lockup, sitting over both panels */}
       <div className="relative z-30 flex flex-col items-center shrink-0 pt-12 pb-9 sm:pt-14 sm:pb-11 px-6 text-center">
         <Image src="/images/logo.png" alt="RÌNWÁ" width={68} height={68} className="opacity-90 mb-3" />
-        <p className="mt-2 text-[0.6rem] uppercase tracking-[0.42em] text-white/35">What's on your mind?</p>
+        <p className="mt-2 text-[0.6rem] font-semibold uppercase tracking-[0.42em] text-white/70">What's on your mind?</p>
       </div>
 
       {/* Two panels — flex-1 fills exactly what's left under the lockup on
@@ -56,7 +56,7 @@ export default function ExperienceHub() {
           Backdrop={NightBackdrop}
           eyebrow="Guest Experience"
           title={["My Guest", "Experience"]}
-          body="Tell us how tonight felt, not just how it ran. Rate the moments that matter in under two minutes, honestly :)"
+          body="Tell us how tonight felt, not just how it ran. Rate the moments that matter in under two minutes, honestly ;)"
           cta="Rate Tonight"
         />
 
