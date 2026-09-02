@@ -25,8 +25,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "RÌNWÁ Hospitality & Experiences",
-    template: "%s | RÌNWÁ Hospitality & Experiences",
+    default: "RÌNWÁ | The Bridge Between Coming Home & Building Home",
+    template: "%s | RÌNWÁ | The Bridge Between Coming Home & Building Home",
   },
   description:
     "RÌNWÁ Hospitality & Experiences specialises in strategic brand positioning, cultural matchmaking, and media relations for high-net-worth individuals. We curate high-profile experiences rooted in African hospitality across Lagos, Africa, and Canada.",
@@ -63,9 +63,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "/",
     siteName: "RÌNWÁ Hospitality & Experiences",
-    title: "RÌNWÁ Hospitality & Experiences",
+    title: "RÌNWÁ | The Bridge Between Coming Home & Building Home",
     description:
-      "A culture-first hospitality brand offering strategic brand positioning, cultural matchmaking, and high-profile experiences for high-net-worth individuals across Lagos, Africa, and Canada.",
+      "A bridge for diasporans returning back home. We connect you to people, places, experiences and opportunities to belong, explore and build.",
     images: [
       {
         url: "https://res.cloudinary.com/matthew-ayinde/image/upload/v1780477515/rinwa-green_iu1he9.png",
@@ -77,9 +77,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "RÌNWÁ Hospitality & Experiences",
+    title: "RÌNWÁ | The Bridge Between Coming Home & Building Home",
     description:
-      "Strategic brand positioning, cultural matchmaking, and high-profile experiences rooted in African hospitality — serving high-net-worth individuals across Lagos, Africa, and Canada.",
+      "A bridge for diasporans returning back home. We connect you to people, places, experiences and opportunities to belong, explore and build.",
     images: [
       "https://res.cloudinary.com/matthew-ayinde/image/upload/v1780477515/rinwa-green_iu1he9.png",
     ],
