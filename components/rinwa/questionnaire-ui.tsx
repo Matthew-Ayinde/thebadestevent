@@ -183,6 +183,32 @@ export function ScoreScale({
   );
 }
 
+// A single numbered question inside a multi-question page — an accent-colored
+// index, a prompt line standing in for what used to be a whole page's Shell
+// title, an optional helper line, then the input. Blocks stack with a
+// hairline divider between them (pass `last` to omit it on the final block),
+// keeping the same flat, undecorated language as the rest of the system.
+export function QuestionBlock({
+  index, prompt, desc, last, children,
+}: {
+  index: number; prompt: string; desc?: string; last?: boolean; children: React.ReactNode;
+}) {
+  return (
+    <div className={last ? "" : "mb-7 pb-7 border-b border-white/10"}>
+      <div className="flex items-baseline gap-3 mb-4">
+        <span className="shrink-0 text-[0.72rem] font-semibold tabular-nums" style={{ color: "var(--accent)" }}>
+          {String(index).padStart(2, "0")}
+        </span>
+        <div className="min-w-0">
+          <p className="text-[0.98rem] sm:text-[1.05rem] font-medium text-white leading-snug">{prompt}</p>
+          {desc && <p className="mt-1.5 text-[0.82rem] text-white/45 leading-relaxed">{desc}</p>}
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export function Reveal({ show, children }: { show: boolean; children: React.ReactNode }) {
   return (
     <AnimatePresence>

@@ -9,7 +9,7 @@ import {
   MessageCircle, Instagram, Facebook, Twitter, Music2, Link as LinkIcon,
   Compass, Globe2, Luggage, MapPin, Ticket, Navigation,
 } from "lucide-react";
-import { Field, Area, SegButtons, Chips, Reveal, Shell } from "./questionnaire-ui";
+import { Field, Area, SegButtons, Chips, Reveal, Shell, QuestionBlock } from "./questionnaire-ui";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────────
 // Same theme as the rest of the site (dark ground, serif display type, thin
@@ -61,21 +61,16 @@ const EXCITEMENTS = [
   "Weddings & social events", "Business / networking", "Wellness / rest", "Local food & dining", "Other",
 ];
 
-const SECTIONS = [
-  { tag: "01 — Let's Start",        title: "What should we call you?",                                            desc: "" },
-  { tag: "02 — Stay In Touch",      title: "How can we reach you?",                                               desc: "Pick whichever works best for you." },
-  { tag: "03 — Home Base",          title: "Where do you live?",                                                  desc: "" },
-  { tag: "04 — Your Journey",       title: "Is this your first time visiting, or are you a returner?",           desc: "" },
-  { tag: "05 — Timing",             title: "Roughly what timeframe are you thinking?",                            desc: "An estimate is fine, nothing's locked in." },
-  { tag: "06 — The Surprise",       title: "Do your family or friends here know you're coming?",                desc: "Or is this a surprise for them?" },
-  { tag: "07 — The Why",            title: "Why are you coming?",                                                 desc: "" },
-  { tag: "08 — The Friction",       title: "What might make your trip harder than it needs to be?",              desc: "Pick as many as apply." },
-  { tag: "09 — A Little Help",      title: "Would you want help with things like airport pickup or getting around?", desc: "" },
-  { tag: "10 — The Fun Part",       title: "What are you excited to experience?",                                 desc: "Pick as many as apply." },
-  { tag: "11 — Last Thing",         title: "Have you heard of Ember to Remember?",                              desc: "" },
+// Three themed pages, each holding several numbered QuestionBlocks (see
+// ./questionnaire-ui) — a group of related questions per screen instead of
+// one screen per question, so the whole flow is three pages, not eleven.
+const PAGES = [
+  { tag: "01 — About You",          title: "Let's start with the basics",         desc: "A few details so we know who we're planning for." },
+  { tag: "02 — Your Trip",          title: "Now, tell us about the trip",          desc: "Rough details are perfectly fine, nothing's locked in." },
+  { tag: "03 — Making It Easier",   title: "Help us make it easier for you",       desc: "The more honest you are, the more useful this is." },
 ];
 
-const TOTAL = SECTIONS.length;
+const TOTAL = PAGES.length;
 
 // ─── Travel Backdrop ────────────────────────────────────────────────────────────
 // A bold, code-drawn travel motif standing in for the missing photo: a faint
@@ -272,17 +267,23 @@ export default function Questions() {
 
   function validate(s: number): string | null {
     switch (s) {
-      case 1: return data.name.trim() ? null : "Let us know what to call you.";
-      case 2: return data.contactMethod && data.contactValue.trim() ? null : "Please choose how to reach you and share the detail.";
-      case 3: return data.residence && (data.residence !== "Other" || data.residenceOther.trim()) ? null : "Please let us know where you live.";
-      case 4: return data.visitorType ? null : "Please pick one.";
-      case 5: return data.timeframe ? null : "Please pick a rough timeframe.";
-      case 6: return data.familyAware ? null : "Please pick one.";
-      case 7: return data.reason && (data.reason !== "Other" || data.reasonOther.trim()) ? null : "Please tell us why you're coming.";
-      case 8: return data.challenges.length && (!data.challenges.includes("Other") || data.challengesOther.trim()) ? null : "Pick at least one, or tell us more.";
-      case 9: return data.wantsHelp ? null : "Please pick one.";
-      case 10: return data.excitedFor.length && (!data.excitedFor.includes("Other") || data.excitedForOther.trim()) ? null : "Pick at least one, or tell us more.";
-      case 11: return data.heardOfDWL ? null : "Please pick one.";
+      case 1:
+        if (!data.name.trim()) return "Let us know what to call you.";
+        if (!data.contactMethod || !data.contactValue.trim()) return "Please choose how to reach you and share the detail.";
+        if (!data.residence || (data.residence === "Other" && !data.residenceOther.trim())) return "Please let us know where you live.";
+        return null;
+      case 2:
+        if (!data.visitorType) return "Please let us know if you're a first timer or returnee.";
+        if (!data.timeframe) return "Please pick a rough timeframe.";
+        if (!data.familyAware) return "Please let us know if family or friends know you're coming.";
+        if (!data.reason || (data.reason === "Other" && !data.reasonOther.trim())) return "Please tell us why you're coming.";
+        return null;
+      case 3:
+        if (!data.challenges.length || (data.challenges.includes("Other") && !data.challengesOther.trim())) return "Pick at least one challenge, or tell us more.";
+        if (!data.wantsHelp) return "Please let us know if you'd want help getting around.";
+        if (!data.excitedFor.length || (data.excitedFor.includes("Other") && !data.excitedForOther.trim())) return "Pick at least one thing you're excited for, or tell us more.";
+        if (!data.heardOfDWL) return "Please let us know if you've heard of Ember to Remember.";
+        return null;
       default: return null;
     }
   }
@@ -369,9 +370,9 @@ export default function Questions() {
           {step >= 1 && step <= TOTAL && (
             <motion.div key={`s${step}`} variants={variants} initial="enter" animate="center" exit="exit" transition={transition}>
               <Shell
-                tag={SECTIONS[step - 1].tag}
-                title={SECTIONS[step - 1].title}
-                desc={SECTIONS[step - 1].desc}
+                tag={PAGES[step - 1].tag}
+                title={PAGES[step - 1].title}
+                desc={PAGES[step - 1].desc}
                 step={step}
                 total={TOTAL}
                 onBack={back}
@@ -379,17 +380,9 @@ export default function Questions() {
                 submitting={submitting}
                 isLast={step === TOTAL}
               >
-                {step === 1 && <S1 data={data} set={set} />}
-                {step === 2 && <S2 data={data} set={set} />}
-                {step === 3 && <S3 data={data} set={set} />}
-                {step === 4 && <S4 data={data} set={set} />}
-                {step === 5 && <S5 data={data} set={set} />}
-                {step === 6 && <S6 data={data} set={set} />}
-                {step === 7 && <S7 data={data} set={set} />}
-                {step === 8 && <S8 data={data} set={set} toggle={toggle} />}
-                {step === 9 && <S9 data={data} set={set} />}
-                {step === 10 && <S10 data={data} set={set} toggle={toggle} />}
-                {step === 11 && <S11 data={data} set={set} />}
+                {step === 1 && <Page1 data={data} set={set} />}
+                {step === 2 && <Page2 data={data} set={set} />}
+                {step === 3 && <Page3 data={data} set={set} toggle={toggle} />}
               </Shell>
             </motion.div>
           )}
@@ -582,93 +575,94 @@ function SuccessScreen() {
   );
 }
 
-// ─── Sections (one question per step) ──────────────────────────────────────────
-// Shell, Field, Area, SegButtons, Chips, and Reveal are shared with every other
-// intake flow — see ./questionnaire-ui. This flow's accent (gold) is set once,
-// below, as a CSS variable on the root element.
+// ─── Pages (several numbered questions per step) ───────────────────────────────
+// Shell, Field, Area, SegButtons, Chips, Reveal, and QuestionBlock are shared
+// with every other intake flow — see ./questionnaire-ui. Each page below is a
+// short, thematically-grouped run of QuestionBlocks inside the one Shell card,
+// so eleven questions read as three pages instead of eleven. This flow's
+// accent (gold) is set once, above, as a CSS variable on the root element.
 
-function S1({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
-  return (
-    <Field
-      label="Your Name" name="name" value={data.name}
-      onChange={e => set("name", e.target.value)}
-      placeholder="What should we call you?" req autoFocus
-    />
-  );
-}
-
-function S2({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+function Page1({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   const methodMeta: Record<string, { label: string; type: string; placeholder: string }> = {
     WhatsApp: { label: "WhatsApp Number", type: "tel", placeholder: "+234 xxx xxx xxxx" },
     Email:    { label: "Email Address",   type: "email", placeholder: "your@email.com" },
     Phone:    { label: "Phone Number",    type: "tel", placeholder: "+234 xxx xxx xxxx" },
   };
   const meta = methodMeta[data.contactMethod];
-  return (
-    <div className="space-y-1">
-      <SegButtons options={["WhatsApp", "Email", "Phone"]} value={data.contactMethod} onPick={v => { set("contactMethod", v); set("contactValue", ""); }} />
-      <Reveal show={!!data.contactMethod}>
-        {meta && (
-          <Field
-            label={meta.label} name="contactValue" type={meta.type}
-            value={data.contactValue} onChange={e => set("contactValue", e.target.value)}
-            placeholder={meta.placeholder} req
-          />
-        )}
-      </Reveal>
-    </div>
-  );
-}
 
-function S3({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
     <div>
-      <Chips options={RESIDENCES} values={data.residence} onToggle={v => set("residence", data.residence === v ? "" : v)} />
-      <Reveal show={data.residence === "Other"}>
-        <Area label="Tell us more" name="residenceOther" value={data.residenceOther} onChange={e => set("residenceOther", e.target.value)} rows={2} placeholder="Where do you live?" />
-      </Reveal>
+      <QuestionBlock index={1} prompt="What should we call you?">
+        <Field
+          label="Your Name" name="name" value={data.name}
+          onChange={e => set("name", e.target.value)}
+          placeholder="Your name" req autoFocus
+        />
+      </QuestionBlock>
+
+      <QuestionBlock index={2} prompt="How can we reach you?" desc="Pick whichever works best for you.">
+        <div className="space-y-1">
+          <SegButtons options={["WhatsApp", "Email", "Phone"]} value={data.contactMethod} onPick={v => { set("contactMethod", v); set("contactValue", ""); }} />
+          <Reveal show={!!data.contactMethod}>
+            {meta && (
+              <Field
+                label={meta.label} name="contactValue" type={meta.type}
+                value={data.contactValue} onChange={e => set("contactValue", e.target.value)}
+                placeholder={meta.placeholder} req
+              />
+            )}
+          </Reveal>
+        </div>
+      </QuestionBlock>
+
+      <QuestionBlock index={3} prompt="Where do you live?" last>
+        <div>
+          <Chips options={RESIDENCES} values={data.residence} onToggle={v => set("residence", data.residence === v ? "" : v)} />
+          <Reveal show={data.residence === "Other"}>
+            <Area label="Tell us more" name="residenceOther" value={data.residenceOther} onChange={e => set("residenceOther", e.target.value)} rows={2} placeholder="Where do you live?" />
+          </Reveal>
+        </div>
+      </QuestionBlock>
     </div>
   );
 }
 
-function S4({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
-  return (
-    <SegButtons options={["First timer", "Returnee"]} value={data.visitorType} onPick={v => set("visitorType", v)} />
-  );
-}
-
-function S5({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
-  return (
-    <Chips
-      options={["September", "October", "November", "December", "Still deciding"]}
-      values={data.timeframe}
-      onToggle={v => set("timeframe", data.timeframe === v ? "" : v)}
-    />
-  );
-}
-
-function S6({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
-  return (
-    <SegButtons
-      options={["They know", "It's a surprise", "Some know, not all"]}
-      value={data.familyAware}
-      onPick={v => set("familyAware", v)}
-    />
-  );
-}
-
-function S7({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+function Page2({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
   return (
     <div>
-      <Chips options={REASONS} values={data.reason} onToggle={v => set("reason", data.reason === v ? "" : v)} />
-      <Reveal show={data.reason === "Other"}>
-        <Area label="Tell us more" name="reasonOther" value={data.reasonOther} onChange={e => set("reasonOther", e.target.value)} rows={2} placeholder="What's bringing you home?" />
-      </Reveal>
+      <QuestionBlock index={1} prompt="Is this your first time visiting, or are you a returner?">
+        <SegButtons options={["First timer", "Returnee"]} value={data.visitorType} onPick={v => set("visitorType", v)} />
+      </QuestionBlock>
+
+      <QuestionBlock index={2} prompt="Roughly what timeframe are you thinking?" desc="An estimate is fine, nothing's locked in.">
+        <Chips
+          options={["September", "October", "November", "December", "Still deciding"]}
+          values={data.timeframe}
+          onToggle={v => set("timeframe", data.timeframe === v ? "" : v)}
+        />
+      </QuestionBlock>
+
+      <QuestionBlock index={3} prompt="Do your family or friends here know you're coming?" desc="Or is this a surprise for them?">
+        <SegButtons
+          options={["They know", "It's a surprise", "Some know, not all"]}
+          value={data.familyAware}
+          onPick={v => set("familyAware", v)}
+        />
+      </QuestionBlock>
+
+      <QuestionBlock index={4} prompt="Why are you coming?" last>
+        <div>
+          <Chips options={REASONS} values={data.reason} onToggle={v => set("reason", data.reason === v ? "" : v)} />
+          <Reveal show={data.reason === "Other"}>
+            <Area label="Tell us more" name="reasonOther" value={data.reasonOther} onChange={e => set("reasonOther", e.target.value)} rows={2} placeholder="What's bringing you home?" />
+          </Reveal>
+        </div>
+      </QuestionBlock>
     </div>
   );
 }
 
-function S8({
+function Page3({
   data, set, toggle,
 }: {
   data: FormData;
@@ -677,39 +671,31 @@ function S8({
 }) {
   return (
     <div>
-      <Chips options={CHALLENGES} values={data.challenges} onToggle={v => toggle("challenges", v)} multi />
-      <Reveal show={data.challenges.includes("Other")}>
-        <Area label="Tell us more" name="challengesOther" value={data.challengesOther} onChange={e => set("challengesOther", e.target.value)} rows={2} placeholder="What else might get in the way?" />
-      </Reveal>
+      <QuestionBlock index={1} prompt="What might make your trip harder than it needs to be?" desc="Pick as many as apply.">
+        <div>
+          <Chips options={CHALLENGES} values={data.challenges} onToggle={v => toggle("challenges", v)} multi />
+          <Reveal show={data.challenges.includes("Other")}>
+            <Area label="Tell us more" name="challengesOther" value={data.challengesOther} onChange={e => set("challengesOther", e.target.value)} rows={2} placeholder="What else might get in the way?" />
+          </Reveal>
+        </div>
+      </QuestionBlock>
+
+      <QuestionBlock index={2} prompt="Would you want help with things like airport pickup or getting around?">
+        <SegButtons options={["Yes", "No", "Maybe"]} value={data.wantsHelp} onPick={v => set("wantsHelp", v)} />
+      </QuestionBlock>
+
+      <QuestionBlock index={3} prompt="What are you excited to experience?" desc="Pick as many as apply.">
+        <div>
+          <Chips options={EXCITEMENTS} values={data.excitedFor} onToggle={v => toggle("excitedFor", v)} multi />
+          <Reveal show={data.excitedFor.includes("Other")}>
+            <Area label="Tell us more" name="excitedForOther" value={data.excitedForOther} onChange={e => set("excitedForOther", e.target.value)} rows={2} placeholder="What else are you looking forward to?" />
+          </Reveal>
+        </div>
+      </QuestionBlock>
+
+      <QuestionBlock index={4} prompt="Have you heard of Ember to Remember?" last>
+        <SegButtons options={["Yes", "No"]} value={data.heardOfDWL} onPick={v => set("heardOfDWL", v)} />
+      </QuestionBlock>
     </div>
-  );
-}
-
-function S9({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
-  return (
-    <SegButtons options={["Yes", "No", "Maybe"]} value={data.wantsHelp} onPick={v => set("wantsHelp", v)} />
-  );
-}
-
-function S10({
-  data, set, toggle,
-}: {
-  data: FormData;
-  set: (f: keyof FormData, v: string) => void;
-  toggle: (f: keyof FormData, v: string) => void;
-}) {
-  return (
-    <div>
-      <Chips options={EXCITEMENTS} values={data.excitedFor} onToggle={v => toggle("excitedFor", v)} multi />
-      <Reveal show={data.excitedFor.includes("Other")}>
-        <Area label="Tell us more" name="excitedForOther" value={data.excitedForOther} onChange={e => set("excitedForOther", e.target.value)} rows={2} placeholder="What else are you looking forward to?" />
-      </Reveal>
-    </div>
-  );
-}
-
-function S11({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
-  return (
-    <SegButtons options={["Yes", "No"]} value={data.heardOfDWL} onPick={v => set("heardOfDWL", v)} />
   );
 }
