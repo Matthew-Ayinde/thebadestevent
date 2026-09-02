@@ -42,7 +42,7 @@ const SECTIONS = [
   { tag: "02 — The Little Things",  title: "Was there a moment tonight someone anticipated something you needed, before you asked?", desc: "" },
   { tag: "03 — Beyond The Run Of Show", title: "How cared for did you feel tonight; beyond just “the event ran smoothly”?", desc: "1 is barely, 5 is completely." },
   { tag: "04 — The Honest Part",     title: "Was there any moment you felt overlooked, or unsure what to do?", desc: "Totally fine if the answer is no. This just helps us fix real gaps." },
-  { tag: "05 — Last Thing",          title: "Would you come back specifically because of how you were treated, not just the lineup or venue?", desc: "" },
+  { tag: "05 — Last Thing",          title: "Would you come back specifically because of how you were treated, not just the hosts, dj, friends or venue?", desc: "" },
 ];
 
 const TOTAL = SECTIONS.length;
@@ -302,13 +302,13 @@ function SuccessScreen() {
           className="font-serif text-[clamp(2.2rem,6.5vw,4rem)] leading-[1.05] tracking-tight text-white mb-6 max-w-2xl"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          Your feedback matters.
+          Feedback Recieved
         </h2>
         <p className="text-base sm:text-lg text-white/55 leading-relaxed max-w-md mb-3">
-          Follow us along to see highlights from tonight!
+          Your thoughts matter
         </p>
         <p className="text-sm text-white/40 leading-relaxed max-w-md mb-10">
-          See you at the next RÌNWÁ experience.
+          See you at the next one!
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4">
