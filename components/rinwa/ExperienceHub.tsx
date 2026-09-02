@@ -37,7 +37,7 @@ export default function ExperienceHub() {
       {/* Shared brand lockup, sitting over both panels */}
       <div className="relative z-30 flex flex-col items-center shrink-0 pt-12 pb-9 sm:pt-14 sm:pb-11 px-6 text-center">
         <Image src="/images/logo.png" alt="RÌNWÁ" width={68} height={68} className="opacity-90 mb-3" />
-        <p className="mt-2 text-[0.6rem] font-semibold uppercase tracking-[0.42em] text-white/70">What's on your mind?</p>
+        <p className="mt-2 text-[0.6rem] font-semibold uppercase tracking-[0.42em] text-white/70">Return. Belonging. Access</p>
       </div>
 
       {/* Two panels — flex-1 fills exactly what's left under the lockup on
