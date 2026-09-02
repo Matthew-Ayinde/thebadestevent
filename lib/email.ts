@@ -348,7 +348,7 @@ export async function sendInquiryEmails({ submission, adminEmail }: InquiryEmail
   };
 }
 
-// ─── Questionnaire Emails ──────────────────────────────────────────────────────
+// ─── Questionnaire Emails. ──────────────────────────────────────────────────────
 
 type QuestionnairePayload = {
   submission: Record<string, any>;

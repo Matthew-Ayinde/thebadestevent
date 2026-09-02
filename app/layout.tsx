@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     siteName: "RÌNWÁ Hospitality & Experiences",
     title: "RÌNWÁ | The Bridge Between Coming Home & Building Home",
     description:
-      "RÌNWÁ is your bridge between coming home and building at home",
+      "A bridge for diasporans returning back home. We connect you to people, places, experiences and opportunities to belong, explore and build.",
     images: [
       {
         url: "https://res.cloudinary.com/matthew-ayinde/image/upload/v1780477515/rinwa-green_iu1he9.png",
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "RÌNWÁ | The Bridge Between Coming Home & Building Home",
     description:
-      "RÌNWÁ is your bridge between coming home and building at home",
+      "A bridge for diasporans returning back home. We connect you to people, places, experiences and opportunities to belong, explore and build.",
     images: [
       "https://res.cloudinary.com/matthew-ayinde/image/upload/v1780477515/rinwa-green_iu1he9.png",
     ],
