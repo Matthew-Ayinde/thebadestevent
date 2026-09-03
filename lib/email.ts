@@ -42,6 +42,33 @@ function formatList(items: string[]) {
   return items.length ? items.join(' • ') : 'Not provided';
 }
 
+const SOCIAL_LINKS = [
+  { name: 'Instagram', url: 'https://instagram.com/rinwahospitality', icon: 'instagram-new' },
+  { name: 'X', url: 'https://x.com/rinwahospitality', icon: 'twitterx' },
+  { name: 'TikTok', url: 'https://tiktok.com/@rinwahospitality', icon: 'tiktok' },
+  { name: 'YouTube', url: 'https://youtube.com/@rinwahospitality', icon: 'youtube-play' },
+];
+
+function buildSocialLinks(accent: string = '#7dd3cf') {
+  const color = accent.replace('#', '');
+  const cells = SOCIAL_LINKS.map(
+    (s) => `
+              <td style="padding:0 7px;">
+                <a href="${s.url}" target="_blank" style="text-decoration:none;display:inline-block;">
+                  <img src="https://img.icons8.com/ios-filled/50/${color}/${s.icon}.png" alt="${s.name}" width="22" height="22" style="display:block;border:0;" />
+                </a>
+              </td>`
+  ).join('');
+
+  return `
+        <tr><td style="padding:8px 0 4px;text-align:center;">
+          <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>${cells}
+            </tr>
+          </table>
+        </td></tr>`;
+}
+
 function getCurrencySymbol(code: string): string {
   const map: Record<string, string> = { NGN: '₦', USD: '$', CAD: 'CA$', GBP: '£', EUR: '€' };
   return map[code] ?? code;
@@ -256,7 +283,8 @@ function buildUserEmailHtml(submission: InquiryEmailPayload['submission']) {
         </td></tr>
 
         <!-- Footer -->
-        <tr><td style="padding:24px 0 0;text-align:center;">
+${buildSocialLinks()}
+        <tr><td style="padding:16px 0 0;text-align:center;">
           <p style="margin:0 0 6px;font-size:11px;color:#3d5a58;">You received this because you submitted an inquiry on the RÌNWÁ website.</p>
           <p style="margin:0;font-size:11px;color:#2a3f3e;">RÌNWÁ Hospitality &nbsp;·&nbsp; Lagos, Nigeria</p>
         </td></tr>
@@ -602,7 +630,8 @@ function buildUserQuestionnaireEmailHtml(s: Record<string, any>) {
             </td></tr>
           </table>
         </td></tr>
-        <tr><td style="padding:20px 0 0;text-align:center;">
+${buildSocialLinks()}
+        <tr><td style="padding:12px 0 0;text-align:center;">
           <p style="margin:0;font-size:11px;color:#3d5a58;">You received this because you completed the RÌNWÁ event questionnaire.</p>
         </td></tr>
       </table>
@@ -832,7 +861,8 @@ function buildUserHomecomingEmailHtml(s: Record<string, any>) {
             </td></tr>
           </table>
         </td></tr>
-        <tr><td style="padding:20px 0 0;text-align:center;">
+${buildSocialLinks(GOLD)}
+        <tr><td style="padding:12px 0 0;text-align:center;">
           <p style="margin:0;font-size:11px;color:#3d5a58;">You received this because you checked in for Ember to Remember 2026 on the RÌNWÁ website.</p>
         </td></tr>
       </table>
@@ -984,7 +1014,7 @@ function buildUserGuestExperienceEmailHtml(s: Record<string, any>) {
                 Your thoughts matter.
               </h1>
               <p style="margin:0;font-size:15px;line-height:1.78;color:#a0bcba;">
-                Thank you for taking the time to tell us how tonight felt. Follow us along to see highlights from tonight!
+                Thank you for taking the time to tell us how you felt. Follow us along to see highlights from tonight!
               </p>
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
@@ -994,7 +1024,8 @@ function buildUserGuestExperienceEmailHtml(s: Record<string, any>) {
             </td></tr>
           </table>
         </td></tr>
-        <tr><td style="padding:20px 0 0;text-align:center;">
+${buildSocialLinks(TEAL)}
+        <tr><td style="padding:12px 0 0;text-align:center;">
           <p style="margin:0;font-size:11px;color:#3d5a58;">You received this because you shared feedback on a RÌNWÁ evening and left your email.</p>
         </td></tr>
       </table>
