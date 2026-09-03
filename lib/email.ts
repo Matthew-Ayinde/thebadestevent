@@ -792,16 +792,16 @@ function buildUserHomecomingEmailHtml(s: Record<string, any>) {
         <tr><td style="text-align:center;padding-bottom:28px;">
           <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="54" height="54" style="display:block;margin:0 auto 10px;" />
           <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;letter-spacing:0.14em;color:#f5f0e8;">RÌNWÁ</div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.38em;color:#8fa8a5;margin-top:4px;">Ember to Remember</div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.30em;color:#8fa8a5;margin-top:4px;">Hospitality &amp; Experiences</div>
         </td></tr>
         <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr><td style="height:2px;background:${GOLD};"></td></tr>
             <tr><td style="padding:36px 32px 28px;">
-              <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.30em;color:${GOLD};">Check-in received</p>
+              <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.30em;color:${GOLD};">Diaspora Check-in</p>
               <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;color:#f5f0e8;font-weight:normal;">
-                Thank you for your time, ${firstName}.<br>
-                <span style="color:#8fa8a5;font-size:19px;">We'd get to you soon.</span>
+                You're checked in, ${firstName}.<br>
+                <span style="color:#8fa8a5;font-size:19px;">RÌNWÁ to Lagos.</span>
               </h1>
               <p style="margin:0;font-size:15px;line-height:1.78;color:#a0bcba;">
                 We've received your details and our team will review everything carefully. Expect a personal follow-up soon on <strong style="color:#f5f0e8;">${escapeHtml(s.contactValue || '')}</strong>.
@@ -981,10 +981,10 @@ function buildUserGuestExperienceEmailHtml(s: Record<string, any>) {
             <tr><td style="padding:36px 32px 28px;">
               <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.30em;color:${TEAL};">Feedback received</p>
             <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;color:#f5f0e8;font-weight:normal;">
-                Every answer goes straight<br>to the people who plan the next one.
+                Your thoughts matter.
               </h1>
               <p style="margin:0;font-size:15px;line-height:1.78;color:#a0bcba;">
-                Thank you for taking a couple of minutes to tell us how tonight felt. Every answer goes straight to the people who plan the next one.
+                Thank you for taking the time to tell us how tonight felt. Follow us along to see highlights from tonight!
               </p>
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
