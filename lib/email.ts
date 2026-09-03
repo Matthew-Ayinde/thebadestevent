@@ -743,7 +743,7 @@ function buildAdminHomecomingEmailHtml(s: Record<string, any>) {
               <td>
                 <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="44" height="44" style="display:block;margin-bottom:7px;" />
                 <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.12em;color:#f5f0e8;">RÌNWÁ</div>
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.32em;color:#8fa8a5;margin-top:3px;">Ember to Remember</div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.32em;color:#8fa8a5;margin-top:3px;">Diaspora</div>
               </td>
               <td align="right">
                 <span style="display:inline-block;background:${GOLD};color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">New Check-In</span>
@@ -863,7 +863,7 @@ function buildUserHomecomingEmailHtml(s: Record<string, any>) {
         </td></tr>
 ${buildSocialLinks(GOLD)}
         <tr><td style="padding:12px 0 0;text-align:center;">
-          <p style="margin:0;font-size:11px;color:#3d5a58;">You received this because you checked in for Ember to Remember 2026 on the RÌNWÁ website.</p>
+          <p style="margin:0;font-size:11px;color:#3d5a58;">You received this because you checked in for Diaspora 2026 on the RÌNWÁ website.</p>
         </td></tr>
       </table>
     </td></tr>
