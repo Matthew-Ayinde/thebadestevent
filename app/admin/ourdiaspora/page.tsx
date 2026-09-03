@@ -88,8 +88,8 @@ export default function OurDiasporaAdminPage() {
       const headers = [
         'Submitted At', 'Name', 'Contact Method', 'Contact Detail',
         'First Time or Returning', 'Timeframe', 'Family/Friends Aware',
-        'Reason', 'Reason (Other)', 'Challenges', 'Challenges (Other)', 'Wants Help',
-        'Excited For', 'Excited For (Other)', 'Heard of Ember to Remember 2026',
+        'Reason', 'Reason (Other)', 'Needs Handled', 'Needs Handled (Other)', 'Wants Help',
+        'Excited For', 'Excited For (Other)',
       ];
 
       const csvRows = rows.map(r => [
@@ -97,7 +97,7 @@ export default function OurDiasporaAdminPage() {
         cell(r.name), cell(r.contactMethod), cell(r.contactValue),
         cell(r.visitorType), cell(r.timeframe), cell(r.familyAware),
         cell(r.reason), cell(r.reasonOther), cell(r.challenges), cell(r.challengesOther), cell(r.wantsHelp),
-        cell(r.excitedFor), cell(r.excitedForOther), cell(r.heardOfDWL),
+        cell(r.excitedFor), cell(r.excitedForOther),
       ].join(','));
 
       const csv = [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
@@ -256,19 +256,15 @@ export default function OurDiasporaAdminPage() {
               <Detail label="Other Reason" value={selected.reasonOther} />
             </Section>
 
-            <Section title="Friction Points">
-              <Detail label="Trip Challenges" value={selected.challenges} />
-              <Detail label="Other Challenge" value={selected.challengesOther} />
+            <Section title="Needs Handled">
+              <Detail label="Needs Handled" value={selected.challenges} />
+              <Detail label="Other Need" value={selected.challengesOther} />
               <Detail label="Wants On-Ground Help" value={selected.wantsHelp} />
             </Section>
 
             <Section title="Excitement">
               <Detail label="Excited To Experience" value={selected.excitedFor} />
               <Detail label="Other Excitement" value={selected.excitedForOther} />
-            </Section>
-
-            <Section title="Awareness">
-              <Detail label="Heard of Ember to Remember" value={selected.heardOfDWL} />
             </Section>
 
             {selected.contactMethod === 'Email' && (

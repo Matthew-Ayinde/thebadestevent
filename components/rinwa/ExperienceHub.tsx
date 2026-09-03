@@ -38,14 +38,9 @@ export default function ExperienceHub() {
       <div className="relative z-30 flex flex-col items-center shrink-0 pt-12 pb-9 sm:pt-14 sm:pb-11 px-6 text-center">
         <Image src="/images/logo.png" alt="RÌNWÁ" width={68} height={68} className="opacity-90 mb-3" />
         <p className="mt-2 text-[0.6rem] font-semibold uppercase tracking-[0.42em] text-white/70">Return. Belonging. Access</p>
+        <p className="mt-3 text-sm text-white/60">Your bridge between coming home and building at home.</p>
       </div>
 
-      {/* Two panels — flex-1 fills exactly what's left under the lockup on
-          md+, so the page fits the viewport with no trailing scroll gap.
-          No min-h-0 override here on purpose: if a panel's content ever
-          needs more room than that leftover space (longer copy, a bigger
-          font, a tiny viewport), it keeps its natural height and the page
-          scrolls normally instead of the text getting squeezed or clipped. */}
       <div className="relative grid md:grid-cols-2 flex-1">
         <div className="hidden md:block absolute inset-y-0 left-1/2 w-px bg-white/10 z-20" />
 

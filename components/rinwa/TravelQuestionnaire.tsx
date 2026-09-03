@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import {
   ArrowRight, Check,
@@ -32,7 +33,6 @@ interface FormData {
   challenges: string[]; challengesOther: string;
   wantsHelp: string;
   excitedFor: string[]; excitedForOther: string;
-  heardOfDWL: string;
 }
 
 const BLANK: FormData = {
@@ -46,7 +46,6 @@ const BLANK: FormData = {
   challenges: [], challengesOther: "",
   wantsHelp: "",
   excitedFor: [], excitedForOther: "",
-  heardOfDWL: "",
 };
 
 const RESIDENCES = ["Canada", "UK", "USA", "Other"];
@@ -279,10 +278,9 @@ export default function Questions() {
         if (!data.reason || (data.reason === "Other" && !data.reasonOther.trim())) return "Please tell us why you're coming.";
         return null;
       case 3:
-        if (!data.challenges.length || (data.challenges.includes("Other") && !data.challengesOther.trim())) return "Pick at least one challenge, or tell us more.";
+        if (!data.challenges.length || (data.challenges.includes("Other") && !data.challengesOther.trim())) return "Pick at least one thing you need handled, or tell us more.";
         if (!data.wantsHelp) return "Please let us know if you'd want help getting around.";
         if (!data.excitedFor.length || (data.excitedFor.includes("Other") && !data.excitedForOther.trim())) return "Pick at least one thing you're excited for, or tell us more.";
-        if (!data.heardOfDWL) return "Please let us know if you've heard of Ember to Remember.";
         return null;
       default: return null;
     }
@@ -562,6 +560,15 @@ function SuccessScreen() {
 
         <ShareRow />
 
+        <Link
+          href="/"
+          className="group mt-12 inline-flex items-center gap-3 rounded-md border px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] transition-colors"
+          style={{ borderColor: `${GOLD}59`, background: `${GOLD}1a`, color: GOLD }}
+        >
+          Back to Home
+          <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+        </Link>
+
         <div className="flex flex-col items-center gap-4 mt-16">
           <p className="text-[0.58rem] uppercase tracking-[0.4em]" style={{ color: `${GOLD}80` }}>The RÌNWÁ Team</p>
           <div className="flex items-center gap-4">
@@ -600,7 +607,7 @@ function Page1({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
         />
       </QuestionBlock>
 
-      <QuestionBlock index={2} prompt="How can we reach you?" desc="Pick whichever works best for you.">
+      <QuestionBlock index={2} prompt="How can we reach you?">
         <div className="space-y-1">
           <SegButtons options={["WhatsApp", "Email", "Phone"]} value={data.contactMethod} onPick={v => { set("contactMethod", v); set("contactValue", ""); }} />
           <Reveal show={!!data.contactMethod}>
@@ -634,7 +641,7 @@ function Page2({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
         <SegButtons options={["First timer", "Returnee"]} value={data.visitorType} onPick={v => set("visitorType", v)} />
       </QuestionBlock>
 
-      <QuestionBlock index={2} prompt="Roughly what timeframe are you thinking?" desc="An estimate is fine, nothing's locked in.">
+      <QuestionBlock index={2} prompt="Roughly what timeframe are you thinking?">
         <Chips
           options={["September", "October", "November", "December", "Still deciding"]}
           values={data.timeframe}
@@ -642,7 +649,7 @@ function Page2({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
         />
       </QuestionBlock>
 
-      <QuestionBlock index={3} prompt="Do your family or friends here know you're coming?" desc="Or is this a surprise for them?">
+      <QuestionBlock index={3} prompt="Do your family or friends here know you're coming?">
         <SegButtons
           options={["They know", "It's a surprise", "Some know, not all"]}
           value={data.familyAware}
@@ -671,11 +678,11 @@ function Page3({
 }) {
   return (
     <div>
-      <QuestionBlock index={1} prompt="What might make your trip harder than it needs to be?" desc="Pick as many as apply.">
+      <QuestionBlock index={1} prompt="What's on your 'I need this handled' list?">
         <div>
           <Chips options={CHALLENGES} values={data.challenges} onToggle={v => toggle("challenges", v)} multi />
           <Reveal show={data.challenges.includes("Other")}>
-            <Area label="Tell us more" name="challengesOther" value={data.challengesOther} onChange={e => set("challengesOther", e.target.value)} rows={2} placeholder="What else might get in the way?" />
+            <Area label="Tell us more" name="challengesOther" value={data.challengesOther} onChange={e => set("challengesOther", e.target.value)} rows={2} placeholder="What else do you need handled?" />
           </Reveal>
         </div>
       </QuestionBlock>
@@ -684,17 +691,13 @@ function Page3({
         <SegButtons options={["Yes", "No", "Maybe"]} value={data.wantsHelp} onPick={v => set("wantsHelp", v)} />
       </QuestionBlock>
 
-      <QuestionBlock index={3} prompt="What are you excited to experience?" desc="Pick as many as apply.">
+      <QuestionBlock index={3} prompt="What are you excited to experience?" last>
         <div>
           <Chips options={EXCITEMENTS} values={data.excitedFor} onToggle={v => toggle("excitedFor", v)} multi />
           <Reveal show={data.excitedFor.includes("Other")}>
             <Area label="Tell us more" name="excitedForOther" value={data.excitedForOther} onChange={e => set("excitedForOther", e.target.value)} rows={2} placeholder="What else are you looking forward to?" />
           </Reveal>
         </div>
-      </QuestionBlock>
-
-      <QuestionBlock index={4} prompt="Have you heard of Ember to Remember?" last>
-        <SegButtons options={["Yes", "No"]} value={data.heardOfDWL} onPick={v => set("heardOfDWL", v)} />
       </QuestionBlock>
     </div>
   );

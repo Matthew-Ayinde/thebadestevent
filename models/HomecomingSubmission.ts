@@ -14,7 +14,6 @@ export interface IHomecomingSubmission extends Document {
   wantsHelp: string;
   excitedFor: string[];
   excitedForOther?: string;
-  heardOfDWL: string;
   status: string;
   createdAt: Date;
   updatedAt: Date;
@@ -35,7 +34,6 @@ const HomecomingSubmissionSchema = new Schema<IHomecomingSubmission>(
     wantsHelp: { type: String, required: true },
     excitedFor: { type: [String], default: [] },
     excitedForOther: { type: String },
-    heardOfDWL: { type: String, required: true },
     status: { type: String, default: 'new' },
   },
   { timestamps: true }

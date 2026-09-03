@@ -305,10 +305,10 @@ function SuccessScreen() {
           Feedback Recieved
         </h2>
         <p className="text-base sm:text-lg text-white/55 leading-relaxed max-w-md mb-3">
-          Your thoughts matter
+          Your thoughts matter.
         </p>
          <p className="text-base sm:text-lg text-white/55 leading-relaxed max-w-md mb-3">
-          Thank you for taking the time to tell us how tonight felt. Follow us along to see highlights from tonight!  
+          Thank you for taking the time to tell us how you felt. Follow us along to see highlights from tonight!  
         </p>
         <p className="text-sm text-white/40 leading-relaxed max-w-md mb-10">
           See you at the next one!

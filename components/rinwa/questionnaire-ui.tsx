@@ -121,7 +121,7 @@ export function Chips({
       {(label || multi) && (
         <div className="flex items-center justify-between mb-3">
           {label && <Label>{label}</Label>}
-          {multi && <span className="text-[0.58rem] uppercase tracking-[0.22em] text-white/28">Select all that apply</span>}
+          {/* {multi && <span className="text-[0.58rem] uppercase tracking-[0.22em] text-white/28">Select all that apply</span>} */}
         </div>
       )}
       <div className="flex flex-wrap gap-2">

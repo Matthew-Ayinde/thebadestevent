@@ -751,17 +751,14 @@ function buildAdminHomecomingEmailHtml(s: Record<string, any>) {
                 ${hSection('Motivation', [
                   hRow('Reason for Coming', s.reason === 'Other' ? s.reasonOther : s.reason),
                 ].join(''))}
-                ${hSection('Friction Points', [
-                  hRow('Trip Challenges', s.challenges),
-                  hRow('Other Challenge', s.challengesOther),
+                ${hSection('Needs Handled', [
+                  hRow('Needs Handled', s.challenges),
+                  hRow('Other Need', s.challengesOther),
                   hRow('Wants On-Ground Help', s.wantsHelp),
                 ].join(''))}
                 ${hSection('Excitement', [
                   hRow('Excited To Experience', s.excitedFor),
                   hRow('Other Excitement', s.excitedForOther),
-                ].join(''))}
-                ${hSection('Awareness', [
-                  hRow('Heard of Ember to Remember', s.heardOfDWL),
                 ].join(''))}
               </table>
             </td></tr>
@@ -983,8 +980,8 @@ function buildUserGuestExperienceEmailHtml(s: Record<string, any>) {
             <tr><td style="height:2px;background:${TEAL};"></td></tr>
             <tr><td style="padding:36px 32px 28px;">
               <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.30em;color:${TEAL};">Feedback received</p>
-              <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;color:#f5f0e8;font-weight:normal;">
-                That&#8217;s exactly what<br>we needed to hear.
+            <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;color:#f5f0e8;font-weight:normal;">
+                Every answer goes straight<br>to the people who plan the next one.
               </h1>
               <p style="margin:0;font-size:15px;line-height:1.78;color:#a0bcba;">
                 Thank you for taking a couple of minutes to tell us how tonight felt. Every answer goes straight to the people who plan the next one.

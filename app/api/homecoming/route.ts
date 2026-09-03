@@ -23,7 +23,6 @@ const Schema = z.object({
   wantsHelp: z.string().min(1, 'Please answer this question'),
   excitedFor: z.array(z.string()).optional(),
   excitedForOther: z.string().optional(),
-  heardOfDWL: z.string().min(1, 'Please answer this question'),
 });
 
 export async function POST(request: NextRequest) {
