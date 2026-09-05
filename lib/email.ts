@@ -1,5 +1,8 @@
 import { Resend } from 'resend';
 
+// Always CC'd on guest experience admin notifications, in addition to the configured admin email.
+const SECONDARY_ADMIN_EMAIL = 'ayindematthew2003@gmail.com';
+
 type InquiryEmailPayload = {
   submission: {
     fullName: string;
@@ -1055,10 +1058,12 @@ export async function sendGuestExperienceEmails({
 
   const userEmail = submission.email && submission.email.trim() ? submission.email.trim() : null;
 
+  const adminRecipients = Array.from(new Set([adminEmail, SECONDARY_ADMIN_EMAIL]));
+
   const sendAdmin = async () => {
     const { error } = await resend.emails.send({
       from,
-      to: adminEmail,
+      to: adminRecipients,
       replyTo: userEmail || undefined,
       subject: `[Guest Experience] ${submission.caredForScore}/5 cared-for rating`,
       text: `Felt welcomed: ${submission.welcomed}. Cared for: ${submission.caredForScore}/5. Would return: ${submission.wouldReturn}.`,
