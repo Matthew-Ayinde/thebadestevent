@@ -995,7 +995,7 @@ function buildAdminGuestExperienceEmailHtml(s: Record<string, any>) {
 function buildUserGuestExperienceEmailHtml(s: Record<string, any>) {
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thanks for the feedback</title></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>You rated tonight — RÌNWÁ in Lagos</title></head>
 <body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
     <tr><td align="center">
@@ -1077,7 +1077,7 @@ export async function sendGuestExperienceEmails({
     const { error } = await resend.emails.send({
       from,
       to: userEmail,
-      subject: "Thanks for the feedback — RÌNWÁ",
+      subject: "You rated tonight — RÌNWÁ in Lagos",
       text: "Thank you for taking a couple of minutes to tell us how tonight felt.",
       html: buildUserGuestExperienceEmailHtml(submission),
     });
