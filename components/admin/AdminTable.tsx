@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import AdminCheckbox from './AdminCheckbox';
 
 interface Column {
   key: string;
@@ -16,6 +17,13 @@ interface AdminTableProps {
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortKey?: string;
   sortDirection?: 'asc' | 'desc';
+  /** Enables the leading checkbox column for multi-select. */
+  selectable?: boolean;
+  selectedIds?: Set<string>;
+  onToggleRow?: (id: string) => void;
+  onToggleAll?: () => void;
+  getRowId?: (row: any) => string;
+  accentColor?: string;
 }
 
 export default function AdminTable({
@@ -24,6 +32,12 @@ export default function AdminTable({
   onSort,
   sortKey,
   sortDirection = 'asc',
+  selectable = false,
+  selectedIds,
+  onToggleRow,
+  onToggleAll,
+  getRowId = (row) => row._id,
+  accentColor = '#5eead4',
 }: AdminTableProps) {
   if (data.length === 0) {
     return (
@@ -33,11 +47,26 @@ export default function AdminTable({
     );
   }
 
+  const selectedCount = data.filter((row) => selectedIds?.has(getRowId(row))).length;
+  const allSelected = selectable && selectedCount === data.length;
+  const someSelected = selectable && selectedCount > 0 && !allSelected;
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
           <tr className="border-b border-white/10">
+            {selectable && (
+              <th className="w-12 px-6 py-4">
+                <AdminCheckbox
+                  checked={allSelected}
+                  indeterminate={someSelected}
+                  onChange={() => onToggleAll?.()}
+                  accentColor={accentColor}
+                  ariaLabel="Select all rows"
+                />
+              </th>
+            )}
             {columns.map((column) => (
               <th
                 key={column.key}
@@ -55,15 +84,32 @@ export default function AdminTable({
           </tr>
         </thead>
         <tbody>
-          {data.map((row, idx) => (
-            <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
-              {columns.map((column) => (
-                <td key={column.key} className="px-6 py-4 text-sm text-white/80">
-                  {column.render ? column.render(row[column.key], row) : row[column.key]}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {data.map((row, idx) => {
+            const rowId = getRowId(row);
+            const isSelected = !!selectedIds?.has(rowId);
+            return (
+              <tr
+                key={idx}
+                className={`border-b border-white/5 transition ${isSelected ? 'bg-white/6' : 'hover:bg-white/5'}`}
+              >
+                {selectable && (
+                  <td className="px-6 py-4">
+                    <AdminCheckbox
+                      checked={isSelected}
+                      onChange={() => onToggleRow?.(rowId)}
+                      accentColor={accentColor}
+                      ariaLabel="Select row"
+                    />
+                  </td>
+                )}
+                {columns.map((column) => (
+                  <td key={column.key} className="px-6 py-4 text-sm text-white/80">
+                    {column.render ? column.render(row[column.key], row) : row[column.key]}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

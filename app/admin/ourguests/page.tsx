@@ -6,10 +6,12 @@ import { Eye, Trash2, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import AdminButton from '@/components/admin/AdminButton';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminTable from '@/components/admin/AdminTable';
+import AdminCheckbox from '@/components/admin/AdminCheckbox';
 import LoadingSpinner from '@/components/admin/LoadingSpinner';
 import ConfirmationDialog from '@/components/admin/ConfirmationDialog';
 
 const PAGE_SIZE = 20;
+const ACCENT = '#7dd3cf';
 
 function Detail({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
@@ -43,8 +45,25 @@ export default function OurGuestsAdminPage() {
   const [page, setPage]               = useState(1);
   const [totalPages, setTotalPages]   = useState(1);
   const [total, setTotal]             = useState(0);
+  const [selectedIds, setSelectedIds]       = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
-  useEffect(() => { fetch_(page); }, [page]);
+  useEffect(() => { setSelectedIds(new Set()); fetch_(page); }, [page]);
+
+  function toggleRow(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelectedIds(prev =>
+      prev.size === submissions.length ? new Set() : new Set(submissions.map(s => s._id))
+    );
+  }
 
   async function fetch_(p = 1) {
     try {
@@ -116,6 +135,28 @@ export default function OurGuestsAdminPage() {
     }
   }
 
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    try {
+      setIsBulkDeleting(true);
+      const results = await Promise.allSettled(
+        ids.map(id => fetch(`/api/experience/${id}`, { method: 'DELETE' }))
+      );
+      const failed = results.filter(r => r.status === 'rejected' || !r.value.ok).length;
+      const succeeded = ids.length - failed;
+      if (succeeded > 0) toast.success(`Deleted ${succeeded} response${succeeded !== 1 ? 's' : ''}`);
+      if (failed > 0) toast.error(`Failed to delete ${failed} response${failed !== 1 ? 's' : ''}`);
+      setBulkDeleteOpen(false);
+      setSelectedIds(new Set());
+      await fetch_(page);
+    } catch {
+      toast.error('Failed to delete responses');
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  }
+
   const columns = [
     { key: 'welcomed', label: 'Welcomed' },
     { key: 'caredForScore', label: 'Cared For', render: (_: any, row: any) => `${row.caredForScore} / 5` },
@@ -170,15 +211,49 @@ export default function OurGuestsAdminPage() {
         </div>
       ) : (
         <div className="bg-white/5 border border-white/10 rounded-[1.8rem] p-4 md:p-6 backdrop-blur-sm">
+          {/* Selection toolbar */}
+          {selectedIds.size > 0 && (
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-red-500/20 bg-red-500/6 px-4 py-3">
+              <p className="text-sm text-white/70">
+                <span className="text-white/90 font-medium">{selectedIds.size}</span> selected
+              </p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setSelectedIds(new Set())} className="text-sm text-white/50 hover:text-white/80 transition px-3 py-2">
+                  Clear
+                </button>
+                <button
+                  onClick={() => setBulkDeleteOpen(true)}
+                  className="flex items-center gap-2 rounded-full bg-red-600/80 hover:bg-red-600 text-white px-5 py-2.5 text-sm font-medium transition"
+                >
+                  <Trash2 size={15} />
+                  Delete selected
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {submissions.map(row => (
-              <div key={row._id} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div
+                key={row._id}
+                className={`border rounded-2xl p-4 transition ${selectedIds.has(row._id) ? 'bg-white/10 border-[#7dd3cf]/30' : 'bg-white/5 border-white/10'}`}
+              >
                 <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white/90 font-medium truncate">Welcomed: {row.welcomed}</p>
-                    <p className="text-[#7dd3cf]/80 text-xs mt-0.5 truncate">Cared for: {row.caredForScore} / 5</p>
-                    <p className="text-white/55 text-xs mt-1">Would return: {row.wouldReturn}</p>
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="pt-1">
+                      <AdminCheckbox
+                        checked={selectedIds.has(row._id)}
+                        onChange={() => toggleRow(row._id)}
+                        accentColor={ACCENT}
+                        ariaLabel="Select response"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white/90 font-medium truncate">Welcomed: {row.welcomed}</p>
+                      <p className="text-[#7dd3cf]/80 text-xs mt-0.5 truncate">Cared for: {row.caredForScore} / 5</p>
+                      <p className="text-white/55 text-xs mt-1">Would return: {row.wouldReturn}</p>
+                    </div>
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
                     <button onClick={() => setSelected(row)} className="p-2 hover:bg-[#7dd3cf]/20 text-[#7dd3cf] rounded-lg transition">
@@ -195,7 +270,15 @@ export default function OurGuestsAdminPage() {
 
           {/* Desktop table */}
           <div className="hidden md:block">
-            <AdminTable columns={columns} data={submissions} />
+            <AdminTable
+              columns={columns}
+              data={submissions}
+              selectable
+              selectedIds={selectedIds}
+              onToggleRow={toggleRow}
+              onToggleAll={toggleAll}
+              accentColor={ACCENT}
+            />
           </div>
 
           {/* Pagination */}
@@ -259,6 +342,16 @@ export default function OurGuestsAdminPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
         isLoading={isDeleting}
+      />
+
+      <ConfirmationDialog
+        isOpen={bulkDeleteOpen}
+        title="Delete Responses"
+        message={`Are you sure you want to delete ${selectedIds.size} response${selectedIds.size !== 1 ? 's' : ''}? This cannot be undone.`}
+        onConfirm={handleBulkDelete}
+        onCancel={() => setBulkDeleteOpen(false)}
+        isLoading={isBulkDeleting}
+        confirmText={`Delete ${selectedIds.size}`}
       />
     </div>
   );
