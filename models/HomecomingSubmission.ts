@@ -4,6 +4,8 @@ export interface IHomecomingSubmission extends Document {
   name: string;
   contactMethod: string;
   contactValue: string;
+  residence: string;
+  residenceOther?: string;
   visitorType: string;
   timeframe: string;
   familyAware: string;
@@ -24,6 +26,8 @@ const HomecomingSubmissionSchema = new Schema<IHomecomingSubmission>(
     name: { type: String, required: true },
     contactMethod: { type: String, required: true },
     contactValue: { type: String, required: true },
+    residence: { type: String, required: true },
+    residenceOther: { type: String },
     visitorType: { type: String, required: true },
     timeframe: { type: String, required: true },
     familyAware: { type: String, required: true },

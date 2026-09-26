@@ -13,6 +13,8 @@ const Schema = z.object({
   name: z.string().min(1, 'Name is required'),
   contactMethod: z.string().min(1, 'Please choose how we can reach you'),
   contactValue: z.string().min(1, 'Please share your contact detail'),
+  residence: z.string().min(1, 'Please let us know where you live'),
+  residenceOther: z.string().optional(),
   visitorType: z.string().min(1, 'Please let us know if this is your first time'),
   timeframe: z.string().min(1, 'Please pick a rough timeframe'),
   familyAware: z.string().min(1, 'Please answer this question'),

@@ -105,7 +105,7 @@ export default function OurDiasporaAdminPage() {
       };
 
       const headers = [
-        'Submitted At', 'Name', 'Contact Method', 'Contact Detail',
+        'Submitted At', 'Name', 'Contact Method', 'Contact Detail', 'Lives In',
         'First Time or Returning', 'Timeframe', 'Family/Friends Aware',
         'Reason', 'Reason (Other)', 'Needs Handled', 'Needs Handled (Other)', 'Wants Help',
         'Excited For', 'Excited For (Other)',
@@ -114,6 +114,7 @@ export default function OurDiasporaAdminPage() {
       const csvRows = rows.map(r => [
         cell(new Date(r.createdAt).toLocaleDateString('en-GB')),
         cell(r.name), cell(r.contactMethod), cell(r.contactValue),
+        cell(r.residence === 'Other' ? r.residenceOther : r.residence),
         cell(r.visitorType), cell(r.timeframe), cell(r.familyAware),
         cell(r.reason), cell(r.reasonOther), cell(r.challenges), cell(r.challengesOther), cell(r.wantsHelp),
         cell(r.excitedFor), cell(r.excitedForOther),
@@ -176,6 +177,22 @@ export default function OurDiasporaAdminPage() {
   const columns = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'contactValue', label: 'Contact', render: (_: any, row: any) => `${row.contactValue} (${row.contactMethod})` },
+    {
+      key: 'residence',
+      label: 'Lives In',
+      render: (_: any, row: any) => {
+        const place = row.residence === 'Other' ? row.residenceOther : row.residence;
+        if (!place) return <span className="text-white/25">—</span>;
+        return (
+          <span
+            title={place}
+            className="inline-block max-w-[16ch] truncate rounded-full border border-white/12 bg-white/6 px-2.5 py-1 text-xs text-white/75 align-middle"
+          >
+            {place}
+          </span>
+        );
+      },
+    },
     { key: 'visitorType', label: 'Type' },
     { key: 'timeframe', label: 'Timeframe' },
     {
@@ -269,7 +286,11 @@ export default function OurDiasporaAdminPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-white/90 font-medium truncate">{row.name}</p>
                       <p className="text-[#e8c07a]/80 text-xs mt-0.5 truncate">{row.contactValue} ({row.contactMethod})</p>
-                      <p className="text-white/55 text-xs mt-1">{row.visitorType} · {row.timeframe}</p>
+                      <p className="text-white/55 text-xs mt-1 truncate">
+                        {[row.residence === 'Other' ? row.residenceOther : row.residence, row.visitorType, row.timeframe]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
@@ -329,6 +350,7 @@ export default function OurDiasporaAdminPage() {
             </Section>
 
             <Section title="Trip Details">
+              <Detail label="Lives In" value={selected.residence === 'Other' ? selected.residenceOther : selected.residence} />
               <Detail label="First Time or Returning" value={selected.visitorType} />
               <Detail label="Timeframe" value={selected.timeframe} />
               <Detail label="Family / Friends Aware" value={selected.familyAware} />
