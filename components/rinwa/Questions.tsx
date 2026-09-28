@@ -223,9 +223,9 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
         className="flex flex-col items-center"
       >
         <Image src="/images/logo.png" alt="RÌNWÁ" width={56} height={56} className="mx-auto mb-5 opacity-90" />
-        <p className="text-[0.6rem] uppercase tracking-[0.5em] text-[#7dd3cf]/65 mb-12">
+        {/* <p className="text-[0.6rem] uppercase tracking-[0.5em] text-[#7dd3cf]/65 mb-12">
           The Global Standard for African Hospitality
-        </p>
+        </p> */}
 
         <h1
           className="font-serif text-[clamp(3.2rem,9vw,6.5rem)] leading-[0.88] tracking-tight text-white mb-8"
