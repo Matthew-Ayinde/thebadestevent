@@ -5,6 +5,7 @@ import { authOptions } from '@/auth';
 import { connectDB } from '@/lib/mongodb';
 import { User } from '@/models/User';
 
+
 const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: z.string().min(8, 'New password must be at least 8 characters'),
