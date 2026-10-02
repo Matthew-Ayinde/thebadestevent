@@ -395,7 +395,7 @@ function buildAdminQuestionnaireEmailHtml(s: Record<string, any>) {
               <td>
                 <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="44" height="44" style="display:block;margin-bottom:7px;" />
                 <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.12em;color:#f5f0e8;">RÌNWÁ</div>
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.32em;color:#8fa8a5;margin-top:3px;">Event Logistics Discovery</div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.32em;color:#8fa8a5;margin-top:3px;">Project Logistics Discovery</div>
               </td>
               <td align="right">
                 <span style="display:inline-block;background:#7dd3cf;color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">New Questionnaire</span>
@@ -528,9 +528,7 @@ function buildUserQuestionnaireEmailHtml(s: Record<string, any>) {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
         <tr><td style="text-align:center;padding-bottom:28px;">
           <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="54" height="54" style="display:block;margin:0 auto 10px;" />
-          <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;letter-spacing:0.14em;color:#f5f0e8;">RÌNWÁ</div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.38em;color:#8fa8a5;margin-top:4px;">The Global Standard for African Hospitality</div>
-        </td></tr>
+  </td></tr>
         <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr><td style="height:2px;background:#7dd3cf;"></td></tr>
@@ -547,14 +545,8 @@ function buildUserQuestionnaireEmailHtml(s: Record<string, any>) {
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
             ${(s.eventName || s.eventPurpose || s.hostCity || s.venueLocation || (s.eventHashtags && s.eventHashtags.length > 0)) ? `
             <tr><td style="padding:22px 32px;">
-              <p style="margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">Your event</p>
+              <p style="margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">Your project</p>
               ${s.eventName ? `<p style="margin:0 0 4px;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#f5f0e8;">${escapeHtml(s.eventName)}</p>` : ''}
-              ${s.eventPurpose ? `<p style="margin:0 0 8px;font-size:13px;color:#8fa8a5;line-height:1.5;">${escapeHtml(s.eventPurpose)}</p>` : ''}
-              ${(s.hostCity || s.venueLocation) ? `<p style="margin:0 0 8px;font-size:12px;color:#7dd3cf;letter-spacing:0.04em;">${[s.hostCity, s.venueLocation].filter(Boolean).map(escapeHtml).join(' · ')}</p>` : ''}
-              ${s.eventDate ? `<p style="margin:0 0 10px;font-size:13px;color:#8fa8a5;">${escapeHtml(s.eventDate)}</p>` : ''}
-              ${(s.eventHashtags && s.eventHashtags.length > 0) ? `<div style="margin-top:6px;">${(s.eventHashtags as string[]).map(tag => `<span style="display:inline-block;margin:2px 4px 2px 0;padding:3px 11px;border-radius:100px;border:1px solid rgba(125,211,207,0.35);background:rgba(125,211,207,0.1);font-size:12px;color:#7dd3cf;font-weight:500;">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
-            </td></tr>
-            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
             ` : ''}
             <tr><td style="padding:24px 32px;">
               <p style="margin:0 0 18px;font-size:10px;text-transform:uppercase;letter-spacing:0.26em;color:#7dd3cf;">What happens next</p>

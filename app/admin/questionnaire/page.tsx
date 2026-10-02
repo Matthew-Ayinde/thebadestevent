@@ -174,7 +174,7 @@ export default function QuestionnairePage() {
         <div>
           <h1 className="font-serif text-2xl sm:text-4xl text-white/90">Event Questionnaires</h1>
           <p className="text-white/50 mt-1 md:mt-2 text-sm md:text-base">
-            Event Logistics & Operations Discovery responses
+            Project Logistics & Operations Discovery responses
           </p>
         </div>
         {total > 0 && (

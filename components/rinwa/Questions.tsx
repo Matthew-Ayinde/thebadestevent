@@ -539,7 +539,7 @@ function HashtagInput({
 
   return (
     <div>
-      <Label>Official Event Hashtag(s)</Label>
+      <Label>Official Project Hashtag(s)</Label>
       <p className="text-[0.63rem] text-white/25 -mt-1.5 mb-3 leading-relaxed">
         Press <span className="text-white/40">Enter</span> or{" "}
         <span className="text-white/40">comma</span> to add each tag. Backspace removes the last one.
@@ -628,20 +628,20 @@ function S2({
   return (
     <div className="space-y-6">
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Event Name" name="eventName" value={data.eventName} onChange={f("eventName")} placeholder="What is this event called?" />
+        <Field label="Project Name" name="eventName" value={data.eventName} onChange={f("eventName")} placeholder="What is this project called?" />
         <Field label="Host City" name="hostCity" value={data.hostCity} onChange={f("hostCity")} placeholder="e.g. Lagos, Toronto, Vancouver" />
       </div>
-      <Area label="Event Purpose" name="eventPurpose" value={data.eventPurpose} onChange={a("eventPurpose")} rows={2} placeholder="What is the purpose or theme of this event?" />
-      <Area label="Primary objectives and success metrics" name="objectives" value={data.objectives} onChange={a("objectives")} placeholder="What does a successful event look like to you?" />
-      <Area label="Who is the target audience?" name="targetAudience" value={data.targetAudience} onChange={a("targetAudience")} rows={3} placeholder="Who is this event designed for?" />
+      <Area label="Project Purpose" name="eventPurpose" value={data.eventPurpose} onChange={a("eventPurpose")} rows={2} placeholder="What is the purpose or theme of this project?" />
+      <Area label="Primary objectives and success metrics" name="objectives" value={data.objectives} onChange={a("objectives")} placeholder="What does a successful project look like to you?" />
+      <Area label="Who is the target audience?" name="targetAudience" value={data.targetAudience} onChange={a("targetAudience")} rows={3} placeholder="Who is this project designed for?" />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Event date(s)" name="eventDate" value={data.eventDate} onChange={f("eventDate")} placeholder="Confirmed or proposed dates" />
+        <Field label="Project date(s)" name="eventDate" value={data.eventDate} onChange={f("eventDate")} placeholder="Confirmed or proposed dates" />
         <Field label="Venue Location" name="venueLocation" value={data.venueLocation} onChange={f("venueLocation")} placeholder="Specific venue being considered" />
         <Field label="Expected attendee count" name="attendeeCount" value={data.attendeeCount} onChange={f("attendeeCount")} placeholder="Approximate number" />
       </div>
       <HashtagInput values={data.eventHashtags} onChange={tags => setArr("eventHashtags", tags)} />
       <Chips
-        label="Event format"
+        label="Project format"
         options={["In-Person", "Virtual", "Hybrid"]}
         values={data.eventFormat}
         onToggle={v => set("eventFormat", data.eventFormat === v ? "" : v)}
@@ -657,8 +657,8 @@ function S3({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
       <Area label="What specific responsibilities would you like us to oversee?" name="responsibilities" value={data.responsibilities} onChange={a("responsibilities")} placeholder="List the areas you'd like RÌNWÁ to manage…" />
       <Divider />
       <Chips
-        label="Will we be managing the entire event or specific workstreams?"
-        options={["Entire Event Operation", "Specific Workstreams Only"]}
+        label="Will we be managing the entire project or specific workstreams?"
+        options={["Entire Project Operation", "Specific Workstreams Only"]}
         values={data.managingScope}
         onToggle={v => set("managingScope", data.managingScope === v ? "" : v)}
       />
@@ -740,7 +740,7 @@ function S6({
   const a = (k: keyof FormData) => (e: React.ChangeEvent<HTMLTextAreaElement>) => set(k, e.target.value);
   return (
     <div className="space-y-6">
-      <Area label="What event-day staffing is needed?" name="staffingRequired" value={data.staffingRequired} onChange={a("staffingRequired")} rows={3} placeholder="Roles, estimated numbers, responsibilities…" />
+      <Area label="What project-day staffing is needed?" name="staffingRequired" value={data.staffingRequired} onChange={a("staffingRequired")} rows={3} placeholder="Roles, estimated numbers, responsibilities…" />
       <YesNo label="Will volunteers be used?" value={data.volunteersNeeded} onToggle={v => set("volunteersNeeded", v)} />
       <Field label="Who is responsible for recruiting, training, and scheduling staff?" name="staffingRecruitment" value={data.staffingRecruitment} onChange={f("staffingRecruitment")} placeholder="Us, your team, or shared responsibility?" />
       <Divider />
@@ -754,7 +754,7 @@ function S6({
       <Divider />
       <YesNo label="Will we be responsible for attendee communications?" value={data.attendeeCommunications} onToggle={v => set("attendeeCommunications", v)} />
       <Field label="Who is managing marketing and promotions?" name="marketingManagement" value={data.marketingManagement} onChange={f("marketingManagement")} placeholder="In-house team, agency, or RÌNWÁ?" />
-      <Chips label="What event materials are required?" options={MATERIALS} values={data.eventMaterials} onToggle={v => toggle("eventMaterials", v)} multi />
+      <Chips label="What project materials are required?" options={MATERIALS} values={data.eventMaterials} onToggle={v => toggle("eventMaterials", v)} multi />
     </div>
   );
 }
@@ -778,7 +778,7 @@ function S7({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
       </SubCard>
 
       <SubCard title="Risk, Compliance & Security">
-        <YesNo label="Is event insurance required?" value={data.eventInsurance} onToggle={v => set("eventInsurance", v)} />
+        <YesNo label="Is project insurance required?" value={data.eventInsurance} onToggle={v => set("eventInsurance", v)} />
         <YesNo label="Are permits or government approvals needed?" value={data.permitsRequired} onToggle={v => set("permitsRequired", v)} />
         <YesNo label="Will security personnel be required?" value={data.securityRequired} onToggle={v => set("securityRequired", v)} />
         <Area label="What contingency plans are currently in place?" name="contingencyPlans" value={data.contingencyPlans} onChange={a("contingencyPlans")} rows={3} placeholder="Backup plans, emergency protocols, risk mitigation…" />
@@ -799,8 +799,8 @@ function S8({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
       <Field label="What is the procurement and approval process?" name="procurementProcess" value={data.procurementProcess} onChange={f("procurementProcess")} placeholder="How are vendors selected and contracts signed?" />
       <Divider />
       <Field label="When do you expect planning to begin?" name="planningStart" value={data.planningStart} onChange={f("planningStart")} placeholder="Expected kick-off date or week" />
-      <Area label="What are the major milestones between now and event day?" name="majorMilestones" value={data.majorMilestones} onChange={a("majorMilestones")} rows={4} placeholder="Key dates, decision points, deliverable deadlines…" />
-      <YesNo label="Do you require post-event reporting and reconciliation?" value={data.postEventReporting} onToggle={v => set("postEventReporting", v)} />
+      <Area label="What are the major milestones between now and project day?" name="majorMilestones" value={data.majorMilestones} onChange={a("majorMilestones")} rows={4} placeholder="Key dates, decision points, deliverable deadlines…" />
+      <YesNo label="Do you require post-project reporting and reconciliation?" value={data.postEventReporting} onToggle={v => set("postEventReporting", v)} />
       <Area label="What deliverables would define a successful engagement?" name="successDefinition" value={data.successDefinition} onChange={a("successDefinition")} rows={3} placeholder="How would you know this partnership was a success?" />
     </div>
   );
