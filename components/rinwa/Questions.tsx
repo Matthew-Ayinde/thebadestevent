@@ -60,13 +60,13 @@ const BLANK: FormData = {
 
 const SECTIONS = [
   { tag: "01 — Your Details",          title: "Let's start with the basics.",        desc: "Tell us who you are and how to reach you." },
-  { tag: "02 — Event Overview",         title: "Tell us about your event.",           desc: "Help us understand the shape and scale of what you're creating." },
+  { tag: "02 — Project Overview",         title: "Tell us about your project.",           desc: "Help us understand the shape and scale of what you're creating." },
   { tag: "03 — Scope of Support",       title: "How can we best serve you?",         desc: "Define the boundaries of engagement and your existing setup." },
   { tag: "04 — Venue & Production",     title: "Setting the stage.",                 desc: "Venue preferences, required spaces, and production requirements." },
   { tag: "05 — Guest Experience",       title: "Crafting every touchpoint.",         desc: "From registration to departure — every moment matters." },
   { tag: "06 — Operations",             title: "The logistics of excellence.",        desc: "Staffing, catering, marketing — the moving parts behind the curtain." },
   { tag: "07 — Logistics & Risk",       title: "Covering every angle.",              desc: "Transportation, sponsorship, compliance, and contingency." },
-  { tag: "08 — Budget & Timeline",      title: "Making it all possible.",            desc: "Investment parameters, decision-making, and the road to event day." },
+  { tag: "08 — Budget & Timeline",      title: "Making it all possible.",            desc: "Investment parameters, decision-making, and the road to project day." },
 ];
 
 const TOTAL = SECTIONS.length;
