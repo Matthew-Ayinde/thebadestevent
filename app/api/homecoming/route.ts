@@ -18,7 +18,7 @@ const Schema = z.object({
   visitorType: z.string().min(1, 'Please let us know if this is your first time'),
   timeframe: z.string().min(1, 'Please pick a rough timeframe'),
   familyAware: z.string().min(1, 'Please answer this question'),
-  reason: z.string().min(1, 'Please tell us why you are coming'),
+  reason: z.array(z.string()).min(1, 'Please tell us why you are coming'),
   reasonOther: z.string().optional(),
   challenges: z.array(z.string()).optional(),
   challengesOther: z.string().optional(),

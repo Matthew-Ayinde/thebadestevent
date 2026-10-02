@@ -107,7 +107,7 @@ export default function OurDiasporaAdminPage() {
       const headers = [
         'Submitted At', 'Name', 'Contact Method', 'Contact Detail', 'Lives In',
         'First Time or Returning', 'Timeframe', 'Family/Friends Aware',
-        'Reason', 'Reason (Other)', 'Needs Handled', 'Needs Handled (Other)', 'Wants Help',
+        'Reasons', 'Reasons (Other)', 'Needs Handled', 'Needs Handled (Other)', 'Wants Help',
         'Excited For', 'Excited For (Other)',
       ];
 
@@ -357,7 +357,7 @@ export default function OurDiasporaAdminPage() {
             </Section>
 
             <Section title="Motivation">
-              <Detail label="Reason for Coming" value={selected.reason} />
+              <Detail label="Reasons for Coming" value={selected.reason} />
               <Detail label="Other Reason" value={selected.reasonOther} />
             </Section>
 

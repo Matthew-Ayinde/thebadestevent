@@ -29,7 +29,7 @@ interface FormData {
   visitorType: string;
   timeframe: string;
   familyAware: string;
-  reason: string; reasonOther: string;
+  reason: string[]; reasonOther: string;
   challenges: string[]; challengesOther: string;
   wantsHelp: string;
   excitedFor: string[]; excitedForOther: string;
@@ -42,7 +42,7 @@ const BLANK: FormData = {
   visitorType: "",
   timeframe: "",
   familyAware: "",
-  reason: "", reasonOther: "",
+  reason: [], reasonOther: "",
   challenges: [], challengesOther: "",
   wantsHelp: "",
   excitedFor: [], excitedForOther: "",
@@ -275,7 +275,7 @@ export default function Questions() {
         if (!data.visitorType) return "Please let us know if you're a first timer or returnee.";
         if (!data.timeframe) return "Please pick a rough timeframe.";
         if (!data.familyAware) return "Please let us know if family or friends know you're coming.";
-        if (!data.reason || (data.reason === "Other" && !data.reasonOther.trim())) return "Please tell us why you're coming.";
+        if (!data.reason.length || (data.reason.includes("Other") && !data.reasonOther.trim())) return "Pick at least one reason you're coming, or tell us more.";
         return null;
       case 3:
         if (!data.challenges.length || (data.challenges.includes("Other") && !data.challengesOther.trim())) return "Pick at least one thing you need handled, or tell us more.";
@@ -379,7 +379,7 @@ export default function Questions() {
                 isLast={step === TOTAL}
               >
                 {step === 1 && <Page1 data={data} set={set} />}
-                {step === 2 && <Page2 data={data} set={set} />}
+                {step === 2 && <Page2 data={data} set={set} toggle={toggle} />}
                 {step === 3 && <Page3 data={data} set={set} toggle={toggle} />}
               </Shell>
             </motion.div>
@@ -634,7 +634,13 @@ function Page1({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
   );
 }
 
-function Page2({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+function Page2({
+  data, set, toggle,
+}: {
+  data: FormData;
+  set: (f: keyof FormData, v: string) => void;
+  toggle: (f: keyof FormData, v: string) => void;
+}) {
   return (
     <div>
       <QuestionBlock index={1} prompt="Is this your first time visiting, or are you a returner?">
@@ -659,8 +665,8 @@ function Page2({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
 
       <QuestionBlock index={4} prompt="Why are you coming?" last>
         <div>
-          <Chips options={REASONS} values={data.reason} onToggle={v => set("reason", data.reason === v ? "" : v)} />
-          <Reveal show={data.reason === "Other"}>
+          <Chips options={REASONS} values={data.reason} onToggle={v => toggle("reason", v)} multi />
+          <Reveal show={data.reason.includes("Other")}>
             <Area label="Tell us more" name="reasonOther" value={data.reasonOther} onChange={e => set("reasonOther", e.target.value)} rows={2} placeholder="What's bringing you home?" />
           </Reveal>
         </div>

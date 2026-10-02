@@ -781,7 +781,8 @@ function buildAdminHomecomingEmailHtml(s: Record<string, any>) {
                   hRow('Family / Friends Aware', s.familyAware),
                 ].join(''))}
                 ${hSection('Motivation', [
-                  hRow('Reason for Coming', s.reason === 'Other' ? s.reasonOther : s.reason),
+                  hRow('Reasons for Coming', s.reason),
+                  hRow('Other Reason', s.reasonOther),
                 ].join(''))}
                 ${hSection('Needs Handled', [
                   hRow('Needs Handled', s.challenges),
@@ -846,7 +847,8 @@ function buildUserHomecomingEmailHtml(s: Record<string, any>) {
                 ${[
                   hRow('Timeframe', s.timeframe),
                   hRow('First Time or Returning', s.visitorType),
-                  hRow('Reason for Coming', s.reason === 'Other' ? s.reasonOther : s.reason),
+                  hRow('Reasons for Coming', s.reason),
+                  hRow('Other Reason', s.reasonOther),
                 ].join('')}
               </table>
             </td></tr>

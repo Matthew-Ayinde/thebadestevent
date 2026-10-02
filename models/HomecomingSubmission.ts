@@ -9,7 +9,7 @@ export interface IHomecomingSubmission extends Document {
   visitorType: string;
   timeframe: string;
   familyAware: string;
-  reason: string;
+  reason: string[];
   reasonOther?: string;
   challenges: string[];
   challengesOther?: string;
@@ -31,7 +31,7 @@ const HomecomingSubmissionSchema = new Schema<IHomecomingSubmission>(
     visitorType: { type: String, required: true },
     timeframe: { type: String, required: true },
     familyAware: { type: String, required: true },
-    reason: { type: String, required: true },
+    reason: { type: [String], default: [] },
     reasonOther: { type: String },
     challenges: { type: [String], default: [] },
     challengesOther: { type: String },
