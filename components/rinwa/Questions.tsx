@@ -727,7 +727,7 @@ function S5({ data, set }: { data: FormData; set: (f: keyof FormData, v: string)
 }
 
 const SERVICE_STYLES = ["Buffet", "Plated", "Cocktail Reception", "Stations", "Food Trucks", "Canapés Only"];
-const MATERIALS = ["Signage & Wayfinding", "Event Programs", "Name Badges", "Gift Bags", "Branded Merchandise", "Press Kits", "Menus"];
+const MATERIALS = ["Signage & Wayfinding", "Project Programs", "Name Badges", "Gift Bags", "Branded Merchandise", "Press Kits", "Menus"];
 
 function S6({
   data, set, toggle,
