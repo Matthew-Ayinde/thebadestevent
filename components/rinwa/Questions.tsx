@@ -59,14 +59,35 @@ const BLANK: FormData = {
 };
 
 const SECTIONS = [
-  { tag: "01 — Your Details",          title: "Let's start with the basics.",        desc: "Tell us who you are and how to reach you." },
-  { tag: "02 — Project Overview",         title: "Tell us about your project.",           desc: "Help us understand the shape and scale of what you're creating." },
-  { tag: "03 — Scope of Support",       title: "How can we best serve you?",         desc: "Define the boundaries of engagement and your existing setup." },
-  { tag: "04 — Venue & Production",     title: "Setting the stage.",                 desc: "Venue preferences, required spaces, and production requirements." },
-  { tag: "05 — Guest Experience",       title: "Crafting every touchpoint.",         desc: "From registration to departure — every moment matters." },
-  { tag: "06 — Operations",             title: "The logistics of excellence.",        desc: "Staffing, catering, marketing — the moving parts behind the curtain." },
-  { tag: "07 — Logistics & Risk",       title: "Covering every angle.",              desc: "Transportation, sponsorship, compliance, and contingency." },
-  { tag: "08 — Budget & Timeline",      title: "Making it all possible.",            desc: "Investment parameters, decision-making, and the road to project day." },
+  {
+    tag: "Part I — The Vision",
+    title: "Let's start with the vision.",
+    desc: "Who you are, what you're creating, and how we can best serve you.",
+    groups: [
+      { num: "01", label: "Your Details",       desc: "Tell us who you are and how to reach you." },
+      { num: "02", label: "Project Overview",   desc: "The shape and scale of what you're creating." },
+      { num: "03", label: "Scope of Support",   desc: "The boundaries of engagement and your existing setup." },
+    ],
+  },
+  {
+    tag: "Part II — The Experience",
+    title: "Crafting every touchpoint.",
+    desc: "The stage, the guests, and the moving parts behind the curtain.",
+    groups: [
+      { num: "04", label: "Venue & Production", desc: "Venue preferences, required spaces, and production requirements." },
+      { num: "05", label: "Guest Experience",   desc: "From registration to departure — every moment matters." },
+      { num: "06", label: "Operations",         desc: "Staffing, catering, and marketing." },
+    ],
+  },
+  {
+    tag: "Part III — The Details",
+    title: "Making it all possible.",
+    desc: "Logistics, risk, investment, and the road to project day.",
+    groups: [
+      { num: "07", label: "Logistics & Risk",   desc: "Transportation, sponsorship, compliance, and contingency." },
+      { num: "08", label: "Budget & Timeline",  desc: "Investment parameters, decision-making, and milestones." },
+    ],
+  },
 ];
 
 const TOTAL = SECTIONS.length;
@@ -120,7 +141,7 @@ export default function Questions() {
         const err = await res.json();
         throw new Error(err.error || "Submission failed");
       }
-      setStep(9);
+      setStep(TOTAL + 1);
       requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -160,7 +181,7 @@ export default function Questions() {
           <motion.div
             className="h-full bg-[#7dd3cf]"
             initial={false}
-            animate={{ width: `${((step - 1) / (TOTAL - 1)) * 100}%` }}
+            animate={{ width: `${(step / TOTAL) * 100}%` }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
           />
         </div>
@@ -181,6 +202,7 @@ export default function Questions() {
                 tag={SECTIONS[step - 1].tag}
                 title={SECTIONS[step - 1].title}
                 desc={SECTIONS[step - 1].desc}
+                groups={SECTIONS[step - 1].groups}
                 step={step}
                 total={TOTAL}
                 onBack={back}
@@ -188,19 +210,25 @@ export default function Questions() {
                 submitting={submitting}
                 isLast={step === TOTAL}
               >
-                {step === 1 && <S1 data={data} set={set} />}
-                {step === 2 && <S2 data={data} set={set} toggle={toggle} setArr={setArr} />}
-                {step === 3 && <S3 data={data} set={set} />}
-                {step === 4 && <S4 data={data} set={set} toggle={toggle} />}
-                {step === 5 && <S5 data={data} set={set} />}
-                {step === 6 && <S6 data={data} set={set} toggle={toggle} />}
-                {step === 7 && <S7 data={data} set={set} />}
-                {step === 8 && <S8 data={data} set={set} />}
+                {step === 1 && <>
+                  <Group {...SECTIONS[0].groups[0]}><S1 data={data} set={set} /></Group>
+                  <Group {...SECTIONS[0].groups[1]}><S2 data={data} set={set} toggle={toggle} setArr={setArr} /></Group>
+                  <Group {...SECTIONS[0].groups[2]}><S3 data={data} set={set} /></Group>
+                </>}
+                {step === 2 && <>
+                  <Group {...SECTIONS[1].groups[0]}><S4 data={data} set={set} toggle={toggle} /></Group>
+                  <Group {...SECTIONS[1].groups[1]}><S5 data={data} set={set} /></Group>
+                  <Group {...SECTIONS[1].groups[2]}><S6 data={data} set={set} toggle={toggle} /></Group>
+                </>}
+                {step === 3 && <>
+                  <Group {...SECTIONS[2].groups[0]}><S7 data={data} set={set} /></Group>
+                  <Group {...SECTIONS[2].groups[1]}><S8 data={data} set={set} /></Group>
+                </>}
               </Shell>
             </motion.div>
           )}
 
-          {step === 9 && (
+          {step === TOTAL + 1 && (
             <motion.div key="done" variants={variants} initial="enter" animate="center" exit="exit" transition={transition}>
               <SuccessScreen />
             </motion.div>
@@ -306,9 +334,10 @@ function SuccessScreen() {
 // ─── Section Shell ──────────────────────────────────────────────────────────────
 
 function Shell({
-  tag, title, desc, step, total, onBack, onNext, submitting, isLast, children,
+  tag, title, desc, groups, step, total, onBack, onNext, submitting, isLast, children,
 }: {
   tag: string; title: string; desc: string;
+  groups: { num: string; label: string }[];
   step: number; total: number;
   onBack: () => void; onNext: () => void;
   submitting: boolean; isLast: boolean;
@@ -332,10 +361,23 @@ function Shell({
             {title}
           </h2>
           <p className="mt-3 text-[0.9rem] text-white/50 leading-relaxed">{desc}</p>
+
+          {/* Sections on this screen */}
+          <div className="mt-5 flex flex-wrap gap-2">
+            {groups.map(g => (
+              <span
+                key={g.num}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.22em] text-white/45"
+              >
+                <span className="text-[#7dd3cf]/70">{g.num}</span>
+                {g.label}
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* Card */}
-        <div className="rounded-[2rem] border border-white/10 bg-[#041114]/72 backdrop-blur-xl p-6 sm:p-8 shadow-[0_28px_80px_rgba(0,0,0,0.5)]">
+        {/* Section cards */}
+        <div className="space-y-6">
           {children}
         </div>
 
@@ -363,6 +405,31 @@ function Shell({
         </div>
       </div>
     </div>
+  );
+}
+
+function Group({
+  num, label, desc, children,
+}: {
+  num: string; label: string; desc: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-[2rem] border border-white/10 bg-[#041114]/72 backdrop-blur-xl p-6 sm:p-8 shadow-[0_28px_80px_rgba(0,0,0,0.5)]">
+      <div className="flex items-start gap-4 mb-7 pb-6 border-b border-white/8">
+        <span
+          className="font-serif text-[2rem] leading-none text-[#7dd3cf]/80"
+          style={{ fontFamily: "var(--font-serif)" }}
+        >
+          {num}
+        </span>
+        <div>
+          <h3 className="text-[0.72rem] uppercase tracking-[0.32em] text-white/80">{label}</h3>
+          <p className="mt-1.5 text-[0.82rem] text-white/42 leading-relaxed">{desc}</p>
+        </div>
+      </div>
+      {children}
+    </section>
   );
 }
 
