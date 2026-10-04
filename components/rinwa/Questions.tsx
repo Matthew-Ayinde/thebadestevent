@@ -4,7 +4,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
 import toast, { Toaster } from "react-hot-toast";
-import { ArrowRight, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import BookMeeting from "./BookMeeting";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -99,6 +100,7 @@ export default function Questions() {
   const [step, setStep]           = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [data, setData]           = useState<FormData>(BLANK);
+  const [meeting, setMeeting]     = useState(false);
 
   function set(field: keyof FormData, value: string) {
     setData(prev => ({ ...prev, [field]: value }));
@@ -190,9 +192,15 @@ export default function Questions() {
       {/* Content */}
       <div className="relative z-10 min-h-screen">
         <AnimatePresence mode="wait">
-          {step === 0 && (
+          {meeting && (
+            <motion.div key="meeting" variants={variants} initial="enter" animate="center" exit="exit" transition={transition}>
+              <BookMeeting onExit={() => setMeeting(false)} />
+            </motion.div>
+          )}
+
+          {!meeting && step === 0 && (
             <motion.div key="welcome" variants={variants} initial="enter" animate="center" exit="exit" transition={transition}>
-              <WelcomeScreen onBegin={() => setStep(1)} />
+              <WelcomeScreen onBegin={() => setStep(1)} onBook={() => setMeeting(true)} />
             </motion.div>
           )}
 
@@ -241,7 +249,7 @@ export default function Questions() {
 
 // ─── Screens ───────────────────────────────────────────────────────────────────
 
-function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
+function WelcomeScreen({ onBegin, onBook }: { onBegin: () => void; onBook: () => void }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24 text-center">
       <motion.div
@@ -276,13 +284,25 @@ function WelcomeScreen({ onBegin }: { onBegin: () => void }) {
           <p className="text-white/35 text-sm italic">We look forward to bringing your vision to life.</p>
         </div>
 
-        <button
-          onClick={onBegin}
-          className="group inline-flex items-center gap-3 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#7dd3cf] transition-all hover:border-[#7dd3cf]/60 hover:bg-[#7dd3cf]/18"
-        >
-          Tell Us More
-          <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-        </button>
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+          <button
+            onClick={onBegin}
+            className="group inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#7dd3cf] transition-all hover:border-[#7dd3cf]/60 hover:bg-[#7dd3cf]/18"
+          >
+            Tell Us More
+            <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+          </button>
+          <button
+            onClick={onBook}
+            className="group inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-full border border-white/12 bg-white/[0.04] px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-white/70 transition-all hover:border-white/25 hover:bg-white/[0.08] hover:text-white"
+          >
+            <CalendarDays size={15} className="text-[#7dd3cf]/80" />
+            Book a Meeting
+          </button>
+        </div>
+        <p className="mt-6 max-w-sm text-xs text-white/35 leading-relaxed">
+          Prefer to talk it through? Book time directly with Rinwa instead of filling the questionnaire.
+        </p>
       </motion.div>
     </div>
   );

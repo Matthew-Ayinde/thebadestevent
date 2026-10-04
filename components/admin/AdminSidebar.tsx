@@ -15,6 +15,7 @@ import {
   Handshake,
   Inbox,
   ClipboardList,
+  CalendarDays,
   MessageSquareQuote,
   Settings2,
   LogOut,
@@ -30,6 +31,7 @@ const navItems = [
   // { href: '/admin/job-postings', label: 'Job Postings', icon: Briefcase },
   // { href: '/admin/submissions', label: 'Submissions', icon: Inbox },
   { href: '/admin/questionnaire', label: 'Questionnaire', icon: ClipboardList },
+  { href: '/admin/meetings', label: 'Meetings', icon: CalendarDays },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },
 ];

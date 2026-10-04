@@ -700,3 +700,96 @@ export async function sendEmail({ to, subject, text, html, from }: GenericEmailP
 
   return { sent: true, warnings };
 }
+
+type MeetingRequestPayload = {
+  request: { fullName: string; email: string; reason: string };
+  adminEmail: string;
+};
+
+function buildAdminMeetingEmailHtml(r: MeetingRequestPayload['request']) {
+  const firstName = escapeHtml(r.fullName.split(' ')[0] || 'them');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Meeting Request</title></head>
+<body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+        <tr><td style="padding-bottom:24px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <img src="https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png" alt="RÌNWÁ" width="44" height="44" style="display:block;margin-bottom:7px;" />
+                <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.12em;color:#f5f0e8;">RÌNWÁ</div>
+              </td>
+              <td align="right">
+                <span style="display:inline-block;background:#7dd3cf;color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">Meeting Request</span>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:28px 32px 20px;">
+              <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">Wants to meet with you</p>
+              <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.2;color:#f5f0e8;font-weight:normal;">${escapeHtml(r.fullName)}</h1>
+              <p style="margin:6px 0 0;font-size:13px;color:#8fa8a5;">${escapeHtml(r.email)}</p>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:22px 32px;">
+              <p style="margin:0 0 10px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">Reason for the meeting</p>
+              <p style="margin:0;font-size:14px;line-height:1.7;color:#e8f0ef;">${escapeHtml(r.reason).replace(/\n/g, '<br>')}</p>
+            </td></tr>
+            <tr><td style="padding:0 32px 8px;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#8fa8a5;">They were taken to your calendar to choose a slot. If they book, Cal.com will send the confirmation separately — if no booking follows, you may want to reach out to ${firstName} directly.</p>
+            </td></tr>
+            <tr><td style="padding:24px 32px 28px;text-align:center;">
+              <a href="mailto:${escapeHtml(r.email)}?subject=Re: Your meeting request with RÌNWÁ"
+                 style="display:inline-block;background:#7dd3cf;color:#041114;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;text-decoration:none;padding:13px 28px;border-radius:100px;">
+                Reply to ${firstName}
+              </a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 0 0;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#3d5a58;letter-spacing:0.1em;">RÌNWÁ Hospitality · Internal notification · Do not forward</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendMeetingRequestEmail({ request, adminEmail }: MeetingRequestPayload): Promise<EmailResult> {
+  const resend = buildResendClient();
+  const warnings: string[] = [];
+
+  if (!resend) {
+    warnings.push('RESEND_API_KEY is not configured');
+    return { sent: false, warnings };
+  }
+
+  const from = process.env.RESEND_FROM;
+  if (!from) {
+    warnings.push('RESEND_FROM is not configured');
+    return { sent: false, warnings };
+  }
+
+  const { error } = await resend.emails.send({
+    from,
+    to: adminEmail,
+    replyTo: request.email,
+    subject: `[Meeting Request] ${request.fullName}`,
+    text: `${request.fullName} (${request.email}) would like to meet.\n\nReason:\n${request.reason}`,
+    html: buildAdminMeetingEmailHtml(request),
+  });
+
+  if (error) {
+    console.error('Meeting request email failed:', error);
+    warnings.push('Failed to send admin notification');
+    return { sent: false, warnings };
+  }
+
+  return { sent: true, warnings };
+}
