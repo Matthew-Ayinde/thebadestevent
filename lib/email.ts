@@ -793,3 +793,277 @@ export async function sendMeetingRequestEmail({ request, adminEmail }: MeetingRe
 
   return { sent: true, warnings };
 }
+
+// ─── Job applications ──────────────────────────────────────────────────────────
+
+type JobApplicationEmailPayload = {
+  application: {
+    fullName: string;
+    email: string;
+    phone: string;
+    location?: string;
+    linkedin?: string;
+    portfolio?: string;
+    coverLetter?: string;
+    answers: { label: string; value: string }[];
+  };
+  job: { title: string; department?: string; location: string; type: string; workplace?: string };
+  resume?: { fileName: string; content: Buffer };
+  adminEmail: string;
+  consoleUrl?: string;
+};
+
+const LOGO_URL = 'https://res.cloudinary.com/matthew-ayinde/image/upload/v1780311622/rinwa-logo_cekwvh.png';
+
+function multiline(value: string) {
+  return escapeHtml(value).replace(/\n/g, '<br>');
+}
+
+function safeHref(url: string) {
+  return /^https?:\/\//i.test(url) ? escapeHtml(url) : '';
+}
+
+function buildAdminApplicationEmailHtml({ application: a, job, resume, consoleUrl }: JobApplicationEmailPayload) {
+  const firstName = escapeHtml(a.fullName.split(' ')[0] || 'them');
+  const row = (label: string, value: string) => `
+    <tr>
+      <td style="padding:11px 16px;width:36%;vertical-align:top;font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#8fa8a5;border-bottom:1px solid rgba(255,255,255,0.05);">${label}</td>
+      <td style="padding:11px 16px;vertical-align:top;font-size:14px;color:#e8f0ef;line-height:1.6;border-bottom:1px solid rgba(255,255,255,0.05);word-break:break-word;">${value}</td>
+    </tr>`;
+  const link = (url?: string) => {
+    const href = url ? safeHref(url) : '';
+    return href ? `<a href="${href}" style="color:#7dd3cf;text-decoration:none;">${escapeHtml(url!)}</a>` : '';
+  };
+  const block = (label: string, body: string) => `
+    <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+    <tr><td style="padding:22px 32px;">
+      <p style="margin:0 0 10px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">${label}</p>
+      <p style="margin:0;font-size:14px;line-height:1.7;color:#e8f0ef;">${body}</p>
+    </td></tr>`;
+
+  const contactRows = [
+    row('Email', `<a href="mailto:${escapeHtml(a.email)}" style="color:#7dd3cf;text-decoration:none;">${escapeHtml(a.email)}</a>`),
+    row('Phone', escapeHtml(a.phone)),
+    a.location ? row('Based in', escapeHtml(a.location)) : '',
+    a.linkedin ? row('LinkedIn', link(a.linkedin)) : '',
+    a.portfolio ? row('Portfolio', link(a.portfolio)) : '',
+    row('Résumé', resume ? `Attached — ${escapeHtml(resume.fileName)}` : 'Not provided'),
+  ].join('');
+
+  const answers = a.answers
+    .filter(ans => ans.value)
+    .map(ans => block(escapeHtml(ans.label), multiline(ans.value)))
+    .join('');
+
+  const meta = [job.department, job.location, job.workplace, job.type]
+    .filter((v): v is string => !!v)
+    .map(escapeHtml)
+    .join(' &nbsp;·&nbsp; ');
+  const replySubject = encodeURIComponent(`Your application for ${job.title} — RÌNWÁ`);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Application</title></head>
+<body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+        <tr><td style="padding-bottom:24px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <img src="${LOGO_URL}" alt="RÌNWÁ" width="44" height="44" style="display:block;margin-bottom:7px;" />
+                <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.12em;color:#f5f0e8;">RÌNWÁ</div>
+              </td>
+              <td align="right">
+                <span style="display:inline-block;background:#7dd3cf;color:#041114;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;padding:5px 12px;border-radius:100px;">New Application</span>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="height:3px;background:linear-gradient(90deg,#7dd3cf,#4db6b0 50%,transparent);"></td></tr>
+            <tr><td style="padding:28px 32px 20px;">
+              <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.28em;color:#7dd3cf;">Applied for ${escapeHtml(job.title)}</p>
+              <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2;color:#f5f0e8;font-weight:normal;">${escapeHtml(a.fullName)}</h1>
+              <p style="margin:8px 0 0;font-size:12px;color:#8fa8a5;">${meta}</p>
+            </td></tr>
+            <tr><td style="padding:0 16px 8px;">
+              <table width="100%" cellpadding="0" cellspacing="0">${contactRows}</table>
+            </td></tr>
+            ${a.coverLetter ? block('Cover letter', multiline(a.coverLetter)) : ''}
+            ${answers}
+            <tr><td style="padding:24px 32px 28px;text-align:center;">
+              <a href="mailto:${escapeHtml(a.email)}?subject=${replySubject}"
+                 style="display:inline-block;background:#7dd3cf;color:#041114;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;text-decoration:none;padding:13px 28px;border-radius:100px;">
+                Reply to ${firstName}
+              </a>
+              ${consoleUrl ? `<p style="margin:16px 0 0;font-size:12px;"><a href="${escapeHtml(consoleUrl)}" style="color:#8fa8a5;text-decoration:underline;">Open in the admin console</a></p>` : ''}
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 0 0;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#3d5a58;letter-spacing:0.1em;">RÌNWÁ Hospitality · Internal notification · Contains personal data — do not forward</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildApplicantEmailHtml({ application: a, job }: JobApplicationEmailPayload) {
+  const step = (num: string, title: string, body: string) => `
+    <tr><td style="padding:0 0 20px;">
+      <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="width:32px;vertical-align:top;padding-top:2px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:#0d2a2e;border:1px solid #7dd3cf;text-align:center;line-height:24px;font-size:11px;font-weight:700;color:#7dd3cf;">${num}</div>
+          </td>
+          <td style="padding-left:14px;vertical-align:top;">
+            <p style="margin:0 0 3px;font-size:13px;font-weight:700;color:#f5f0e8;">${title}</p>
+            <p style="margin:0;font-size:13px;color:#8fa8a5;line-height:1.6;">${body}</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>`;
+  const meta = [job.location, job.workplace, job.type]
+    .filter((v): v is string => !!v)
+    .map(escapeHtml)
+    .join(' &nbsp;·&nbsp; ');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Application received</title></head>
+<body style="margin:0;padding:0;background:#041114;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+        <tr><td style="text-align:center;padding-bottom:32px;">
+          <img src="${LOGO_URL}" alt="RÌNWÁ" width="54" height="54" style="display:block;margin:0 auto 10px;" />
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;letter-spacing:0.14em;color:#f5f0e8;">RÌNWÁ</div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.36em;color:#8fa8a5;margin-top:4px;">Careers</div>
+        </td></tr>
+        <tr><td style="background:#07171a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="height:3px;background:linear-gradient(90deg,#7dd3cf,#4db6b0 50%,transparent);"></td></tr>
+            <tr><td style="padding:36px 32px 28px;">
+              <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.30em;color:#7dd3cf;">Application received</p>
+              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.15;color:#f5f0e8;font-weight:normal;">
+                Thank you for applying,<br>${escapeHtml(a.fullName.split(' ')[0] || a.fullName)}.
+              </h1>
+              <p style="margin:0;font-size:15px;line-height:1.75;color:#a0bcba;">
+                Your application is safely with us. Every application is read by a person on our team, with care.
+              </p>
+            </td></tr>
+            <tr><td style="padding:0 32px 28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;border:1px solid rgba(125,211,207,0.22);border-radius:14px;">
+                <tr><td style="padding:18px 20px;">
+                  <p style="margin:0 0 4px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#8fa8a5;">The role</p>
+                  <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:20px;color:#f5f0e8;">${escapeHtml(job.title)}</p>
+                  <p style="margin:6px 0 0;font-size:12px;color:#8fa8a5;">${meta}</p>
+                </td></tr>
+              </table>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:28px 32px;">
+              <p style="margin:0 0 20px;font-size:11px;text-transform:uppercase;letter-spacing:0.26em;color:#7dd3cf;">What happens next</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${step('1', 'We read your application', 'Our team reviews your experience and answers carefully.')}
+                ${step('2', 'We reach out if there is a fit', 'If your profile matches what the role needs, we will contact you at ' + escapeHtml(a.email) + ' to arrange a conversation.')}
+                ${step('3', 'A conversation, not an interrogation', 'We want to understand how you think, what you value, and how you would shape experiences with us.')}
+              </table>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:28px 32px 36px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:14px;color:#8fa8a5;">With warmth,</p>
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:20px;color:#f5f0e8;letter-spacing:0.08em;">The RÌNWÁ Team</p>
+              <p style="margin:10px 0 0;font-size:12px;color:#3d5a58;font-style:italic;">Come here, you've arrived home.</p>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:24px 0 0;text-align:center;">
+          <p style="margin:0 0 6px;font-size:11px;color:#3d5a58;">You received this because you applied for a role on the RÌNWÁ website.</p>
+          <p style="margin:0;font-size:11px;color:#2a3f3e;">RÌNWÁ Hospitality &nbsp;·&nbsp; Lagos, Nigeria</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendJobApplicationEmails(payload: JobApplicationEmailPayload): Promise<EmailResult> {
+  const resend = buildResendClient();
+  const warnings: string[] = [];
+
+  if (!resend) {
+    warnings.push('RESEND_API_KEY is not configured');
+    return { sent: false, warnings };
+  }
+
+  const from = process.env.RESEND_FROM;
+  if (!from) {
+    warnings.push('RESEND_FROM is not configured');
+    return { sent: false, warnings };
+  }
+
+  const { application: a, job, resume, adminEmail } = payload;
+
+  const sendAdmin = async () => {
+    const { error } = await resend.emails.send({
+      from,
+      to: adminEmail,
+      replyTo: a.email,
+      subject: `[Application] ${a.fullName} — ${job.title}`,
+      text: [
+        `${a.fullName} applied for ${job.title}.`,
+        '',
+        `Email: ${a.email}`,
+        `Phone: ${a.phone}`,
+        a.location ? `Based in: ${a.location}` : '',
+        a.linkedin ? `LinkedIn: ${a.linkedin}` : '',
+        a.portfolio ? `Portfolio: ${a.portfolio}` : '',
+        `Résumé: ${resume ? `attached (${resume.fileName})` : 'not provided'}`,
+        a.coverLetter ? `\nCover letter:\n${a.coverLetter}` : '',
+        ...a.answers.filter(ans => ans.value).map(ans => `\n${ans.label}\n${ans.value}`),
+      ].filter(Boolean).join('\n'),
+      html: buildAdminApplicationEmailHtml(payload),
+      attachments: resume ? [{ filename: resume.fileName, content: resume.content }] : undefined,
+    });
+    if (error) {
+      console.error('Admin application email failed:', error);
+      warnings.push('Failed to send admin notification');
+      return false;
+    }
+    return true;
+  };
+
+  const sendApplicant = async () => {
+    const { error } = await resend.emails.send({
+      from,
+      to: a.email,
+      subject: `We've received your application — ${job.title}`,
+      text: [
+        `Thank you for applying, ${a.fullName}.`,
+        '',
+        `Your application for ${job.title} (${job.location}) is safely with us.`,
+        `If your profile matches what the role needs, we will reach out at ${a.email}.`,
+        '',
+        'With warmth,',
+        'The RÌNWÁ Team',
+      ].join('\n'),
+      html: buildApplicantEmailHtml(payload),
+    });
+    if (error) {
+      console.error('Applicant confirmation email failed:', error);
+      warnings.push('Failed to send confirmation email to applicant');
+      return false;
+    }
+    return true;
+  };
+
+  const [adminSent, applicantSent] = await Promise.all([sendAdmin(), sendApplicant()]);
+  return { sent: adminSent && applicantSent, warnings };
+}

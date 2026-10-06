@@ -94,3 +94,49 @@ export function generateSignedUrl(publicId: string, expiresIn: number = 3600): s
     resource_type: 'image',
   });
 }
+
+// ─── Private documents (e.g. applicant résumés) ────────────────────────────────
+// Stored as private raw assets so they are never reachable at a public URL;
+// admins download them through short-lived signed links.
+
+export async function uploadPrivateDocument(
+  fileBuffer: Buffer,
+  folder: string,
+  publicId: string
+): Promise<{ publicId: string; bytes: number }> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `${CLOUDINARY_ROOT_FOLDER}/${folder}`,
+        public_id: publicId,
+        resource_type: 'raw',
+        type: 'private',
+        overwrite: false,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else if (result) resolve({ publicId: result.public_id, bytes: result.bytes });
+        else reject(new Error('Upload failed'));
+      }
+    );
+
+    uploadStream.end(fileBuffer);
+  });
+}
+
+export function privateDocumentUrl(publicId: string, expiresInSeconds = 300): string {
+  return cloudinary.utils.private_download_url(publicId, '', {
+    resource_type: 'raw',
+    type: 'private',
+    attachment: true,
+    expires_at: Math.floor(Date.now() / 1000) + expiresInSeconds,
+  });
+}
+
+export async function deletePrivateDocument(publicId: string): Promise<void> {
+  try {
+    await cloudinary.uploader.destroy(publicId, { resource_type: 'raw', type: 'private', invalidate: true });
+  } catch (err) {
+    console.error(`Cloudinary private delete failed for ${publicId}:`, err);
+  }
+}

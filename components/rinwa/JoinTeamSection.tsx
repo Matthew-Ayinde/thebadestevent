@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 
 interface JobPosting {
-  _id: string;
+  id: string;
+  slug: string;
   title: string;
   company: string;
   location: string;
@@ -16,7 +18,6 @@ interface JobPosting {
 
 interface Settings {
   joinTeamDescription: string;
-  joinTeamGoogleFormUrl: string;
 }
 
 export function JoinTeamSection() {
@@ -53,8 +54,6 @@ export function JoinTeamSection() {
     return null;
   }
 
-  const googleFormUrl = settings?.joinTeamGoogleFormUrl || 'https://forms.gle/example';
-
   return (
     <section className="py-20 px-4 bg-background">
       <div className="max-w-3xl mx-auto">
@@ -73,13 +72,13 @@ export function JoinTeamSection() {
         <div className="space-y-0">
           {jobs.map((job) => (
             <div
-              key={job._id}
+              key={job.id}
               className="border-b border-foreground/10 last:border-b-0"
             >
               {/* Collapsible Header */}
               <button
                 onClick={() =>
-                  setExpandedId(expandedId === job._id ? null : job._id)
+                  setExpandedId(expandedId === job.id ? null : job.id)
                 }
                 className="w-full text-left py-6 px-0 flex justify-between items-center group hover:opacity-80 transition-opacity"
               >
@@ -98,13 +97,13 @@ export function JoinTeamSection() {
                 <ChevronDown
                   size={24}
                   className={`flex-shrink-0 text-teal-soft transition-transform duration-300 ml-4 ${
-                    expandedId === job._id ? 'rotate-180' : ''
+                    expandedId === job.id ? 'rotate-180' : ''
                   }`}
                 />
               </button>
 
               {/* Expanded Content */}
-              {expandedId === job._id && (
+              {expandedId === job.id && (
                 <div className="pb-6 px-0 space-y-6 border-t border-foreground/5 pt-6 animate-in fade-in duration-300">
                   {/* Overview */}
                   <div>
@@ -151,14 +150,12 @@ export function JoinTeamSection() {
 
                   {/* Apply Button */}
                   <div className="pt-4">
-                    <a
-                      href={googleFormUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href={`/careers/${job.slug}`}
                       className="inline-block px-8 py-3 bg-foreground/10 hover:bg-foreground/15 border border-foreground/20 hover:border-teal-soft text-foreground/90 hover:text-teal-soft font-semibold rounded-full transition-all duration-300"
                     >
                       Apply Now
-                    </a>
+                    </Link>
                   </div>
                 </div>
               )}
