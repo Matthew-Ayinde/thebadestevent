@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/rinwa/SplashScreen";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { themeInitScript } from "@/lib/theme";
 
 const geistSans = Geist({
@@ -113,6 +114,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SplashScreen />
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
