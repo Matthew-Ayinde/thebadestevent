@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/rinwa/SplashScreen";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import { themeInitScript } from "@/lib/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,7 +92,7 @@ export const metadata: Metadata = {
   },
   other: {
     "theme-color": "#0f766e",
-    "color-scheme": "dark",
+    "color-scheme": "dark light",
   },
 };
 
@@ -104,7 +105,11 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${serif.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SplashScreen />
         {children}

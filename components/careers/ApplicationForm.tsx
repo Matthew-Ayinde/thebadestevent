@@ -25,7 +25,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const inputCls =
-  'w-full min-h-[52px] rounded-2xl border bg-[#07171a]/90 px-4 py-3.5 text-white text-sm placeholder:text-white/22 outline-none transition focus:border-[#7dd3cf]/50 focus:shadow-[0_0_0_4px_rgba(125,211,207,0.07)]';
+  'w-full min-h-[52px] rounded-2xl border bg-field px-4 py-3.5 text-fg text-sm placeholder:text-fg-faint outline-none transition focus:border-accent/50 focus:shadow-[0_0_0_4px_var(--ring)]';
 
 type Values = Record<string, string>;
 
@@ -45,7 +45,7 @@ export function ApplicationForm({ job }: { job: PublicJob }) {
     <div ref={containerRef} className="scroll-mt-8">
       <Toaster
         position="top-center"
-        toastOptions={{ style: { background: '#07171a', color: '#f5f0e8', border: '1px solid rgba(125,211,207,0.2)' } }}
+        toastOptions={{ style: { background: 'var(--card-solid)', color: 'var(--fg)', border: '1px solid var(--line)', boxShadow: 'var(--card-shadow)' } }}
       />
       <AnimatePresence mode="wait" initial={false}>
         {submitted ? (
@@ -161,11 +161,11 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
 
   return (
     <form onSubmit={submit} noValidate>
-      <p className="mb-5 text-[0.6rem] uppercase tracking-[0.38em] text-[#7dd3cf]/60">Apply</p>
-      <h2 id="apply-heading" className="text-[clamp(2.2rem,5vw,3.4rem)] leading-[1.02] tracking-tight text-white" style={serif}>
+      <p className="mb-5 text-[0.66rem] uppercase tracking-[0.38em] text-accent">Apply</p>
+      <h2 id="apply-heading" className="text-[clamp(2.2rem,5vw,3.4rem)] leading-[1.02] tracking-tight text-fg" style={serif}>
         Introduce yourself.
       </h2>
-      <p className="mt-4 mb-10 max-w-lg text-[0.92rem] leading-relaxed text-white/50">
+      <p className="mt-4 mb-10 max-w-lg text-[0.92rem] leading-relaxed text-fg-muted">
         Tell us who you are and what you&apos;d bring to the role. It takes about five minutes, and every application is read by a person.
       </p>
 
@@ -232,17 +232,17 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
       />
 
       <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs leading-relaxed text-white/35 sm:max-w-xs">
+        <p className="text-xs leading-relaxed text-fg-faint sm:max-w-xs">
           Your details are only used to consider your application for this role.
         </p>
         <button
           type="submit"
           disabled={submitting}
-          className="group flex items-center justify-center gap-2 rounded-full bg-[#7dd3cf] px-8 py-4 text-sm font-semibold text-[#041114] transition hover:bg-[#a5e3df] disabled:cursor-not-allowed disabled:opacity-55"
+          className="group flex items-center justify-center gap-2 rounded-full bg-accent px-8 py-4 text-sm font-semibold text-on-accent transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-55"
         >
           {submitting ? (
             <>
-              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#041114]/30 border-t-[#041114]" aria-hidden="true" />
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-on-accent/30 border-t-on-accent" aria-hidden="true" />
               Sending your application…
             </>
           ) : (
@@ -270,13 +270,13 @@ const fieldId = (key: string) => `apply-${key.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 
 function Group({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-[#041114]/72 p-6 shadow-[0_28px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
+    <section className="rounded-[2rem] border border-line bg-card p-6 shadow-card backdrop-blur-xl sm:p-8">
       <div className="mb-7 flex items-center gap-4">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#7dd3cf]/40 bg-[#7dd3cf]/10 text-[0.62rem] tracking-[0.1em] text-[#7dd3cf]">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-[0.66rem] tracking-[0.1em] text-accent">
           {num}
         </span>
-        <h3 className="text-[0.68rem] uppercase tracking-[0.3em] text-white/70">{label}</h3>
-        <span className="h-px flex-1 bg-white/8" />
+        <h3 className="text-[0.72rem] uppercase tracking-[0.3em] text-fg-muted">{label}</h3>
+        <span className="h-px flex-1 bg-tint-strong" />
       </div>
       {children}
     </section>
@@ -284,11 +284,11 @@ function Group({ num, label, children }: { num: string; label: string; children:
 }
 
 function FieldLabel({ children, req, id, htmlFor }: { children: React.ReactNode; req?: boolean; id?: string; htmlFor?: string }) {
-  const cls = 'block text-[0.68rem] uppercase tracking-[0.22em] text-white/42 mb-3 leading-relaxed';
+  const cls = 'block text-[0.72rem] uppercase tracking-[0.22em] text-fg-subtle mb-3 leading-relaxed';
   const content = (
     <>
       {children}
-      {req ? <span className="ml-1 text-[#7dd3cf]/60">*</span> : <span className="ml-2 normal-case tracking-normal text-white/25">(optional)</span>}
+      {req ? <span className="ml-1 text-accent">*</span> : <span className="ml-2 normal-case tracking-normal text-fg-faint">(optional)</span>}
     </>
   );
   return htmlFor ? <label id={id} htmlFor={htmlFor} className={cls}>{content}</label> : <span id={id} className={cls}>{content}</span>;
@@ -301,7 +301,7 @@ function FieldError({ id, msg }: { id: string; msg?: string }) {
         <motion.p
           id={id}
           initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-          className="overflow-hidden pt-2 text-xs text-[#e8a598]" role="alert"
+          className="overflow-hidden pt-2 text-xs text-danger" role="alert"
         >
           {msg}
         </motion.p>
@@ -326,7 +326,7 @@ function TextField({
         id={id} name={name} type={type} value={value} autoComplete={autoComplete} inputMode={inputMode}
         onChange={e => onChange(e.target.value)} onBlur={onBlur} placeholder={placeholder} maxLength={300}
         aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined} aria-required={req}
-        className={`${inputCls} ${error ? 'border-[#e8a598]/50' : 'border-white/10'}`}
+        className={`${inputCls} ${error ? 'border-danger/50' : 'border-line'}`}
       />
       <FieldError id={`${id}-error`} msg={error} />
     </div>
@@ -341,7 +341,7 @@ function AreaField({ name, label, value, onChange, onBlur, error, req, placehold
       <div className="flex items-start justify-between gap-4">
         <FieldLabel htmlFor={id} req={req}>{label}</FieldLabel>
         {value.length > 0 && (
-          <span className={`shrink-0 text-[0.65rem] tabular-nums ${near ? 'text-[#e8a598]' : 'text-white/25'}`}>
+          <span className={`shrink-0 text-[0.65rem] tabular-nums ${near ? 'text-danger' : 'text-fg-faint'}`}>
             {value.length}/{maxLength}
           </span>
         )}
@@ -350,7 +350,7 @@ function AreaField({ name, label, value, onChange, onBlur, error, req, placehold
         id={id} name={name} rows={rows} value={value} maxLength={maxLength}
         onChange={e => onChange(e.target.value)} onBlur={onBlur} placeholder={placeholder}
         aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined} aria-required={req}
-        className={`${inputCls} min-h-0 resize-y leading-relaxed ${error ? 'border-[#e8a598]/50' : 'border-white/10'}`}
+        className={`${inputCls} min-h-0 resize-y leading-relaxed ${error ? 'border-danger/50' : 'border-line'}`}
       />
       <FieldError id={`${id}-error`} msg={error} />
     </div>
@@ -391,8 +391,8 @@ function QuestionField({ q, value, onChange, onBlur, error }: {
             onClick={() => { onChange(value === opt ? '' : opt); onBlur(); }}
             className={`rounded-full border px-4 py-2 text-sm transition-all ${
               value === opt
-                ? 'border-[#7dd3cf] bg-[#7dd3cf]/14 text-[#7dd3cf]'
-                : `${error ? 'border-[#e8a598]/40' : 'border-white/10'} bg-white/4 text-white/55 hover:border-white/18 hover:bg-white/7 hover:text-white`
+                ? 'border-accent bg-accent/14 text-accent'
+                : `${error ? 'border-danger/40' : 'border-line'} bg-tint text-fg-muted hover:border-line-strong hover:bg-tint-strong hover:text-fg`
             }`}
           >
             {opt}
@@ -420,17 +420,17 @@ function ResumeDrop({ file, required, error, onPick }: {
     <div>
       <FieldLabel htmlFor={id} req={required}>Résumé / CV</FieldLabel>
       {file ? (
-        <div className="flex items-center gap-4 rounded-2xl border border-[#7dd3cf]/30 bg-[#7dd3cf]/[0.06] px-4 py-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#7dd3cf]/30 bg-[#041114]/60">
-            <FileText size={18} className="text-[#7dd3cf]" />
+        <div className="flex items-center gap-4 rounded-2xl border border-accent/30 bg-accent/[0.06] px-4 py-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-accent/30 bg-field">
+            <FileText size={18} className="text-accent" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm text-white/85">{file.name}</p>
-            <p className="mt-0.5 text-xs text-white/40">{formatBytes(file.size)} · ready to send</p>
+            <p className="truncate text-sm text-fg">{file.name}</p>
+            <p className="mt-0.5 text-xs text-fg-subtle">{formatBytes(file.size)} · ready to send</p>
           </div>
           <button
             type="button" onClick={() => onPick(null)} aria-label="Remove résumé"
-            className="shrink-0 rounded-full border border-white/10 p-2 text-white/50 transition hover:border-[#e8a598]/40 hover:text-[#e8a598]"
+            className="shrink-0 rounded-full border border-line p-2 text-fg-muted transition hover:border-danger/40 hover:text-danger"
           >
             <X size={14} />
           </button>
@@ -441,21 +441,21 @@ function ResumeDrop({ file, required, error, onPick }: {
           onDragOver={e => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={e => { e.preventDefault(); setDragging(false); onPick(e.dataTransfer.files?.[0] ?? null); }}
-          className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-6 py-9 text-center transition focus-within:border-[#7dd3cf]/60 focus-within:shadow-[0_0_0_4px_rgba(125,211,207,0.07)] ${
+          className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-6 py-9 text-center transition focus-within:border-accent/60 focus-within:shadow-[0_0_0_4px_var(--ring)] ${
             dragging
-              ? 'border-[#7dd3cf] bg-[#7dd3cf]/[0.08]'
+              ? 'border-accent bg-accent/[0.08]'
               : error
-                ? 'border-[#e8a598]/50 bg-[#07171a]/60'
-                : 'border-white/15 bg-[#07171a]/60 hover:border-[#7dd3cf]/40 hover:bg-[#07171a]/90'
+                ? 'border-danger/50 bg-field/60'
+                : 'border-line-strong bg-field/60 hover:border-accent/40 hover:bg-field'
           }`}
         >
-          <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#7dd3cf]/30 bg-[#7dd3cf]/10">
-            <UploadCloud size={19} className="text-[#7dd3cf]" />
+          <span className="flex h-12 w-12 items-center justify-center rounded-full border border-accent/30 bg-accent/10">
+            <UploadCloud size={19} className="text-accent" />
           </span>
-          <span className="text-sm text-white/75">
-            <span className="text-[#7dd3cf]">Choose a file</span> or drag it here
+          <span className="text-sm text-fg">
+            <span className="text-accent">Choose a file</span> or drag it here
           </span>
-          <span className="text-xs text-white/35">PDF or Word · up to {formatBytes(RESUME_MAX_BYTES)}</span>
+          <span className="text-xs text-fg-faint">PDF or Word · up to {formatBytes(RESUME_MAX_BYTES)}</span>
           <input
             ref={inputRef} id={id} type="file" accept={RESUME_ACCEPT} className="sr-only"
             aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined} aria-required={required}
@@ -475,32 +475,32 @@ function Submitted({ job, firstName, email }: { job: PublicJob; firstName: strin
   useEffect(() => { headingRef.current?.focus({ preventScroll: true }); }, []);
 
   return (
-    <div className="flex flex-col items-center rounded-[2rem] border border-white/10 bg-[#041114]/72 px-6 py-14 text-center shadow-[0_28px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:px-12 sm:py-20">
+    <div className="flex flex-col items-center rounded-[2rem] border border-line bg-card px-6 py-14 text-center shadow-card backdrop-blur-xl sm:px-12 sm:py-20">
       <motion.div
         initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
-        className="mb-8 flex h-16 w-16 items-center justify-center rounded-full border border-[#7dd3cf]/40 bg-[#7dd3cf]/10"
+        className="mb-8 flex h-16 w-16 items-center justify-center rounded-full border border-accent/40 bg-accent/10"
       >
-        <Check size={26} className="text-[#7dd3cf]" strokeWidth={2.5} />
+        <Check size={26} className="text-accent" strokeWidth={2.5} />
       </motion.div>
 
-      <p className="mb-6 text-[0.6rem] tracking-[0.45em] text-[#7dd3cf]/60">You&apos;ve&nbsp;Rinwa&apos;d</p>
+      <p className="mb-6 text-[0.66rem] tracking-[0.45em] text-accent">You&apos;ve&nbsp;Rinwa&apos;d</p>
       <h2
         ref={headingRef} tabIndex={-1}
-        className="mb-6 max-w-xl text-[clamp(2.2rem,6vw,3.6rem)] leading-[1] tracking-tight text-white outline-none"
+        className="mb-6 max-w-xl text-[clamp(2.2rem,6vw,3.6rem)] leading-[1] tracking-tight text-fg outline-none"
         style={serif}
       >
         Thank you, {firstName}. Your application is with us.
       </h2>
-      <p className="mb-3 max-w-md text-base leading-relaxed text-white/55">
-        We&apos;ve sent a confirmation to <span className="break-all text-white/80">{email}</span>. Our team will read your
-        application for <span className="text-white/80">{job.title}</span>{' '}and reach out if there&apos;s a fit.
+      <p className="mb-3 max-w-md text-base leading-relaxed text-fg-muted">
+        We&apos;ve sent a confirmation to <span className="break-all text-fg">{email}</span>. Our team will read your
+        application for <span className="text-fg">{job.title}</span>{' '}and reach out if there&apos;s a fit.
       </p>
-      <p className="mb-10 text-sm italic text-white/35">Don&apos;t see the email? Check your spam or promotions folder.</p>
+      <p className="mb-10 text-sm italic text-fg-faint">Don&apos;t see the email? Check your spam or promotions folder.</p>
 
       <Link
         href="/careers"
-        className="group inline-flex items-center gap-3 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#7dd3cf] transition-all hover:border-[#7dd3cf]/60 hover:bg-[#7dd3cf]/18"
+        className="group inline-flex items-center gap-3 rounded-full border border-accent/35 bg-accent/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-accent transition-all hover:border-accent/60 hover:bg-accent/18"
       >
         Explore other roles
       </Link>

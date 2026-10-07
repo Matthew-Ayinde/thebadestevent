@@ -90,14 +90,14 @@ export function SplashScreen() {
           role="presentation"
         >
           {/* Background */}
-          <div className="absolute inset-0 bg-[#041114]/50" />
+          <div className="absolute inset-0 bg-page/50" />
 
           {/* Left door */}
           <motion.div
             variants={doorVariants}
             initial="initial"
             animate={isAnimatingOut ? "exit" : "animate"}
-            className="absolute inset-y-0 left-0 bg-[#041114]"
+            className="absolute inset-y-0 left-0 bg-page"
             style={{ originX: 0 }}
           />
 
@@ -106,7 +106,7 @@ export function SplashScreen() {
             variants={doorVariants}
             initial="initial"
             animate={isAnimatingOut ? "exit" : "animate"}
-            className="absolute inset-y-0 right-0 bg-[#041114]"
+            className="absolute inset-y-0 right-0 bg-page"
             style={{ originX: 1 }}
           />
 
@@ -124,7 +124,7 @@ export function SplashScreen() {
                   fill
                   priority
                   sizes="(max-width: 768px) 72vw, 30rem"
-                  className="object-contain"
+                  className="theme-logo object-contain"
                 />
               </motion.div>
           </div>

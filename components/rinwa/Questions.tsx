@@ -6,6 +6,7 @@ import Image from "next/image";
 import toast, { Toaster } from "react-hot-toast";
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import BookMeeting from "./BookMeeting";
+import { ThemeToggle } from "./ThemeToggle";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -161,7 +162,7 @@ export default function Questions() {
 
   return (
     <div className="relative">
-      <Toaster position="top-center" toastOptions={{ style: { background: "#07171a", color: "#f5f0e8", border: "1px solid rgba(125,211,207,0.2)" } }} />
+      <Toaster position="top-center" toastOptions={{ style: { background: "var(--card-solid)", color: "var(--fg)", border: "1px solid var(--line)", boxShadow: "var(--card-shadow)" } }} />
 
       {/* Fixed background image */}
       <div className="fixed inset-0 z-0 overflow-hidden">
@@ -174,14 +175,14 @@ export default function Questions() {
             backgroundRepeat: "no-repeat",
           }}
         />
-        <div className="absolute inset-0 bg-[#041114]/83" />
+        <div className="absolute inset-0 bg-veil" />
       </div>
 
       {/* Progress bar */}
       {step >= 1 && step <= TOTAL && (
-        <div className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-white/8">
+        <div className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-tint-strong">
           <motion.div
-            className="h-full bg-[#7dd3cf]"
+            className="h-full bg-accent"
             initial={false}
             animate={{ width: `${(step / TOTAL) * 100}%` }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -191,6 +192,7 @@ export default function Questions() {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen">
+        <ThemeToggle className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6" />
         <AnimatePresence mode="wait">
           {meeting && (
             <motion.div key="meeting" variants={variants} initial="enter" animate="center" exit="exit" transition={transition}>
@@ -258,19 +260,19 @@ function WelcomeScreen({ onBegin, onBook }: { onBegin: () => void; onBook: () =>
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="flex flex-col items-center"
       >
-        <Image src="/images/logo.png" alt="RÌNWÁ" width={56} height={56} className="mx-auto mb-5 opacity-90" />
-        {/* <p className="text-[0.6rem] uppercase tracking-[0.5em] text-[#7dd3cf]/65 mb-12">
+        <Image src="/images/logo.png" alt="RÌNWÁ" width={56} height={56} className="theme-logo mx-auto mb-5 opacity-90" />
+        {/* <p className="text-[0.66rem] uppercase tracking-[0.5em] text-accent mb-12">
           The Global Standard for African Hospitality
         </p> */}
 
         <h1
-          className="font-serif text-[clamp(3.2rem,9vw,6.5rem)] leading-[0.88] tracking-tight text-white mb-8"
+          className="font-serif text-[clamp(3.2rem,9vw,6.5rem)] leading-[0.88] tracking-tight text-fg mb-8"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           Welcome Home
         </h1>
 
-        <div className="max-w-lg space-y-4 text-[0.95rem] sm:text-base text-white/55 leading-relaxed mb-14">
+        <div className="max-w-lg space-y-4 text-[0.95rem] sm:text-base text-fg-muted leading-relaxed mb-14">
           <p>Thank you for reaching out.</p>
           <p>
             We're excited to learn more about your vision and bring clarity to your thoughts.
@@ -281,26 +283,26 @@ function WelcomeScreen({ onBegin, onBook }: { onBegin: () => void; onBook: () =>
             Your responses will help us understand your goals, preferences, and the level
             of support required, allowing us to design the experience that aligns with your needs.
           </p>
-          <p className="text-white/35 text-sm italic">We look forward to bringing your vision to life.</p>
+          <p className="text-fg-faint text-sm italic">We look forward to bringing your vision to life.</p>
         </div>
 
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
           <button
             onClick={onBegin}
-            className="group inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#7dd3cf] transition-all hover:border-[#7dd3cf]/60 hover:bg-[#7dd3cf]/18"
+            className="group inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-full border border-accent/35 bg-accent/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-accent transition-all hover:border-accent/60 hover:bg-accent/18"
           >
             Tell Us More
             <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
           </button>
           <button
             onClick={onBook}
-            className="group inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-full border border-white/12 bg-white/[0.04] px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-white/70 transition-all hover:border-white/25 hover:bg-white/[0.08] hover:text-white"
+            className="group inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-full border border-line bg-tint px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-fg-muted transition-all hover:border-line-strong hover:bg-tint-strong hover:text-fg"
           >
-            <CalendarDays size={15} className="text-[#7dd3cf]/80" />
+            <CalendarDays size={15} className="text-accent" />
             Book a Meeting
           </button>
         </div>
-        <p className="mt-6 max-w-sm text-xs text-white/35 leading-relaxed">
+        <p className="mt-6 max-w-sm text-xs text-fg-faint leading-relaxed">
           Prefer to talk it through? Book time directly with Rinwa instead of filling the questionnaire.
         </p>
       </motion.div>
@@ -317,33 +319,33 @@ function SuccessScreen() {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="flex flex-col items-center"
       >
-        <div className="w-16 h-16 rounded-full border border-[#7dd3cf]/40 bg-[#7dd3cf]/10 flex items-center justify-center mb-8">
-          <Check size={26} className="text-[#7dd3cf]" strokeWidth={2.5} />
+        <div className="w-16 h-16 rounded-full border border-accent/40 bg-accent/10 flex items-center justify-center mb-8">
+          <Check size={26} className="text-accent" strokeWidth={2.5} />
         </div>
 
-        <Image src="/images/logo.png" alt="RÌNWÁ" width={46} height={46} className="mx-auto mb-4 opacity-85" />
-        <p className="text-[0.6rem] tracking-[0.45em] text-[#7dd3cf]/60 mb-12">
+        <Image src="/images/logo.png" alt="RÌNWÁ" width={46} height={46} className="theme-logo mx-auto mb-4 opacity-85" />
+        <p className="text-[0.66rem] tracking-[0.45em] text-accent mb-12">
           You&apos;ve&nbsp;Rinwa&apos;d
         </p>
 
         <h2
-          className="font-serif text-[clamp(2.4rem,7vw,4.5rem)] leading-[0.95] tracking-tight text-white mb-6 max-w-2xl"
+          className="font-serif text-[clamp(2.4rem,7vw,4.5rem)] leading-[0.95] tracking-tight text-fg mb-6 max-w-2xl"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           We look forward to bringing your vision to life.
         </h2>
-        <p className="text-base sm:text-lg text-white/55 leading-relaxed max-w-md mb-3">
+        <p className="text-base sm:text-lg text-fg-muted leading-relaxed max-w-md mb-3">
           Your responses have been received. Our team will review everything carefully and reach out
-          within <span className="text-white/80">48 hours</span> with tailored recommendations.
+          within <span className="text-fg">48 hours</span> with tailored recommendations.
         </p>
-        <p className="text-sm text-white/35 italic mb-16">Check your inbox — a confirmation is on its way.</p>
+        <p className="text-sm text-fg-faint italic mb-16">Check your inbox — a confirmation is on its way.</p>
 
         <div className="flex flex-col items-center gap-4">
-          <p className="text-[0.58rem] uppercase tracking-[0.55em] text-[#7dd3cf]/50">Enter Into Your Ease</p>
+          <p className="text-[0.66rem] uppercase tracking-[0.55em] text-accent">Enter Into Your Ease</p>
           <div className="flex items-center gap-4">
-            <div className="h-px w-14 bg-[#7dd3cf]/25" />
-            <Image src="/images/logo.png" alt="" width={20} height={20} className="opacity-30" />
-            <div className="h-px w-14 bg-[#7dd3cf]/25" />
+            <div className="h-px w-14 bg-accent/25" />
+            <Image src="/images/logo.png" alt="" width={20} height={20} className="theme-logo opacity-30" />
+            <div className="h-px w-14 bg-accent/25" />
           </div>
         </div>
       </motion.div>
@@ -368,28 +370,28 @@ function Shell({
       <div className="w-full max-w-2xl">
         {/* Header meta */}
         <div className="flex items-center justify-between mb-5">
-          <p className="text-[0.6rem] uppercase tracking-[0.38em] text-[#7dd3cf]/60">{tag}</p>
-          <p className="text-[0.6rem] uppercase tracking-[0.3em] text-white/30">Step {step} of {total}</p>
+          <p className="text-[0.66rem] uppercase tracking-[0.38em] text-accent">{tag}</p>
+          <p className="text-[0.66rem] uppercase tracking-[0.3em] text-fg-faint">Step {step} of {total}</p>
         </div>
 
         {/* Section title */}
         <div className="mb-8">
           <h2
-            className="font-serif text-[clamp(2rem,5.5vw,3.25rem)] leading-[1.05] tracking-tight text-white"
+            className="font-serif text-[clamp(2rem,5.5vw,3.25rem)] leading-[1.05] tracking-tight text-fg"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             {title}
           </h2>
-          <p className="mt-3 text-[0.9rem] text-white/50 leading-relaxed">{desc}</p>
+          <p className="mt-3 text-[0.9rem] text-fg-muted leading-relaxed">{desc}</p>
 
           {/* Sections on this screen */}
           <div className="mt-5 flex flex-wrap gap-2">
             {groups.map(g => (
               <span
                 key={g.num}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.22em] text-white/45"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-tint px-3 py-1.5 text-[0.66rem] uppercase tracking-[0.22em] text-fg-subtle"
               >
-                <span className="text-[#7dd3cf]/70">{g.num}</span>
+                <span className="text-accent">{g.num}</span>
                 {g.label}
               </span>
             ))}
@@ -405,7 +407,7 @@ function Shell({
         <div className="mt-6 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-white/60 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
+            className="flex items-center gap-2 rounded-full border border-line bg-tint px-5 py-3 text-sm text-fg-muted transition hover:border-line-strong hover:bg-tint-strong hover:text-fg"
           >
             <ChevronLeft size={14} />
             Back
@@ -413,7 +415,7 @@ function Shell({
           <button
             onClick={onNext}
             disabled={submitting}
-            className="group flex items-center gap-2 rounded-full bg-[#7dd3cf] px-7 py-3.5 text-sm font-semibold text-[#041114] transition hover:bg-[#a5e3df] disabled:opacity-55 disabled:cursor-not-allowed"
+            className="group flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-on-accent transition hover:bg-accent-hover disabled:opacity-55 disabled:cursor-not-allowed"
           >
             {submitting ? "Submitting…" : isLast ? "Submit Responses" : "Continue"}
             {!submitting && (
@@ -435,17 +437,17 @@ function Group({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-[#041114]/72 backdrop-blur-xl p-6 sm:p-8 shadow-[0_28px_80px_rgba(0,0,0,0.5)]">
-      <div className="flex items-start gap-4 mb-7 pb-6 border-b border-white/8">
+    <section className="rounded-[2rem] border border-line bg-card backdrop-blur-xl p-6 sm:p-8 shadow-card">
+      <div className="flex items-start gap-4 mb-7 pb-6 border-b border-line-soft">
         <span
-          className="font-serif text-[2rem] leading-none text-[#7dd3cf]/80"
+          className="font-serif text-[2rem] leading-none text-accent"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {num}
         </span>
         <div>
-          <h3 className="text-[0.72rem] uppercase tracking-[0.32em] text-white/80">{label}</h3>
-          <p className="mt-1.5 text-[0.82rem] text-white/42 leading-relaxed">{desc}</p>
+          <h3 className="text-[0.72rem] uppercase tracking-[0.32em] text-fg">{label}</h3>
+          <p className="mt-1.5 text-[0.82rem] text-fg-subtle leading-relaxed">{desc}</p>
         </div>
       </div>
       {children}
@@ -456,12 +458,12 @@ function Group({
 // ─── Input Primitives ──────────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full min-h-[52px] rounded-2xl border border-white/10 bg-[#07171a]/90 px-4 py-3.5 text-white text-sm placeholder:text-white/22 outline-none transition focus:border-[#7dd3cf]/50 focus:shadow-[0_0_0_4px_rgba(125,211,207,0.07)]";
+  "w-full min-h-[52px] rounded-2xl border border-line bg-field px-4 py-3.5 text-fg text-sm placeholder:text-fg-faint outline-none transition focus:border-accent/50 focus:shadow-[0_0_0_4px_var(--ring)]";
 
 function Label({ children, req }: { children: React.ReactNode; req?: boolean }) {
   return (
-    <span className="block text-[0.68rem] uppercase tracking-[0.26em] text-white/42 mb-3">
-      {children}{req && <span className="ml-1 text-[#7dd3cf]/60">*</span>}
+    <span className="block text-[0.72rem] uppercase tracking-[0.26em] text-fg-subtle mb-3">
+      {children}{req && <span className="ml-1 text-accent">*</span>}
     </span>
   );
 }
@@ -520,8 +522,8 @@ function YesNo({
             onClick={() => onToggle(value === opt ? "" : opt)}
             className={`flex-1 py-3 rounded-2xl border text-sm font-medium transition-all ${
               value === opt
-                ? "border-[#7dd3cf] bg-[#7dd3cf]/14 text-[#7dd3cf]"
-                : "border-white/10 bg-white/4 text-white/50 hover:border-white/18 hover:text-white"
+                ? "border-accent bg-accent/14 text-accent"
+                : "border-line bg-tint text-fg-muted hover:border-line-strong hover:text-fg"
             }`}
           >
             {opt}
@@ -545,7 +547,7 @@ function Chips({
     <div>
       <div className="flex items-center justify-between mb-3">
         <Label>{label}</Label>
-        {multi && <span className="text-[0.58rem] uppercase tracking-[0.22em] text-white/28 -mt-3">Select all that apply</span>}
+        {multi && <span className="text-[0.66rem] uppercase tracking-[0.22em] text-fg-faint -mt-3">Select all that apply</span>}
       </div>
       <div className="flex flex-wrap gap-2">
         {options.map(o => (
@@ -553,8 +555,8 @@ function Chips({
             key={o} type="button" onClick={() => onToggle(o)}
             className={`rounded-full border px-4 py-2 text-sm transition-all ${
               active(o)
-                ? "border-[#7dd3cf] bg-[#7dd3cf]/14 text-[#7dd3cf]"
-                : "border-white/10 bg-white/4 text-white/50 hover:border-white/18 hover:bg-white/7 hover:text-white"
+                ? "border-accent bg-accent/14 text-accent"
+                : "border-line bg-tint text-fg-muted hover:border-line-strong hover:bg-tint-strong hover:text-fg"
             }`}
           >
             {o}
@@ -566,13 +568,13 @@ function Chips({
 }
 
 function Divider() {
-  return <div className="border-t border-white/8" />;
+  return <div className="border-t border-line-soft" />;
 }
 
 function SubCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/8 bg-white/[0.025] p-5 space-y-5">
-      <p className="text-[0.6rem] uppercase tracking-[0.28em] text-white/35">{title}</p>
+    <div className="rounded-2xl border border-line-soft bg-tint-soft p-5 space-y-5">
+      <p className="text-[0.66rem] uppercase tracking-[0.28em] text-fg-faint">{title}</p>
       {children}
     </div>
   );
@@ -627,9 +629,9 @@ function HashtagInput({
   return (
     <div>
       <Label>Official Project Hashtag(s)</Label>
-      <p className="text-[0.63rem] text-white/25 -mt-1.5 mb-3 leading-relaxed">
-        Press <span className="text-white/40">Enter</span> or{" "}
-        <span className="text-white/40">comma</span> to add each tag. Backspace removes the last one.
+      <p className="text-[0.7rem] text-fg-faint -mt-1.5 mb-3 leading-relaxed">
+        Press <span className="text-fg-subtle">Enter</span> or{" "}
+        <span className="text-fg-subtle">comma</span> to add each tag. Backspace removes the last one.
       </p>
       <AnimatePresence>
         {values.length > 0 && (
@@ -647,15 +649,15 @@ function HashtagInput({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.18 }}
-                className="inline-flex items-center gap-1 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 pl-3 pr-2 py-1.5"
+                className="inline-flex items-center gap-1 rounded-full border border-accent/35 bg-accent/10 pl-3 pr-2 py-1.5"
               >
-                <span className="font-mono text-[#7dd3cf]/50 text-xs select-none">#</span>
-                <span className="text-sm text-[#7dd3cf] font-medium">{tag.slice(1)}</span>
+                <span className="font-mono text-accent/60 text-xs select-none">#</span>
+                <span className="text-sm text-accent font-medium">{tag.slice(1)}</span>
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
                   aria-label={`Remove ${tag}`}
-                  className="ml-1 w-4 h-4 flex items-center justify-center rounded-full hover:bg-[#7dd3cf]/25 transition-colors text-[#7dd3cf]/45 hover:text-[#7dd3cf] text-sm leading-none"
+                  className="ml-1 w-4 h-4 flex items-center justify-center rounded-full hover:bg-accent/25 transition-colors text-accent/60 hover:text-accent text-sm leading-none"
                 >
                   ×
                 </button>
@@ -666,7 +668,7 @@ function HashtagInput({
       </AnimatePresence>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7dd3cf]/40 font-mono text-sm pointer-events-none select-none">#</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-accent/60 font-mono text-sm pointer-events-none select-none">#</span>
           <input
             type="text"
             value={input}
@@ -679,7 +681,7 @@ function HashtagInput({
         <button
           type="button"
           onClick={addTag}
-          className="flex-shrink-0 px-5 rounded-2xl border border-[#7dd3cf]/25 bg-[#7dd3cf]/8 text-[#7dd3cf] text-sm font-medium hover:bg-[#7dd3cf]/18 hover:border-[#7dd3cf]/45 transition-all"
+          className="flex-shrink-0 px-5 rounded-2xl border border-accent/25 bg-accent/8 text-accent text-sm font-medium hover:bg-accent/18 hover:border-accent/45 transition-all"
         >
           Add
         </button>

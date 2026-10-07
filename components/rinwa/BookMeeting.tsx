@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ExternalLink, Mail, PenLine } from "lucide-react";
+import { useTheme } from "./ThemeToggle";
 
 // ─── Cal.com config ────────────────────────────────────────────────────────────
 
@@ -15,21 +16,40 @@ const CAL_NS = "rinwa";
 const CAL_LOAD_ERROR = "rinwa:cal-load-error";
 const EMBED_TIMEOUT_MS = 15000;
 
+// Mirrors the site tokens in app/globals.css so the embed matches the active theme.
 const CAL_THEME = {
-  "cal-brand": "#7dd3cf",
-  "cal-brand-emphasis": "#a5e3df",
-  "cal-brand-text": "#041114",
-  "cal-bg": "#07171a",
-  "cal-bg-muted": "#081b1e",
-  "cal-bg-subtle": "#0a1f22",
-  "cal-bg-emphasis": "#0d2a2e",
-  "cal-border": "#183235",
-  "cal-border-subtle": "#11272a",
-  "cal-border-emphasis": "#2f6a68",
-  "cal-text": "#e8f0ef",
-  "cal-text-emphasis": "#f5f0e8",
-  "cal-text-subtle": "#8fa8a5",
-  "cal-text-muted": "#5f7a77",
+  dark: {
+    "cal-brand": "#7dd3cf",
+    "cal-brand-emphasis": "#a5e3df",
+    "cal-brand-text": "#041114",
+    "cal-bg": "#07171a",
+    "cal-bg-muted": "#081b1e",
+    "cal-bg-subtle": "#0a1f22",
+    "cal-bg-emphasis": "#0d2a2e",
+    "cal-border": "#183235",
+    "cal-border-subtle": "#11272a",
+    "cal-border-emphasis": "#2f6a68",
+    "cal-text": "#e8f0ef",
+    "cal-text-emphasis": "#f5f0e8",
+    "cal-text-subtle": "#a3b8b5",
+    "cal-text-muted": "#7f9895",
+  },
+  light: {
+    "cal-brand": "#0f766e",
+    "cal-brand-emphasis": "#115e59",
+    "cal-brand-text": "#ffffff",
+    "cal-bg": "#ffffff",
+    "cal-bg-muted": "#faf8f4",
+    "cal-bg-subtle": "#f3efe8",
+    "cal-bg-emphasis": "#e8e2d8",
+    "cal-border": "#e2dcd2",
+    "cal-border-subtle": "#ece7df",
+    "cal-border-emphasis": "#9cc5c0",
+    "cal-text": "#1c2f32",
+    "cal-text-emphasis": "#0c1f22",
+    "cal-text-subtle": "#4f6366",
+    "cal-text-muted": "#5b6d70",
+  },
 };
 
 type CalApi = (...args: unknown[]) => void;
@@ -139,13 +159,13 @@ export default function BookMeeting({ onExit }: { onExit: () => void }) {
   const stepIndex = stage === "intake" ? 0 : stage === "calendar" ? 1 : STEPS.length - 1;
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-10 sm:py-14">
+    <div className="min-h-screen flex flex-col items-center px-4 pt-20 pb-10 sm:pt-24 sm:pb-14">
       {/* Top bar */}
       <div className={`w-full ${stage === "calendar" ? "max-w-5xl" : "max-w-2xl"} flex items-center justify-between gap-4 mb-10 sm:mb-14 transition-[max-width] duration-500`}>
         <button
           type="button"
           onClick={stage === "calendar" ? () => setStage("intake") : onExit}
-          className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white/60 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
+          className="group flex items-center gap-2 rounded-full border border-line bg-tint px-4 py-2.5 text-xs text-fg-muted transition hover:border-line-strong hover:bg-tint-strong hover:text-fg"
         >
           <ArrowLeft size={13} className="transition-transform group-hover:-translate-x-0.5" />
           {stage === "calendar" ? "Edit details" : "Back"}
@@ -185,21 +205,21 @@ function Stepper({ current }: { current: number }) {
         return (
           <li key={s.num} className="flex items-center gap-2 sm:gap-3" aria-current={active ? "step" : undefined}>
             <span
-              className={`flex h-7 w-7 items-center justify-center rounded-full border text-[0.6rem] tracking-[0.1em] transition-all duration-500 ${
+              className={`flex h-7 w-7 items-center justify-center rounded-full border text-[0.66rem] tracking-[0.1em] transition-all duration-500 ${
                 done
-                  ? "border-[#7dd3cf] bg-[#7dd3cf] text-[#041114]"
+                  ? "border-accent bg-accent text-on-accent"
                   : active
-                    ? "border-[#7dd3cf] bg-[#7dd3cf]/14 text-[#7dd3cf]"
-                    : "border-white/12 text-white/30"
+                    ? "border-accent bg-accent/14 text-accent"
+                    : "border-line text-fg-faint"
               }`}
             >
               {done ? <Check size={12} strokeWidth={3} /> : s.num}
             </span>
-            <span className={`hidden md:inline text-[0.6rem] uppercase tracking-[0.26em] ${active ? "text-white/75" : "text-white/30"}`}>
+            <span className={`hidden md:inline text-[0.66rem] uppercase tracking-[0.26em] ${active ? "text-fg" : "text-fg-faint"}`}>
               {s.label}
             </span>
             {i < STEPS.length - 1 && (
-              <span className={`h-px w-4 sm:w-8 transition-colors duration-500 ${done ? "bg-[#7dd3cf]/60" : "bg-white/12"}`} />
+              <span className={`h-px w-4 sm:w-8 transition-colors duration-500 ${done ? "bg-accent/60" : "bg-line"}`} />
             )}
           </li>
         );
@@ -211,7 +231,7 @@ function Stepper({ current }: { current: number }) {
 // ─── Stage 1: Intake ───────────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full min-h-[52px] rounded-2xl border bg-[#07171a]/90 px-4 py-3.5 text-white text-sm placeholder:text-white/22 outline-none transition focus:border-[#7dd3cf]/50 focus:shadow-[0_0_0_4px_rgba(125,211,207,0.07)]";
+  "w-full min-h-[52px] rounded-2xl border bg-field px-4 py-3.5 text-fg text-sm placeholder:text-fg-faint outline-none transition focus:border-accent/50 focus:shadow-[0_0_0_4px_var(--ring)]";
 
 function Intake({
   initial, existing, onDone,
@@ -271,21 +291,21 @@ function Intake({
 
   return (
     <form onSubmit={submit} noValidate>
-      <p className="text-[0.6rem] uppercase tracking-[0.38em] text-[#7dd3cf]/60 mb-5">A Private Conversation</p>
+      <p className="text-[0.66rem] uppercase tracking-[0.38em] text-accent mb-5">A Private Conversation</p>
       <h2
         ref={headingRef}
         tabIndex={-1}
-        className="font-serif text-[clamp(2.2rem,6vw,3.6rem)] leading-[1.02] tracking-tight text-white outline-none"
+        className="font-serif text-[clamp(2.2rem,6vw,3.6rem)] leading-[1.02] tracking-tight text-fg outline-none"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         Let&apos;s talk it through.
       </h2>
-      <p className="mt-4 mb-9 max-w-lg text-[0.92rem] text-white/50 leading-relaxed">
+      <p className="mt-4 mb-9 max-w-lg text-[0.92rem] text-fg-muted leading-relaxed">
         Share a little about yourself and what&apos;s on your mind. Next, you&apos;ll see Rinwa&apos;s calendar
         and choose a time that suits you.
       </p>
 
-      <section className="rounded-[2rem] border border-white/10 bg-[#041114]/72 backdrop-blur-xl p-6 sm:p-8 shadow-[0_28px_80px_rgba(0,0,0,0.5)] space-y-6">
+      <section className="rounded-[2rem] border border-line bg-card backdrop-blur-xl p-6 sm:p-8 shadow-card space-y-6">
         <div className="grid gap-6 sm:grid-cols-2">
           <TextField
             label="Full name" name="name" autoComplete="name" value={fullName}
@@ -299,7 +319,7 @@ function Intake({
           />
         </div>
 
-        <div className="border-t border-white/8" />
+        <div className="border-t border-line-soft" />
 
         <div>
           <FieldLabel id="topic-label">What would you like to discuss?</FieldLabel>
@@ -310,8 +330,8 @@ function Intake({
                 onClick={() => setTopic(topic === t ? "" : t)}
                 className={`rounded-full border px-4 py-2 text-sm transition-all ${
                   topic === t
-                    ? "border-[#7dd3cf] bg-[#7dd3cf]/14 text-[#7dd3cf]"
-                    : "border-white/10 bg-white/4 text-white/50 hover:border-white/18 hover:bg-white/7 hover:text-white"
+                    ? "border-accent bg-accent/14 text-accent"
+                    : "border-line bg-tint text-fg-muted hover:border-line-strong hover:bg-tint-strong hover:text-fg"
                 }`}
               >
                 {t}
@@ -329,7 +349,7 @@ function Intake({
             placeholder="What would you like Rinwa to know before you meet?"
             aria-invalid={!!show("note")}
             maxLength={1200}
-            className={`${inputCls} min-h-0 resize-none ${show("note") ? "border-[#e8a598]/50" : "border-white/10"}`}
+            className={`${inputCls} min-h-0 resize-none ${show("note") ? "border-danger/50" : "border-line"}`}
           />
           <FieldError msg={show("note")} />
         </label>
@@ -343,13 +363,13 @@ function Intake({
       </section>
 
       <div className="mt-6 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-white/35 leading-relaxed sm:max-w-xs">
+        <p className="text-xs text-fg-faint leading-relaxed sm:max-w-xs">
           Your details are only used to prepare for your conversation.
         </p>
         <button
           type="submit"
           disabled={submitting}
-          className="group flex items-center justify-center gap-2 rounded-full bg-[#7dd3cf] px-7 py-3.5 text-sm font-semibold text-[#041114] transition hover:bg-[#a5e3df] disabled:opacity-55 disabled:cursor-not-allowed"
+          className="group flex items-center justify-center gap-2 rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-on-accent transition hover:bg-accent-hover disabled:opacity-55 disabled:cursor-not-allowed"
         >
           {submitting ? "One moment…" : CAL_LINK ? "See available times" : "Request a meeting"}
           {!submitting && <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />}
@@ -361,8 +381,8 @@ function Intake({
 
 function FieldLabel({ children, req, id }: { children: React.ReactNode; req?: boolean; id?: string }) {
   return (
-    <span id={id} className="block text-[0.68rem] uppercase tracking-[0.26em] text-white/42 mb-3">
-      {children}{req && <span className="ml-1 text-[#7dd3cf]/60">*</span>}
+    <span id={id} className="block text-[0.72rem] uppercase tracking-[0.26em] text-fg-subtle mb-3">
+      {children}{req && <span className="ml-1 text-accent">*</span>}
     </span>
   );
 }
@@ -373,7 +393,7 @@ function FieldError({ msg }: { msg: string | false | undefined }) {
       {msg && (
         <motion.p
           initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-          className="overflow-hidden pt-2 text-xs text-[#e8a598]" role="alert"
+          className="overflow-hidden pt-2 text-xs text-danger" role="alert"
         >
           {msg}
         </motion.p>
@@ -396,7 +416,7 @@ function TextField({
         type={type} name={name} value={value} autoComplete={autoComplete}
         onChange={e => onChange(e.target.value)} onBlur={onBlur}
         placeholder={placeholder} aria-invalid={!!error}
-        className={`${inputCls} ${error ? "border-[#e8a598]/50" : "border-white/10"}`}
+        className={`${inputCls} ${error ? "border-danger/50" : "border-line"}`}
       />
       <FieldError msg={error} />
     </label>
@@ -417,6 +437,9 @@ function CalendarStage({
   const onBookedRef = useRef(onBooked);
   onBookedRef.current = onBooked;
   const [embed, setEmbed] = useState<"loading" | "ready" | "failed">("loading");
+  const theme = useTheme();
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus({ preventScroll: true }); }, []);
   const firstName = details.fullName.split(" ")[0];
@@ -455,17 +478,17 @@ function CalendarStage({
       calLink: CAL_LINK,
       config: {
         layout: "month_view",
-        theme: "dark",
+        theme: themeRef.current,
         name: details.fullName,
         email: details.email,
         notes: details.reason,
       },
     });
     api("ui", {
-      theme: "dark",
+      theme: themeRef.current,
       layout: "month_view",
       hideEventTypeDetails: false,
-      cssVarsPerTheme: { dark: CAL_THEME, light: CAL_THEME },
+      cssVarsPerTheme: CAL_THEME,
     });
     listeners.forEach(l => api("on", l));
     window.addEventListener(CAL_LOAD_ERROR, onFailed);
@@ -479,38 +502,43 @@ function CalendarStage({
     };
   }, [details]);
 
+  // Re-theme the live embed in place — no reload, so a half-picked slot survives the toggle.
+  useEffect(() => {
+    if (CAL_LINK) ensureCal().ns?.[CAL_NS]?.("ui", { theme });
+  }, [theme]);
+
   return (
     <div className="space-y-6 lg:space-y-8">
       {/* Header + summary */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:items-end lg:gap-10">
         <div>
-          <p className="text-[0.6rem] uppercase tracking-[0.38em] text-[#7dd3cf]/60 mb-4">Choose a Moment</p>
+          <p className="text-[0.66rem] uppercase tracking-[0.38em] text-accent mb-4">Choose a Moment</p>
           <h2
             ref={headingRef}
             tabIndex={-1}
-            className="font-serif text-[clamp(2.2rem,5.5vw,3.6rem)] leading-[1.02] tracking-tight text-white outline-none"
+            className="font-serif text-[clamp(2.2rem,5.5vw,3.6rem)] leading-[1.02] tracking-tight text-fg outline-none"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             Whenever suits you, {firstName}.
           </h2>
-          <p className="mt-4 max-w-xl text-[0.9rem] text-white/50 leading-relaxed">
+          <p className="mt-4 max-w-xl text-[0.9rem] text-fg-muted leading-relaxed">
             Pick a day, then a time. Slots are shown in your local timezone, and an invite will land in your inbox.
           </p>
         </div>
 
-        <div className="rounded-[1.6rem] border border-white/10 bg-[#041114]/72 backdrop-blur-xl p-5 shadow-[0_28px_80px_rgba(0,0,0,0.45)]">
+        <div className="rounded-[1.6rem] border border-line bg-card backdrop-blur-xl p-5 shadow-card">
           <div className="flex items-start gap-3">
-            <Image src="/images/logo.png" alt="" width={30} height={30} className="mt-0.5 opacity-85" />
+            <Image src="/images/logo.png" alt="" width={30} height={30} className="theme-logo mt-0.5 opacity-85" />
             <div className="min-w-0 flex-1">
-              <p className="text-[0.58rem] uppercase tracking-[0.28em] text-white/40">Meeting with Rinwa</p>
-              <p className="mt-1 truncate text-sm text-white/80">
-                {details.fullName} <span className="text-white/40">· {details.email}</span>
+              <p className="text-[0.66rem] uppercase tracking-[0.28em] text-fg-subtle">Meeting with Rinwa</p>
+              <p className="mt-1 truncate text-sm text-fg">
+                {details.fullName} <span className="text-fg-subtle">· {details.email}</span>
               </p>
-              <p className="mt-1.5 text-[0.8rem] leading-relaxed text-white/55 line-clamp-2">{details.reason}</p>
+              <p className="mt-1.5 text-[0.8rem] leading-relaxed text-fg-muted line-clamp-2">{details.reason}</p>
             </div>
             <button
               type="button" onClick={onEdit} aria-label="Edit details"
-              className="shrink-0 rounded-full border border-white/10 p-2 text-[#7dd3cf]/80 transition hover:border-[#7dd3cf]/40 hover:text-[#7dd3cf]"
+              className="shrink-0 rounded-full border border-line p-2 text-accent transition hover:border-accent/40 hover:text-accent"
             >
               <PenLine size={13} />
             </button>
@@ -521,13 +549,13 @@ function CalendarStage({
       {/* Calendar */}
       <section
         aria-label="Rinwa's calendar"
-        className="relative min-h-[620px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#07171a]/88 backdrop-blur-xl shadow-[0_28px_80px_rgba(0,0,0,0.5)]"
+        className="relative min-h-[620px] overflow-hidden rounded-[2rem] border border-line bg-card backdrop-blur-xl shadow-card"
       >
         <div
           ref={embedRef}
           className={`w-full p-2 sm:p-4 transition-opacity duration-700 ${embed === "ready" ? "opacity-100" : "opacity-0"}`}
-          // Matching the iframe's dark color-scheme keeps it transparent instead of painting a white canvas.
-          style={{ minHeight: 620, colorScheme: "dark" }}
+          // Matching the iframe's color-scheme keeps it transparent instead of painting an opaque canvas.
+          style={{ minHeight: 620, colorScheme: theme }}
         />
 
         <AnimatePresence>
@@ -541,18 +569,18 @@ function CalendarStage({
               key="failed" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
             >
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-[#7dd3cf]/30 bg-[#7dd3cf]/10">
-                <CalendarDays size={22} className="text-[#7dd3cf]" />
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10">
+                <CalendarDays size={22} className="text-accent" />
               </div>
-              <p className="font-serif text-2xl text-white mb-3" style={{ fontFamily: "var(--font-serif)" }}>
+              <p className="font-serif text-2xl text-fg mb-3" style={{ fontFamily: "var(--font-serif)" }}>
                 The calendar is taking a moment.
               </p>
-              <p className="max-w-sm text-sm text-white/50 leading-relaxed mb-8">
+              <p className="max-w-sm text-sm text-fg-muted leading-relaxed mb-8">
                 Open it in a new tab to choose your time. Your details are already filled in.
               </p>
               <a
                 href={calUrl(details)} target="_blank" rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 rounded-full bg-[#7dd3cf] px-7 py-3.5 text-sm font-semibold text-[#041114] transition hover:bg-[#a5e3df]"
+                className="group inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-on-accent transition hover:bg-accent-hover"
               >
                 Open Rinwa&apos;s calendar
                 <ExternalLink size={14} />
@@ -569,22 +597,22 @@ function CalendarSkeleton() {
   return (
     <div className="mx-auto flex h-full w-full max-w-2xl flex-col p-6 sm:p-10" aria-hidden="true">
       <div className="mb-8 flex items-center justify-between">
-        <div className="h-5 w-40 rounded-full bg-white/[0.06] animate-pulse" />
+        <div className="h-5 w-40 rounded-full bg-tint-strong animate-pulse" />
         <div className="flex gap-2">
-          <div className="h-8 w-8 rounded-full bg-white/[0.06] animate-pulse" />
-          <div className="h-8 w-8 rounded-full bg-white/[0.06] animate-pulse" />
+          <div className="h-8 w-8 rounded-full bg-tint-strong animate-pulse" />
+          <div className="h-8 w-8 rounded-full bg-tint-strong animate-pulse" />
         </div>
       </div>
       <div className="grid grid-cols-7 gap-2 sm:gap-3">
         {Array.from({ length: 35 }).map((_, i) => (
           <div
             key={i}
-            className={`h-10 sm:h-14 rounded-xl animate-pulse ${i % 7 > 0 && i % 7 < 6 && i > 8 && i < 30 ? "bg-[#7dd3cf]/[0.07]" : "bg-white/[0.035]"}`}
+            className={`h-10 sm:h-14 rounded-xl animate-pulse ${i % 7 > 0 && i % 7 < 6 && i > 8 && i < 30 ? "bg-accent/[0.07]" : "bg-tint-soft"}`}
             style={{ animationDelay: `${(i % 7) * 80}ms` }}
           />
         ))}
       </div>
-      <p className="mt-auto pt-8 text-center text-[0.6rem] uppercase tracking-[0.38em] text-[#7dd3cf]/50">
+      <p className="mt-auto pt-8 text-center text-[0.66rem] uppercase tracking-[0.38em] text-accent">
         Opening Rinwa&apos;s calendar
       </p>
     </div>
@@ -615,38 +643,38 @@ function Confirmed({ details, booking, onExit }: { details: Details; booking: Bo
       <motion.div
         initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-        className="mb-8 flex h-16 w-16 items-center justify-center rounded-full border border-[#7dd3cf]/40 bg-[#7dd3cf]/10"
+        className="mb-8 flex h-16 w-16 items-center justify-center rounded-full border border-accent/40 bg-accent/10"
       >
-        <Check size={26} className="text-[#7dd3cf]" strokeWidth={2.5} />
+        <Check size={26} className="text-accent" strokeWidth={2.5} />
       </motion.div>
 
-      <p className="text-[0.6rem] tracking-[0.45em] text-[#7dd3cf]/60 mb-6">
+      <p className="text-[0.66rem] tracking-[0.45em] text-accent mb-6">
         You&apos;ve&nbsp;Rinwa&apos;d
       </p>
       <h2
         ref={headingRef}
         tabIndex={-1}
-        className="font-serif text-[clamp(2.4rem,7vw,4.2rem)] leading-[0.98] tracking-tight text-white mb-6 outline-none"
+        className="font-serif text-[clamp(2.4rem,7vw,4.2rem)] leading-[0.98] tracking-tight text-fg mb-6 outline-none"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         {booking ? <>It&apos;s in the diary, {firstName}.</> : <>Your request is with us, {firstName}.</>}
       </h2>
 
       {slot && (
-        <div className="mb-8 w-full max-w-md rounded-[1.6rem] border border-[#7dd3cf]/25 bg-[#041114]/72 backdrop-blur-xl px-6 py-5 shadow-[0_28px_80px_rgba(0,0,0,0.45)]">
-          <p className="text-[0.58rem] uppercase tracking-[0.3em] text-[#7dd3cf]/70 mb-2">Your meeting with Rinwa</p>
-          <p className="font-serif text-2xl text-white leading-tight" style={{ fontFamily: "var(--font-serif)" }}>{slot.day}</p>
-          <p className="mt-1 text-sm text-white/60">{slot.time}</p>
+        <div className="mb-8 w-full max-w-md rounded-[1.6rem] border border-accent/25 bg-card backdrop-blur-xl px-6 py-5 shadow-card">
+          <p className="text-[0.66rem] uppercase tracking-[0.3em] text-accent mb-2">Your meeting with Rinwa</p>
+          <p className="font-serif text-2xl text-fg leading-tight" style={{ fontFamily: "var(--font-serif)" }}>{slot.day}</p>
+          <p className="mt-1 text-sm text-fg-muted">{slot.time}</p>
         </div>
       )}
 
-      <p className="max-w-md text-base text-white/55 leading-relaxed mb-3">
+      <p className="max-w-md text-base text-fg-muted leading-relaxed mb-3">
         {booking
-          ? <>A calendar invite with the meeting details is on its way to <span className="text-white/80 break-all">{details.email}</span>.</>
-          : <>Rinwa will be in touch at <span className="text-white/80 break-all">{details.email}</span> within <span className="text-white/80">48 hours</span> to find a time that works.</>}
+          ? <>A calendar invite with the meeting details is on its way to <span className="text-fg break-all">{details.email}</span>.</>
+          : <>Rinwa will be in touch at <span className="text-fg break-all">{details.email}</span> within <span className="text-fg">48 hours</span> to find a time that works.</>}
       </p>
       {booking ? (
-        <p className="mb-12 inline-flex items-center gap-2 text-sm text-white/35 italic">
+        <p className="mb-12 inline-flex items-center gap-2 text-sm text-fg-faint italic">
           <Mail size={13} />
           Need to reschedule? Use the link in your confirmation email.
         </p>
@@ -654,17 +682,17 @@ function Confirmed({ details, booking, onExit }: { details: Details; booking: Bo
 
       <button
         type="button" onClick={onExit}
-        className="group inline-flex items-center gap-3 rounded-full border border-[#7dd3cf]/35 bg-[#7dd3cf]/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#7dd3cf] transition-all hover:border-[#7dd3cf]/60 hover:bg-[#7dd3cf]/18"
+        className="group inline-flex items-center gap-3 rounded-full border border-accent/35 bg-accent/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] text-accent transition-all hover:border-accent/60 hover:bg-accent/18"
       >
         Back to start
       </button>
 
       <div className="mt-14 flex flex-col items-center gap-4">
-        <p className="text-[0.58rem] uppercase tracking-[0.55em] text-[#7dd3cf]/50">Enter Into Your Ease</p>
+        <p className="text-[0.66rem] uppercase tracking-[0.55em] text-accent">Enter Into Your Ease</p>
         <div className="flex items-center gap-4">
-          <div className="h-px w-14 bg-[#7dd3cf]/25" />
-          <Image src="/images/logo.png" alt="" width={20} height={20} className="opacity-30" />
-          <div className="h-px w-14 bg-[#7dd3cf]/25" />
+          <div className="h-px w-14 bg-accent/25" />
+          <Image src="/images/logo.png" alt="" width={20} height={20} className="theme-logo opacity-30" />
+          <div className="h-px w-14 bg-accent/25" />
         </div>
       </div>
     </div>
