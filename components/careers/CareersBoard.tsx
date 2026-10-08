@@ -17,6 +17,7 @@ export function CareersBoard({ jobs, description, contactEmail }: { jobs: Public
 
   const departments = useMemo(() => distinct(jobs.map(j => j.department)), [jobs]);
   const types = useMemo(() => distinct(jobs.map(j => j.type)), [jobs]);
+  const companies = useMemo(() => distinct(jobs.map(j => j.company)), [jobs]);
 
   // Only offer a filter dimension when it actually splits the list.
   const chips: Filter[] = [
@@ -40,14 +41,14 @@ export function CareersBoard({ jobs, description, contactEmail }: { jobs: Public
       {/* Hero */}
       <section className="mx-auto w-full max-w-6xl px-5 pt-20 pb-16 sm:px-8 sm:pt-28 sm:pb-20">
         <motion.p {...rise()} className="mb-6 text-[0.66rem] uppercase tracking-[0.42em] text-accent">
-          Careers at RÌNWÁ
+          Roles curated by RÌNWÁ
         </motion.p>
         <motion.h1
           {...rise(0.05)}
           className="max-w-4xl text-[clamp(2.8rem,8vw,6rem)] leading-[0.92] tracking-tight text-fg"
           style={serif}
         >
-          Shape the moments people carry home.
+          Your next role, thoughtfully placed.
         </motion.h1>
         <motion.p {...rise(0.12)} className="mt-8 max-w-xl text-[0.95rem] leading-relaxed text-fg-muted sm:text-base">
           {description}
@@ -56,8 +57,8 @@ export function CareersBoard({ jobs, description, contactEmail }: { jobs: Public
         <motion.dl {...rise(0.2)} className="mt-12 grid max-w-2xl grid-cols-3 gap-px overflow-hidden rounded-[1.6rem] border border-line bg-line">
           {[
             { k: 'Open roles', v: String(jobs.length) },
-            { k: 'Rooted in', v: 'Lagos' },
-            { k: 'Reaching', v: 'Africa · Canada' },
+            { k: 'Companies hiring', v: String(companies.length) },
+            { k: 'Managed by', v: 'RÌNWÁ' },
           ].map(item => (
             <div key={item.k} className="bg-card px-4 py-4 backdrop-blur-xl sm:px-6 sm:py-5">
               <dt className="text-[0.66rem] uppercase tracking-[0.28em] text-fg-subtle">{item.k}</dt>
@@ -137,9 +138,9 @@ function RoleCard({ job }: { job: PublicJob }) {
       <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[2px] origin-top scale-y-0 bg-accent transition-transform duration-500 group-hover:scale-y-100" />
 
       <div className="min-w-0 flex-1">
-        {job.department && (
-          <p className="mb-2 text-[0.66rem] uppercase tracking-[0.3em] text-accent">{job.department}</p>
-        )}
+        <p className="mb-2 text-[0.66rem] uppercase tracking-[0.3em] text-accent">
+          {[job.company, job.department].filter(Boolean).join(' · ')}
+        </p>
         <h3 className="text-[1.65rem] leading-[1.1] text-fg transition-colors sm:text-[2rem]" style={serif}>
           {job.title}
         </h3>
@@ -174,13 +175,13 @@ function EmptyState({ contactEmail }: { contactEmail: string }) {
         <Briefcase size={20} className="text-accent" />
       </div>
       <p className="max-w-md text-2xl leading-snug text-fg sm:text-3xl" style={serif}>
-        Our team is complete for now — but not closed to wonder.
+        No roles are open right now, but new ones arrive often.
       </p>
       <p className="mt-4 max-w-sm text-sm leading-relaxed text-fg-muted">
-        New roles appear here first. If you&apos;d love to work with us, introduce yourself and tell us what you&apos;d bring.
+        Our partners&apos; roles appear here as soon as they open. To be considered for future opportunities, introduce yourself and tell us what you&apos;re looking for.
       </p>
       <a
-        href={`mailto:${contactEmail}?subject=${encodeURIComponent('Introducing myself — RÌNWÁ Careers')}`}
+        href={`mailto:${contactEmail}?subject=${encodeURIComponent('Future opportunities · RÌNWÁ Careers')}`}
         className="group mt-8 inline-flex items-center gap-3 rounded-full border border-accent/35 bg-accent/10 px-7 py-3.5 text-xs font-semibold uppercase tracking-[0.24em] text-accent transition-all hover:border-accent/60 hover:bg-accent/18"
       >
         <Mail size={14} />

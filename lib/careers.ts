@@ -113,7 +113,7 @@ export const JobQuestionSchema = z
 
 export const JobPostingInputSchema = z.object({
   title: z.string().trim().min(2, 'Title is required').max(140),
-  company: z.string().trim().max(140).optional(),
+  company: z.string().trim().min(2, 'Hiring company is required').max(140),
   department: z.string().trim().max(80).default(''),
   location: z.string().trim().min(2, 'Location is required').max(140),
   workplace: z.enum(WORKPLACE_TYPES),
@@ -247,7 +247,7 @@ export function normalizeUrl(value: string) {
 // Maps validated admin input onto the stored document. Empty optional values are unset
 // rather than stored as empty strings, so "no closing date" really means none.
 export function toJobDocument(input: JobPostingInput) {
-  const { closingDate, compensation, company, ...rest } = input;
+  const { closingDate, compensation, ...rest } = input;
   const set: Record<string, unknown> = { ...rest };
   const unset: Record<string, ''> = {};
 
@@ -256,8 +256,6 @@ export function toJobDocument(input: JobPostingInput) {
 
   if (compensation) set.compensation = compensation;
   else unset.compensation = '';
-
-  if (company) set.company = company;
 
   return { set, unset };
 }

@@ -32,6 +32,7 @@ import {
 
 type Draft = {
   title: string;
+  company: string;
   department: string;
   location: string;
   workplace: (typeof WORKPLACE_TYPES)[number];
@@ -49,6 +50,7 @@ type Draft = {
 
 const EMPTY_DRAFT: Draft = {
   title: '',
+  company: '',
   department: '',
   location: 'Lagos, Nigeria',
   workplace: 'On-site',
@@ -67,6 +69,7 @@ const EMPTY_DRAFT: Draft = {
 function fromJob(job: any): Draft {
   return {
     title: job.title ?? '',
+    company: job.company ?? '',
     department: job.department ?? '',
     location: job.location ?? '',
     workplace: (WORKPLACE_TYPES as readonly string[]).includes(job.workplace) ? job.workplace : 'On-site',
@@ -222,7 +225,7 @@ export default function JobPostingsPage() {
                       <StatusBadge job={job} />
                     </div>
                     <p className="text-white/55 text-xs md:text-sm mt-1.5">
-                      {[job.department, job.location, job.workplace, job.type].filter(Boolean).join(' · ')}
+                      {[job.company, job.department, job.location, job.workplace, job.type].filter(Boolean).join(' · ')}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
                       <Link
@@ -360,6 +363,7 @@ function RoleEditor({
 
       <EditorSection title="The role">
         <AdminInput label="Job title" id="role-title" value={draft.title} onChange={e => set('title', e.target.value)} required placeholder="e.g. Guest Experience Lead" />
+        <AdminInput label="Hiring company" id="role-company" value={draft.company} onChange={e => set('company', e.target.value)} required placeholder="The partner agency or company this role is for" />
         <div className="grid gap-4 sm:grid-cols-2">
           <AdminInput label="Department" id="role-department" value={draft.department} onChange={e => set('department', e.target.value)} placeholder="e.g. Experiences" />
           <AdminInput label="Location" id="role-location" value={draft.location} onChange={e => set('location', e.target.value)} required placeholder="e.g. Lagos, Nigeria" />

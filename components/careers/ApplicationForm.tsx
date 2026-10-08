@@ -166,7 +166,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
         Introduce yourself.
       </h2>
       <p className="mt-4 mb-10 max-w-lg text-[0.92rem] leading-relaxed text-fg-muted">
-        Tell us who you are and what you&apos;d bring to the role. It takes about five minutes, and every application is read by a person.
+        Tell us who you are and what you&apos;d bring to the role. It takes about five minutes. RÌNWÁ reads every application and introduces strong matches to the hiring team.
       </p>
 
       <div className="space-y-5">
@@ -205,7 +205,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
               )}
               {f.coverLetter !== 'off' && (
                 <AreaField name="coverLetter" label="Cover letter" req={f.coverLetter === 'required'} rows={7}
-                  maxLength={COVER_LETTER_MAX} placeholder="Why this role, and why now? What would you bring to RÌNWÁ?"
+                  maxLength={COVER_LETTER_MAX} placeholder={`Why this role, and why now? What would you bring to ${job.company}?`}
                   value={v('coverLetter')} onChange={set('coverLetter')} onBlur={touch('coverLetter')} error={show('coverLetter')} />
               )}
             </div>
@@ -233,7 +233,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
 
       <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs leading-relaxed text-fg-faint sm:max-w-xs">
-          Your details are only used to consider your application for this role.
+          Your details are used only for this application and shared only with the company hiring for this role.
         </p>
         <button
           type="submit"
@@ -493,8 +493,8 @@ function Submitted({ job, firstName, email }: { job: PublicJob; firstName: strin
         Thank you, {firstName}. Your application is with us.
       </h2>
       <p className="mb-3 max-w-md text-base leading-relaxed text-fg-muted">
-        We&apos;ve sent a confirmation to <span className="break-all text-fg">{email}</span>. Our team will read your
-        application for <span className="text-fg">{job.title}</span>{' '}and reach out if there&apos;s a fit.
+        We&apos;ve sent a confirmation to <span className="break-all text-fg">{email}</span>. We&apos;ll review your
+        application for <span className="text-fg">{job.title}</span>{' '}and, if there&apos;s a fit, introduce you to the hiring team at {job.company}.
       </p>
       <p className="mb-10 text-sm italic text-fg-faint">Don&apos;t see the email? Check your spam or promotions folder.</p>
 

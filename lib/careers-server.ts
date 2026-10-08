@@ -20,11 +20,12 @@ export const getJobBySlug = cache(async (slug: string): Promise<{ job: PublicJob
 
 export const getCareersCopy = cache(async () => {
   await connectDB();
-  const settings: any = await Settings.findOne().select('joinTeamDescription partnershipEmail').lean();
+  // Roles on /careers belong to RÌNWÁ's partner companies, so this deliberately does not reuse
+  // joinTeamDescription, which describes hiring for the RÌNWÁ team itself.
+  const settings: any = await Settings.findOne().select('partnershipEmail').lean();
   return {
     description:
-      settings?.joinTeamDescription ||
-      'As RÌNWÁ expands globally, we’re building a team of thoughtful creatives, strategists, and cultural disruptors to help shape the future of culturally-driven hospitality and experiences.',
+      'RÌNWÁ manages hiring for agencies and companies we partner with. Every role here belongs to one of those teams. We handle the applications, read each one with care, and introduce the right people to the employers who need them.',
     contactEmail: process.env.CAREERS_EMAIL || settings?.partnershipEmail || 'rinwahospitality@gmail.com',
   };
 });

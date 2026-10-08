@@ -807,7 +807,7 @@ type JobApplicationEmailPayload = {
     coverLetter?: string;
     answers: { label: string; value: string }[];
   };
-  job: { title: string; department?: string; location: string; type: string; workplace?: string };
+  job: { title: string; company?: string; department?: string; location: string; type: string; workplace?: string };
   resume?: { fileName: string; content: Buffer };
   adminEmail: string;
   consoleUrl?: string;
@@ -855,7 +855,7 @@ function buildAdminApplicationEmailHtml({ application: a, job, resume, consoleUr
     .map(ans => block(escapeHtml(ans.label), multiline(ans.value)))
     .join('');
 
-  const meta = [job.department, job.location, job.workplace, job.type]
+  const meta = [job.company, job.department, job.location, job.workplace, job.type]
     .filter((v): v is string => !!v)
     .map(escapeHtml)
     .join(' &nbsp;·&nbsp; ');
@@ -954,7 +954,7 @@ function buildApplicantEmailHtml({ application: a, job }: JobApplicationEmailPay
                 Thank you for applying,<br>${escapeHtml(a.fullName.split(' ')[0] || a.fullName)}.
               </h1>
               <p style="margin:0;font-size:15px;line-height:1.75;color:#a0bcba;">
-                Your application is safely with us. Every application is read by a person on our team, with care.
+                Your application is safely with us. RÌNWÁ manages hiring for this role on behalf of ${escapeHtml(job.company || 'the hiring company')}, and every application is read by a person, with care.
               </p>
             </td></tr>
             <tr><td style="padding:0 32px 28px;">
@@ -962,6 +962,7 @@ function buildApplicantEmailHtml({ application: a, job }: JobApplicationEmailPay
                 <tr><td style="padding:18px 20px;">
                   <p style="margin:0 0 4px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:#8fa8a5;">The role</p>
                   <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:20px;color:#f5f0e8;">${escapeHtml(job.title)}</p>
+                  ${job.company ? `<p style="margin:4px 0 0;font-size:13px;color:#a0bcba;">${escapeHtml(job.company)}</p>` : ''}
                   <p style="margin:6px 0 0;font-size:12px;color:#8fa8a5;">${meta}</p>
                 </td></tr>
               </table>
@@ -970,9 +971,9 @@ function buildApplicantEmailHtml({ application: a, job }: JobApplicationEmailPay
             <tr><td style="padding:28px 32px;">
               <p style="margin:0 0 20px;font-size:11px;text-transform:uppercase;letter-spacing:0.26em;color:#7dd3cf;">What happens next</p>
               <table width="100%" cellpadding="0" cellspacing="0">
-                ${step('1', 'We read your application', 'Our team reviews your experience and answers carefully.')}
-                ${step('2', 'We reach out if there is a fit', 'If your profile matches what the role needs, we will contact you at ' + escapeHtml(a.email) + ' to arrange a conversation.')}
-                ${step('3', 'A conversation, not an interrogation', 'We want to understand how you think, what you value, and how you would shape experiences with us.')}
+                ${step('1', 'We read your application', 'We review your experience and answers carefully against what the role needs.')}
+                ${step('2', 'We introduce you if there is a fit', 'If your profile matches, we will share it with ' + escapeHtml(job.company || 'the hiring company') + ' and contact you at ' + escapeHtml(a.email) + ' about next steps.')}
+                ${step('3', 'A conversation, not an interrogation', 'Interviews are about understanding how you think, what you value, and where you would thrive.')}
               </table>
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
@@ -984,7 +985,7 @@ function buildApplicantEmailHtml({ application: a, job }: JobApplicationEmailPay
           </table>
         </td></tr>
         <tr><td style="padding:24px 0 0;text-align:center;">
-          <p style="margin:0 0 6px;font-size:11px;color:#3d5a58;">You received this because you applied for a role on the RÌNWÁ website.</p>
+          <p style="margin:0 0 6px;font-size:11px;color:#3d5a58;">You received this because you applied for a role through RÌNWÁ Careers.</p>
           <p style="margin:0;font-size:11px;color:#2a3f3e;">RÌNWÁ Hospitality &nbsp;·&nbsp; Lagos, Nigeria</p>
         </td></tr>
       </table>
@@ -1016,9 +1017,9 @@ export async function sendJobApplicationEmails(payload: JobApplicationEmailPaylo
       from,
       to: adminEmail,
       replyTo: a.email,
-      subject: `[Application] ${a.fullName} — ${job.title}`,
+      subject: `[Application] ${a.fullName} — ${job.title}${job.company ? ` (${job.company})` : ''}`,
       text: [
-        `${a.fullName} applied for ${job.title}.`,
+        `${a.fullName} applied for ${job.title}${job.company ? ` at ${job.company}` : ''}.`,
         '',
         `Email: ${a.email}`,
         `Phone: ${a.phone}`,
@@ -1044,12 +1045,13 @@ export async function sendJobApplicationEmails(payload: JobApplicationEmailPaylo
     const { error } = await resend.emails.send({
       from,
       to: a.email,
-      subject: `We've received your application — ${job.title}`,
+      subject: `We've received your application — ${job.title}${job.company ? ` at ${job.company}` : ''}`,
       text: [
         `Thank you for applying, ${a.fullName}.`,
         '',
         `Your application for ${job.title} (${job.location}) is safely with us.`,
-        `If your profile matches what the role needs, we will reach out at ${a.email}.`,
+        `RÌNWÁ manages hiring for this role on behalf of ${job.company || 'the hiring company'}.`,
+        `If your profile matches what the role needs, we will share it with them and reach out at ${a.email}.`,
         '',
         'With warmth,',
         'The RÌNWÁ Team',

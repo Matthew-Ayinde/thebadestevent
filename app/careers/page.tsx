@@ -9,11 +9,11 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Careers',
   description:
-    'Join RÌNWÁ Hospitality & Experiences — open roles for thoughtful creatives, strategists and cultural disruptors shaping culture-first hospitality across Lagos, Africa and Canada.',
+    'Open roles at agencies and companies hiring through RÌNWÁ. Browse positions and apply in one place, with RÌNWÁ managing every application on the employer’s behalf.',
   alternates: { canonical: '/careers' },
   openGraph: {
-    title: 'Careers at RÌNWÁ',
-    description: 'Open roles at RÌNWÁ Hospitality & Experiences.',
+    title: 'Open roles · RÌNWÁ Careers',
+    description: 'Roles at agencies and companies hiring through RÌNWÁ.',
     url: '/careers',
   },
 };

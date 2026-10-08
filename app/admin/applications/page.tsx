@@ -467,7 +467,7 @@ function ApplicationDetail({ app, onStatus, onNotes, onDelete }: {
       )}
 
       <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-4 space-y-4">
-        <p className="text-[0.6rem] uppercase tracking-[0.28em] text-teal-300/60">Pipeline</p>
+        <p className="text-[0.6rem] uppercase tracking-[0.28em] text-teal-300/60">Status</p>
         <div className="flex flex-wrap gap-2">
           {APPLICATION_STATUSES.map(s => (
             <button

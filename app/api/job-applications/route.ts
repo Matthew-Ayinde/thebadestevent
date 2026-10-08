@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
 
     const emailResult = await sendJobApplicationEmails({
       application: { fullName, email: normalizedEmail, phone, location, linkedin, portfolio, coverLetter, answers },
-      job: { title: job.title, department: job.department, location: job.location, type: job.type, workplace: job.workplace },
+      job: { title: job.title, company: job.company, department: job.department, location: job.location, type: job.type, workplace: job.workplace },
       resume: resume ? { fileName: resume.fileName, content: resume.buffer } : undefined,
       adminEmail,
       consoleUrl: siteUrl ? `${siteUrl}/admin/applications?id=${application._id}` : undefined,

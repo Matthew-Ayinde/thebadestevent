@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ArrowDown, Briefcase, CalendarClock, Clock, MapPin, Wallet } from 'lucide-react';
+import { ArrowDown, Briefcase, Building2, CalendarClock, Clock, MapPin, Wallet } from 'lucide-react';
 import { CareersBackdrop, CareersFooter, CareersTopBar, serif } from '@/components/careers/CareersChrome';
 import { ApplicationForm } from '@/components/careers/ApplicationForm';
 import { getJobBySlug } from '@/lib/careers-server';
@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { job } = result;
   const description = job.overview.length > 160 ? `${job.overview.slice(0, 157).trimEnd()}…` : job.overview;
   return {
-    title: `${job.title} · Careers`,
+    title: `${job.title} at ${job.company} · Careers`,
     description,
     alternates: { canonical: `/careers/${job.slug}` },
-    openGraph: { title: `${job.title} — RÌNWÁ Careers`, description, url: `/careers/${job.slug}` },
+    openGraph: { title: `${job.title} at ${job.company} · RÌNWÁ Careers`, description, url: `/careers/${job.slug}` },
     robots: result.accepting ? undefined : { index: false },
   };
 }
@@ -75,6 +75,7 @@ export default async function JobPage({ params }: Props) {
   const closes = formatClosingDate(job.closingDate);
 
   const facts = [
+    { icon: Building2, label: 'Hiring company', value: job.company },
     { icon: MapPin, label: 'Location', value: job.location },
     { icon: Briefcase, label: 'Workplace', value: job.workplace },
     { icon: Clock, label: 'Employment', value: job.type },
@@ -98,7 +99,7 @@ export default async function JobPage({ params }: Props) {
         {/* Hero */}
         <section className="mx-auto w-full max-w-6xl px-5 pt-16 pb-12 sm:px-8 sm:pt-24 sm:pb-16">
           <p className="mb-5 text-[0.66rem] uppercase tracking-[0.42em] text-accent">
-            {job.department || 'Open role'}
+            {[job.company, job.department].filter(Boolean).join(' · ')}
           </p>
           <h1 className="max-w-4xl text-[clamp(2.6rem,7vw,5.2rem)] leading-[0.95] tracking-tight text-fg" style={serif}>
             {job.title}
@@ -136,6 +137,9 @@ export default async function JobPage({ params }: Props) {
                   </div>
                 ))}
               </dl>
+              <p className="mt-6 text-xs leading-relaxed text-fg-subtle">
+                RÌNWÁ manages applications for this role on behalf of {job.company}.
+              </p>
               <div className="mt-6 border-t border-line-soft pt-6">
                 {accepting ? (
                   <a
@@ -162,7 +166,7 @@ export default async function JobPage({ params }: Props) {
               <div className="rounded-[2rem] border border-line bg-card px-6 py-12 text-center backdrop-blur-xl">
                 <h2 id="apply-heading" className="text-3xl text-fg" style={serif}>This role has closed.</h2>
                 <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-fg-muted">
-                  Thank you for your interest. Take a look at our other open roles — there may be a place for you there.
+                  Thank you for your interest. Take a look at the other open roles, there may be a fit for you there.
                 </p>
                 <a
                   href="/careers"
