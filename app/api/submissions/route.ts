@@ -1,4 +1,5 @@
 import { connectDB } from '@/lib/mongodb';
+import { identifyVisitor } from '@/lib/analytics-server';
 import { ContactSubmission } from '@/models/ContactSubmission';
 import { Settings } from '@/models/Settings';
 import { getServerSession } from 'next-auth/next';
@@ -50,6 +51,8 @@ export async function POST(request: NextRequest) {
       industries,
       feelings: validated.feelings ?? [],
     });
+
+    identifyVisitor(request, { source: 'contact', email: validated.email, name: validated.fullName, phone: validated.phone });
 
     const settings = await Settings.findOne().select('partnershipEmail');
     const adminEmail = process.env.ADMIN_EMAIL || settings?.partnershipEmail || 'rinwahospitality@gmail.com';

@@ -1,4 +1,5 @@
 import { connectDB } from '@/lib/mongodb';
+import { identifyVisitor } from '@/lib/analytics-server';
 import { MeetingRequest } from '@/models/MeetingRequest';
 import { Settings } from '@/models/Settings';
 import { getServerSession } from 'next-auth/next';
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
     const meeting = await MeetingRequest.create({ fullName, email, reason, accessToken });
+    identifyVisitor(request, { source: 'meeting_request', email, name: fullName });
 
     const settings = await Settings.findOne().select('partnershipEmail');
     const adminEmail =

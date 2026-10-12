@@ -25,6 +25,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.50.0",
     "react-hot-toast": "^2.4.1",
+    "recharts": "^3.10.1",
     "resend": "^6.12.4",
     "zod": "^3.22.4"
   },

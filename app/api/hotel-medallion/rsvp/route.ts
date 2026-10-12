@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { connectDB } from '@/lib/mongodb';
+import { identifyVisitor } from '@/lib/analytics-server';
 import { MedallionGuest, type IMedallionGuest } from '@/models/MedallionGuest';
 import { generateTicketCode, generateTicketToken, sendMedallionInvitation } from '@/lib/hotel-medallion-server';
 
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { firstName, lastName, email } = parsed.data;
+    identifyVisitor(request, { source: 'medallion_rsvp', email, name: `${firstName} ${lastName}` });
     await connectDB();
 
     if (await MedallionGuest.exists({ email })) return resendToExisting(email);

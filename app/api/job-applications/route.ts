@@ -1,4 +1,5 @@
 import { connectDB } from '@/lib/mongodb';
+import { identifyVisitor } from '@/lib/analytics-server';
 import { JobPosting } from '@/models/JobPosting';
 import { JobApplication } from '@/models/JobApplication';
 import { Settings } from '@/models/Settings';
@@ -204,6 +205,7 @@ export async function POST(request: NextRequest) {
       throw err?.code === 11000 ? alreadyApplied() : err;
     });
     uploadedPublicId = null; // owned by the saved application from here on
+    identifyVisitor(request, { source: 'job_application', email: normalizedEmail, name: fullName, phone });
 
     const settings: any = await Settings.findOne().select('partnershipEmail').lean();
     const adminEmail =

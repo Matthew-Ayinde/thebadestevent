@@ -20,11 +20,13 @@ import {
   Settings2,
   LogOut,
   UserRoundCheck,
+  BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   // { href: '/admin/featured-events', label: 'Featured Events', icon: Trophy },
   // { href: '/admin/past-events', label: 'Past Events', icon: Archive },
   // { href: '/admin/hero-slides', label: 'Hero Slides', icon: MonitorPlay },

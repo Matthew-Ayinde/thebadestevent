@@ -1,4 +1,5 @@
 import { connectDB } from '@/lib/mongodb';
+import { identifyVisitor } from '@/lib/analytics-server';
 import { QuestionnaireSubmission } from '@/models/QuestionnaireSubmission';
 import { Settings } from '@/models/Settings';
 import { getServerSession } from 'next-auth/next';
@@ -81,6 +82,7 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
     const submission = await QuestionnaireSubmission.create(validated);
+    identifyVisitor(request, { source: 'questionnaire', email: validated.email, name: validated.fullName, phone: validated.phone });
 
     const settings = await Settings.findOne().select('partnershipEmail');
     const adminEmail =
