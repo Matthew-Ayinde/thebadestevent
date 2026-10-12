@@ -11,9 +11,9 @@ export default function HotelMedallionRsvpPage() {
       <header className="text-center">
         <MedallionWordmark />
         <AccentRule className="mt-8" />
-        <p className="mt-8 text-xs uppercase tracking-[0.32em] text-(--hm-mist)">You are specially invited to</p>
+        <p className="mt-8 text-xs uppercase tracking-[0.32em] text-(--hm-mist)">You are specially invited to the relaunch</p>
         <h1 className="mt-3 font-serif text-3xl leading-tight text-(--hm-cream) sm:text-4xl">
-          The Relaunch
+          {/* The Relaunch */}
           <span className="block text-(--hm-accent-soft) italic">Wine &amp; Wings Cocktail Party</span>
         </h1>
 

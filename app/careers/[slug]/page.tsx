@@ -109,6 +109,9 @@ export default async function JobPage({ params }: Props) {
               <li key={v} className="rounded-full border border-line bg-tint px-4 py-2 text-sm text-fg-muted">{v}</li>
             ))}
           </ul>
+          <p className="mt-6 max-w-2xl text-sm leading-relaxed text-fg-muted sm:text-[0.95rem]">
+            RÌNWÁ advises and liaises applications for this role on behalf of {job.company}.
+          </p>
         </section>
 
         <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
@@ -137,9 +140,6 @@ export default async function JobPage({ params }: Props) {
                   </div>
                 ))}
               </dl>
-              <p className="mt-6 text-xs leading-relaxed text-fg-subtle">
-                RÌNWÁ manages applications for this role on behalf of {job.company}.
-              </p>
               <div className="mt-6 border-t border-line-soft pt-6">
                 {accepting ? (
                   <a

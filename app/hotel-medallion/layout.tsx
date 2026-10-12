@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/hotel-medallion' },
   icons: { icon: MEDALLION_EVENT.logoPath },
   openGraph: {
-    title: `${MEDALLION_EVENT.hotel} Relaunch — Wine & Wings`,
-    description: `You are specially invited. ${MEDALLION_EVENT.dateLabel}.`,
+    title: `${MEDALLION_EVENT.hotel} — Wine & Wings`,
+    description: `You are specially invited to the relaunch. ${MEDALLION_EVENT.dateLabel}.`,
     url: '/hotel-medallion',
     siteName: MEDALLION_EVENT.hotel,
     images: [],
