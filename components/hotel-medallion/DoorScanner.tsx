@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import jsQR from 'jsqr';
-import { Camera, CameraOff, CheckCircle2, Keyboard, Loader2, LogOut, ShieldAlert, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import { Camera, CameraOff, CheckCircle2, ChevronRight, Keyboard, Loader2, LogOut, ShieldAlert, Users, XCircle } from 'lucide-react';
 import type { CheckInResult } from '@/lib/hotel-medallion';
 import { MedallionLogo } from '@/components/hotel-medallion/MedallionBrand';
 
@@ -215,6 +216,17 @@ export function DoorScanner() {
         <Stat label="Checked in" value={stats?.checkedIn} accent />
         <Stat label="Registered" value={stats?.registered} />
       </section>
+
+      <Link
+        href="/hotel-medallion/scan/guests"
+        className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-(--hm-line) bg-(--hm-navy)/60 px-4 py-3.5 text-sm text-(--hm-cream) transition hover:border-(--hm-accent)/60"
+      >
+        <span className="flex items-center gap-2.5">
+          <Users className="size-4 text-(--hm-accent)" aria-hidden />
+          View guest list
+        </span>
+        <ChevronRight className="size-4 text-(--hm-dim)" aria-hidden />
+      </Link>
 
       <section className="relative mt-5 aspect-square w-full overflow-hidden rounded-3xl border border-(--hm-line) bg-(--hm-ink)">
         <video
