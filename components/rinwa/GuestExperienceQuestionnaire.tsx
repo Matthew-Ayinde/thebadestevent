@@ -39,10 +39,10 @@ const BLANK: FormData = {
 
 const SECTIONS = [
   { tag: "01 — First Impressions", title: "Did you feel welcomed the moment you walked in?", desc: "" },
-  { tag: "02 — The Little Things",  title: "Was there a moment tonight someone anticipated something you needed, before you asked?", desc: "" },
-  { tag: "03 — Beyond The Run Of Show", title: "How cared for did you feel tonight; beyond just “the event ran smoothly”?", desc: "1 is barely, 5 is completely." },
-  { tag: "04 — The Honest Part",     title: "Was there any moment you felt overlooked, or unsure what to do?", desc: "Totally fine if the answer is no. This just helps us fix real gaps." },
-  { tag: "05 — Last Thing",          title: "Would you come back specifically because of how you were treated, not just the hosts, dj, friends or venue?", desc: "" },
+  { tag: "02 — The Little Things",  title: "Was there a moment tonight where someone anticipated something you needed before you asked?", desc: "" },
+  { tag: "03 — Beyond The Run Of Show", title: "On a scale of 1–5, how cared for did you feel tonight — beyond just “the event ran smoothly”?", desc: "1 is barely, 5 is completely." },
+  { tag: "04 — The Honest Part",     title: "Was there any moment you felt overlooked or unsure what to do?", desc: "Totally fine if the answer is no. This just helps us fix real gaps." },
+  { tag: "05 — Last Thing",          title: "Would you come back specifically because of how you were treated — not just the lineup/venue?", desc: "" },
 ];
 
 const TOTAL = SECTIONS.length;

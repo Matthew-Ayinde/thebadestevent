@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Eye, Trash2, ChevronLeft, ChevronRight, Mail, Download } from 'lucide-react';
 import AdminButton from '@/components/admin/AdminButton';
@@ -31,10 +31,16 @@ function Detail({ label, value }: { label: string; value?: string | string[] }) 
   );
 }
 
+function hasValue(v: unknown) {
+  return Array.isArray(v) ? v.length > 0 : !!v;
+}
+
+// Hidden when every <Detail> inside it is empty (e.g. older check-ins that
+// predate the current questions), so no bare section headings show up.
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const hasContent = Array.isArray(children)
-    ? (children as any[]).some(Boolean)
-    : !!children;
+  const hasContent = React.Children.toArray(children).some(c =>
+    React.isValidElement<{ value?: unknown }>(c) ? hasValue(c.props.value) : !!c
+  );
   if (!hasContent) return null;
   return (
     <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
@@ -105,19 +111,27 @@ export default function OurDiasporaAdminPage() {
       };
 
       const headers = [
-        'Submitted At', 'Name', 'Contact Method', 'Contact Detail', 'Lives In',
-        'First Time or Returning', 'Timeframe', 'Family/Friends Aware',
-        'Reasons', 'Reasons (Other)', 'Needs Handled', 'Needs Handled (Other)', 'Wants Help',
-        'Excited For', 'Excited For (Other)',
+        'Submitted At', 'Name', 'Contact Method', 'Contact Detail', 'Travelling From',
+        'Last Home', 'Arriving', 'Staying For', 'Coming With',
+        'Reasons', 'Reasons (Other)', 'Wants Wedding Help', 'Staying At', 'Budget Per Night',
+        'Wants Handled', 'Wants Handled (Other)', 'Excited For', 'Excited For (Other)',
+        'Perks', 'Partner Consent', 'Heard About Us',
+        // Legacy answers from the first version of the questionnaire
+        'First Time or Returning (legacy)', 'Timeframe (legacy)', 'Family/Friends Aware (legacy)',
+        'Needs Handled (legacy)', 'Needs Handled Other (legacy)', 'Wants Help (legacy)',
       ];
 
       const csvRows = rows.map(r => [
         cell(new Date(r.createdAt).toLocaleDateString('en-GB')),
         cell(r.name), cell(r.contactMethod), cell(r.contactValue),
         cell(r.residence === 'Other' ? r.residenceOther : r.residence),
+        cell(r.lastHome), cell(r.arrival), cell(r.stayLength), cell(r.companions),
+        cell(r.reason), cell(r.reasonOther), cell(r.weddingHelp), cell(r.accommodation), cell(r.budget),
+        cell(r.needs), cell(r.needsOther), cell(r.excitedFor), cell(r.excitedForOther),
+        cell(r.perks), cell(r.perks ? (r.partnerConsent ? 'Yes' : 'No') : ''),
+        cell(r.heardFrom === 'Other' ? r.heardFromOther : r.heardFrom),
         cell(r.visitorType), cell(r.timeframe), cell(r.familyAware),
-        cell(r.reason), cell(r.reasonOther), cell(r.challenges), cell(r.challengesOther), cell(r.wantsHelp),
-        cell(r.excitedFor), cell(r.excitedForOther),
+        cell(r.challenges), cell(r.challengesOther), cell(r.wantsHelp),
       ].join(','));
 
       const csv = [headers.map(h => `"${h}"`).join(','), ...csvRows].join('\r\n');
@@ -179,7 +193,7 @@ export default function OurDiasporaAdminPage() {
     { key: 'contactValue', label: 'Contact', render: (_: any, row: any) => `${row.contactValue} (${row.contactMethod})` },
     {
       key: 'residence',
-      label: 'Lives In',
+      label: 'From',
       render: (_: any, row: any) => {
         const place = row.residence === 'Other' ? row.residenceOther : row.residence;
         if (!place) return <span className="text-white/25">—</span>;
@@ -193,8 +207,8 @@ export default function OurDiasporaAdminPage() {
         );
       },
     },
-    { key: 'visitorType', label: 'Type' },
-    { key: 'timeframe', label: 'Timeframe' },
+    { key: 'arrival', label: 'Arriving', render: (_: any, row: any) => row.arrival || row.timeframe || '—' },
+    { key: 'stayLength', label: 'Staying', render: (_: any, row: any) => row.stayLength || '—' },
     {
       key: 'createdAt',
       label: 'Submitted',
@@ -287,7 +301,7 @@ export default function OurDiasporaAdminPage() {
                       <p className="text-white/90 font-medium truncate">{row.name}</p>
                       <p className="text-[#e8c07a]/80 text-xs mt-0.5 truncate">{row.contactValue} ({row.contactMethod})</p>
                       <p className="text-white/55 text-xs mt-1 truncate">
-                        {[row.residence === 'Other' ? row.residenceOther : row.residence, row.visitorType, row.timeframe]
+                        {[row.residence === 'Other' ? row.residenceOther : row.residence, row.arrival || row.timeframe, row.stayLength]
                           .filter(Boolean)
                           .join(' · ')}
                       </p>
@@ -343,34 +357,51 @@ export default function OurDiasporaAdminPage() {
       <AdminModal isOpen={!!selected} onClose={() => setSelected(null)} title="Diaspora Check-In">
         {selected && (
           <div className="space-y-4">
-            <Section title="Contact">
+            <Section title="About Them">
               <Detail label="Name" value={selected.name} />
               <Detail label="Reach via" value={selected.contactMethod} />
               <Detail label="Contact Detail" value={selected.contactValue} />
+              <Detail label="Travelling From" value={selected.residence === 'Other' ? selected.residenceOther : selected.residence} />
             </Section>
 
-            <Section title="Trip Details">
-              <Detail label="Lives In" value={selected.residence === 'Other' ? selected.residenceOther : selected.residence} />
-              <Detail label="First Time or Returning" value={selected.visitorType} />
-              <Detail label="Timeframe" value={selected.timeframe} />
-              <Detail label="Family / Friends Aware" value={selected.familyAware} />
-            </Section>
-
-            <Section title="Motivation">
-              <Detail label="Reasons for Coming" value={selected.reason} />
+            <Section title="Their Trip">
+              <Detail label="Last Home" value={selected.lastHome} />
+              <Detail label="Arriving" value={selected.arrival} />
+              <Detail label="Staying For" value={selected.stayLength} />
+              <Detail label="Coming With" value={selected.companions} />
+              <Detail label="What's Bringing Them Home" value={selected.reason} />
               <Detail label="Other Reason" value={selected.reasonOther} />
+              <Detail label="Wants Wedding Help" value={selected.weddingHelp} />
+              <Detail label="Staying At" value={selected.accommodation} />
+              <Detail label="Budget Per Night" value={selected.budget} />
             </Section>
 
-            <Section title="Needs Handled">
-              <Detail label="Needs Handled" value={selected.challenges} />
-              <Detail label="Other Need" value={selected.challengesOther} />
-              <Detail label="Wants On-Ground Help" value={selected.wantsHelp} />
-            </Section>
-
-            <Section title="Excitement">
+            <Section title="What They Need">
+              <Detail label="Wants Handled" value={selected.needs} />
+              <Detail label="Other Need" value={selected.needsOther} />
               <Detail label="Excited To Experience" value={selected.excitedFor} />
               <Detail label="Other Excitement" value={selected.excitedForOther} />
             </Section>
+
+            {selected.perks && (
+              <Section title="Perks">
+                <Detail label="Perks & Discounts" value={selected.perks} />
+                <Detail label="Partner Sharing Consent" value={selected.partnerConsent ? 'Yes' : 'No'} />
+                <Detail label="Heard About Us" value={selected.heardFrom === 'Other' ? selected.heardFromOther : selected.heardFrom} />
+              </Section>
+            )}
+
+            {/* Answers from the first version of the questionnaire */}
+            {(selected.visitorType || selected.timeframe || selected.familyAware || selected.wantsHelp || selected.challenges?.length > 0) && (
+              <Section title="Earlier Questionnaire">
+                <Detail label="First Time or Returning" value={selected.visitorType} />
+                <Detail label="Timeframe" value={selected.timeframe} />
+                <Detail label="Family / Friends Aware" value={selected.familyAware} />
+                <Detail label="Needs Handled" value={selected.challenges} />
+                <Detail label="Other Need" value={selected.challengesOther} />
+                <Detail label="Wants On-Ground Help" value={selected.wantsHelp} />
+              </Section>
+            )}
 
             {selected.contactMethod === 'Email' && (
               <div className="pt-2">

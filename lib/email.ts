@@ -705,6 +705,7 @@ export async function sendQuestionnaireEmails({
 
 const GOLD = '#e8c07a';
 const TEAL = '#7dd3cf';
+const DIASPORA_WHATSAPP_COMMUNITY = 'https://chat.whatsapp.com/JWUhVtXbFlbBSbmvpYhtpa';
 
 type HomecomingPayload = {
   submission: Record<string, any>;
@@ -763,35 +764,39 @@ function buildAdminHomecomingEmailHtml(s: Record<string, any>) {
                 ${escapeHtml(s.name)}
               </h1>
               <p style="margin:10px 0 0;font-size:12px;letter-spacing:0.04em;color:#8fa8a5;">
-                ${escapeHtml(s.visitorType || '—')} · ${escapeHtml(s.timeframe || '—')}
+                ${escapeHtml(s.arrival || '—')} · ${escapeHtml(s.stayLength || '—')} · ${escapeHtml(s.companions || '—')}
               </p>
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
             <tr><td style="padding:4px 16px 8px;">
               <table width="100%" cellpadding="0" cellspacing="0">
-                ${hSection('Contact', [
+                ${hSection('About Them', [
                   hRow('Name', s.name),
                   hRow('Reach via', s.contactMethod),
                   hRow('Contact Detail', s.contactValue),
+                  hRow('Travelling From', s.residence === 'Other' ? s.residenceOther : s.residence),
                 ].join(''))}
-                ${hSection('Trip Details', [
-                  hRow('Lives In', s.residence === 'Other' ? s.residenceOther : s.residence),
-                  hRow('First Time or Returning', s.visitorType),
-                  hRow('Timeframe', s.timeframe),
-                  hRow('Family / Friends Aware', s.familyAware),
-                ].join(''))}
-                ${hSection('Motivation', [
-                  hRow('Reasons for Coming', s.reason),
+                ${hSection('Their Trip', [
+                  hRow('Last Home', s.lastHome),
+                  hRow('Arriving', s.arrival),
+                  hRow('Staying For', s.stayLength),
+                  hRow('Coming With', s.companions),
+                  hRow('Bringing Them Home', s.reason),
                   hRow('Other Reason', s.reasonOther),
+                  hRow('Wants Wedding Help', s.weddingHelp),
+                  hRow('Staying At', s.accommodation),
+                  hRow('Budget Per Night', s.budget),
                 ].join(''))}
-                ${hSection('Needs Handled', [
-                  hRow('Needs Handled', s.challenges),
-                  hRow('Other Need', s.challengesOther),
-                  hRow('Wants On-Ground Help', s.wantsHelp),
-                ].join(''))}
-                ${hSection('Excitement', [
+                ${hSection('What They Need', [
+                  hRow('Wants Handled', s.needs),
+                  hRow('Other Need', s.needsOther),
                   hRow('Excited To Experience', s.excitedFor),
                   hRow('Other Excitement', s.excitedForOther),
+                ].join(''))}
+                ${hSection('Perks', [
+                  hRow('Perks & Discounts', s.perks),
+                  hRow('Partner Sharing Consent', s.partnerConsent ? 'Yes' : ''),
+                  hRow('Heard About Us', s.heardFrom === 'Other' ? s.heardFromOther : s.heardFrom),
                 ].join(''))}
               </table>
             </td></tr>
@@ -845,12 +850,26 @@ function buildUserHomecomingEmailHtml(s: Record<string, any>) {
               <p style="margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:${GOLD};">What you told us</p>
               <table width="100%" cellpadding="0" cellspacing="0">
                 ${[
-                  hRow('Timeframe', s.timeframe),
-                  hRow('First Time or Returning', s.visitorType),
-                  hRow('Reasons for Coming', s.reason),
+                  hRow('Arriving', s.arrival),
+                  hRow('Staying For', s.stayLength),
+                  hRow('Coming With', s.companions),
+                  hRow("What's Bringing You Home", s.reason),
                   hRow('Other Reason', s.reasonOther),
+                  hRow('Staying At', s.accommodation),
+                  hRow('What You Want Handled', s.needs),
                 ].join('')}
               </table>
+            </td></tr>
+            <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
+            <tr><td style="padding:28px 32px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:0.28em;color:${GOLD};">The RÌNWÁ Diaspora Community</p>
+              <p style="margin:0 0 18px;font-size:13px;line-height:1.7;color:#8fa8a5;">
+                We share exclusive experiences, partner perks, and tips for your trip.
+              </p>
+              <a href="${DIASPORA_WHATSAPP_COMMUNITY}"
+                 style="display:inline-block;background:${GOLD};color:#041114;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;text-decoration:none;padding:13px 28px;border-radius:100px;">
+                Join on WhatsApp
+              </a>
             </td></tr>
             <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:0;"></td></tr>
             <tr><td style="padding:28px 32px;text-align:center;">
@@ -903,7 +922,7 @@ export async function sendHomecomingEmails({
       to: adminEmail,
       replyTo: userEmail || undefined,
       subject: `[Diaspora Check-In] ${submission.name}`,
-      text: `${submission.name} checked in via ${submission.contactMethod} (${submission.contactValue}). Coming ${submission.timeframe} as a ${submission.visitorType}.`,
+      text: `${submission.name} checked in via ${submission.contactMethod} (${submission.contactValue}). Arriving ${submission.arrival}, staying ${submission.stayLength}, ${submission.companions}.`,
       html: buildAdminHomecomingEmailHtml(submission),
     });
     if (error) {
@@ -920,7 +939,7 @@ export async function sendHomecomingEmails({
       from,
       to: userEmail,
       subject: "You're checked in — RÌNWÁ Homecoming",
-      text: `Thank you for your time, ${submission.name}! We'd get to you soon.`,
+      text: `Thank you for your time, ${submission.name}! We'd get to you soon. Join the RÌNWÁ Diaspora WhatsApp community: ${DIASPORA_WHATSAPP_COMMUNITY}`,
       html: buildUserHomecomingEmailHtml(submission),
     });
     if (error) {

@@ -26,47 +26,78 @@ interface FormData {
   name: string;
   contactMethod: string; contactValue: string;
   residence: string; residenceOther: string;
-  visitorType: string;
-  timeframe: string;
-  familyAware: string;
+  lastHome: string;
+  arrival: string;
+  stayLength: string;
+  companions: string;
   reason: string[]; reasonOther: string;
-  challenges: string[]; challengesOther: string;
-  wantsHelp: string;
+  weddingHelp: string;
+  accommodation: string;
+  budget: string;
+  needs: string[]; needsOther: string;
   excitedFor: string[]; excitedForOther: string;
+  perks: string; partnerConsent: boolean;
+  heardFrom: string; heardFromOther: string;
 }
 
 const BLANK: FormData = {
   name: "",
   contactMethod: "", contactValue: "",
   residence: "", residenceOther: "",
-  visitorType: "",
-  timeframe: "",
-  familyAware: "",
+  lastHome: "",
+  arrival: "",
+  stayLength: "",
+  companions: "",
   reason: [], reasonOther: "",
-  challenges: [], challengesOther: "",
-  wantsHelp: "",
+  weddingHelp: "",
+  accommodation: "",
+  budget: "",
+  needs: [], needsOther: "",
   excitedFor: [], excitedForOther: "",
+  perks: "", partnerConsent: false,
+  heardFrom: "", heardFromOther: "",
 };
 
-const RESIDENCES = ["Canada", "UK", "USA", "Other"];
-const REASONS = ["Reconnect with family", "Explore the city", "Business opportunities", "Wedding celebrations", "Relocating decisions", "Other"];
-const CHALLENGES = [
-  "Getting from the airport without hassle", "Traffic / getting around", "Eating well consistently",
-  "Finding good accommodation", "Knowing who to trust for help", "Building solid connections",
-  "Just not knowing where to start", "Other",
+const RESIDENCES = ["Canada", "UK", "USA", "UAE", "Other"];
+const LAST_HOME = ["This would be my first time since I left", "Within the last year", "1–3 years ago", "4+ years ago", "I have never been"];
+const ARRIVALS = ["November", "December", "Early 2027", "Not sure yet"];
+const STAY_LENGTHS = ["Under 1 week", "1–2 weeks", "3–4 weeks", "1 month+"];
+const COMPANIONS = ["Just me", "With my partner", "With family (including kids)", "With a group of friends"];
+const OWN_WEDDING = "My own wedding";
+const REASONS = [
+  "Reconnecting with family", "Exploring Lagos", "Business or investment",
+  "Attending a wedding or celebration", OWN_WEDDING, "Exploring relocation", "Other",
+];
+const WEDDING_HELP = ["Yes, let's talk", "Maybe later", "No, it's covered"];
+const ACCOMMODATIONS = ["With family or friends", "Hotel", "Short-let / Airbnb", "Not sure yet"];
+const BUDGETS = ["Under ₦75,000", "₦75,000–₦150,000", "₦150,000–₦250,000", "₦250,000+"];
+const NEEDS = [
+  "Airport pickup", "A driver or getting around", "Recommended stays",
+  "Beauty & grooming (waxing, nails, spa)", "Event-ready glam (hair, makeup, gele)",
+  "Home help (laundry, cleaning, errands)", "Private chef or catering",
+  "Venues for hosting (dinners, parties, meetings)", "Other",
 ];
 const EXCITEMENTS = [
-  "Curated nightlife", "Private / exclusive social clubs", "Cultural experiences",
-  "Weddings & social events", "Business / networking", "Wellness / rest", "Local food & dining", "Other",
+  "Weddings & social events", "Business & networking", "Curated nightlife", "Private social clubs",
+  "Cultural experiences", "Wellness & rest", "Local food & dining", "Children's activities", "Other",
 ];
+const PARTNER_OFFERS = "Send me partner offers";
+const PERKS = [PARTNER_OFFERS, "Send offers through RÌNWÁ only", "Not right now"];
+const HEARD_FROM = ["Instagram", "TikTok", "Friend or family", "A partner brand", "Other"];
 
-// Three themed pages, each holding several numbered QuestionBlocks (see
+const WHATSAPP_COMMUNITY = "https://chat.whatsapp.com/JWUhVtXbFlbBSbmvpYhtpa";
+
+// The budget question only matters when they aren't staying with people.
+const needsBudget = (accommodation: string) => !!accommodation && accommodation !== "With family or friends";
+
+// Four themed pages, each holding several numbered QuestionBlocks (see
 // ./questionnaire-ui) — a group of related questions per screen instead of
-// one screen per question, so the whole flow is three pages, not eleven.
+// one screen per question, so the whole flow is four pages, not fifteen.
 const PAGES = [
-  { tag: "01 — About You",          title: "Let's start with the basics",         desc: "A few details so we know who we're planning for." },
-  { tag: "02 — Your Trip",          title: "Now, tell us about the trip",          desc: "Rough details are perfectly fine, nothing's locked in." },
-  { tag: "03 — Making It Easier",   title: "Help us make it easier for you",       desc: "The more honest you are, the more useful this is." },
+  { tag: "01 — About You",        title: "Let's start with the basics",    desc: "A few details so we know who we're planning for." },
+  { tag: "02 — Your Trip",        title: "Now, tell us about the trip",    desc: "Rough details are perfectly fine, nothing's locked in." },
+  { tag: "03 — What You Need",    title: "Help us make it easier for you", desc: "The more honest you are, the more useful this is." },
+  { tag: "04 — Perks",            title: "A few extras before you go",     desc: "Partner perks, discounts, and the community." },
 ];
 
 const TOTAL = PAGES.length;
@@ -253,7 +284,7 @@ export default function Questions() {
   const [submitting, setSubmitting] = useState(false);
   const [data, setData]           = useState<FormData>(BLANK);
 
-  function set(field: keyof FormData, value: string) {
+  function set<K extends keyof FormData>(field: K, value: FormData[K]) {
     setData(prev => ({ ...prev, [field]: value }));
   }
 
@@ -269,18 +300,27 @@ export default function Questions() {
       case 1:
         if (!data.name.trim()) return "Let us know what to call you.";
         if (!data.contactMethod || !data.contactValue.trim()) return "Please choose how to reach you and share the detail.";
-        if (!data.residence || (data.residence === "Other" && !data.residenceOther.trim())) return "Please let us know where you live.";
+        if (data.contactMethod === "Email" && !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(data.contactValue.trim())) return "Please enter a valid email address.";
+        if (!data.residence || (data.residence === "Other" && !data.residenceOther.trim())) return "Please let us know where you're travelling from.";
         return null;
       case 2:
-        if (!data.visitorType) return "Please let us know if you're a first timer or returnee.";
-        if (!data.timeframe) return "Please pick a rough timeframe.";
-        if (!data.familyAware) return "Please let us know if family or friends know you're coming.";
+        if (!data.lastHome) return "Please let us know when you were last home.";
+        if (!data.arrival) return "Please let us know when you're planning to arrive.";
+        if (!data.stayLength) return "Please let us know how long you're staying.";
+        if (!data.companions) return "Please let us know who's coming with you.";
         if (!data.reason.length || (data.reason.includes("Other") && !data.reasonOther.trim())) return "Pick at least one reason you're coming, or tell us more.";
+        if (data.reason.includes(OWN_WEDDING) && !data.weddingHelp) return "Let us know if you'd like help with your wedding plans.";
+        if (!data.accommodation) return "Please let us know where you'll be staying.";
+        if (needsBudget(data.accommodation) && !data.budget) return "Please pick a rough accommodation budget.";
         return null;
       case 3:
-        if (!data.challenges.length || (data.challenges.includes("Other") && !data.challengesOther.trim())) return "Pick at least one thing you need handled, or tell us more.";
-        if (!data.wantsHelp) return "Please let us know if you'd want help getting around.";
+        if (!data.needs.length || (data.needs.includes("Other") && !data.needsOther.trim())) return "Pick at least one thing you'd like handled, or tell us more.";
         if (!data.excitedFor.length || (data.excitedFor.includes("Other") && !data.excitedForOther.trim())) return "Pick at least one thing you're excited for, or tell us more.";
+        return null;
+      case 4:
+        if (!data.perks) return "Let us know if you'd like perks and discounts.";
+        if (data.perks === PARTNER_OFFERS && !data.partnerConsent) return "Please tick the consent box so partners can send you offers.";
+        if (!data.heardFrom || (data.heardFrom === "Other" && !data.heardFromOther.trim())) return "Let us know how you heard about RÌNWÁ.";
         return null;
       default: return null;
     }
@@ -312,7 +352,13 @@ export default function Questions() {
       const res = await fetch("/api/homecoming", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        // Drop answers to conditional questions that are no longer showing.
+        body: JSON.stringify({
+          ...data,
+          weddingHelp: data.reason.includes(OWN_WEDDING) ? data.weddingHelp : "",
+          budget: needsBudget(data.accommodation) ? data.budget : "",
+          partnerConsent: data.perks === PARTNER_OFFERS && data.partnerConsent,
+        }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -381,6 +427,7 @@ export default function Questions() {
                 {step === 1 && <Page1 data={data} set={set} />}
                 {step === 2 && <Page2 data={data} set={set} toggle={toggle} />}
                 {step === 3 && <Page3 data={data} set={set} toggle={toggle} />}
+                {step === 4 && <Page4 data={data} set={set} />}
               </Shell>
             </motion.div>
           )}
@@ -560,6 +607,13 @@ function SuccessScreen() {
 
         <ShareRow />
 
+        <div className="mt-10 flex flex-col items-center gap-3">
+          <p className="text-sm text-white/50 max-w-sm">
+            Join the RÌNWÁ Diaspora WhatsApp community for exclusive experiences, partner perks, and trip tips.
+          </p>
+          <WhatsAppCommunityButton />
+        </div>
+
         <Link
           href="/"
           className="group mt-12 inline-flex items-center gap-3 rounded-md border px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] transition-colors"
@@ -586,14 +640,17 @@ function SuccessScreen() {
 // Shell, Field, Area, SegButtons, Chips, Reveal, and QuestionBlock are shared
 // with every other intake flow — see ./questionnaire-ui. Each page below is a
 // short, thematically-grouped run of QuestionBlocks inside the one Shell card,
-// so eleven questions read as three pages instead of eleven. This flow's
+// so fifteen questions read as four pages instead of fifteen. This flow's
 // accent (gold) is set once, above, as a CSS variable on the root element.
 
-function Page1({ data, set }: { data: FormData; set: (f: keyof FormData, v: string) => void }) {
+type SetFn = <K extends keyof FormData>(f: K, v: FormData[K]) => void;
+type ToggleFn = (f: keyof FormData, v: string) => void;
+
+function Page1({ data, set }: { data: FormData; set: SetFn }) {
   const methodMeta: Record<string, { label: string; type: string; placeholder: string }> = {
-    WhatsApp: { label: "WhatsApp Number", type: "tel", placeholder: "+234 xxx xxx xxxx" },
-    Email:    { label: "Email Address",   type: "email", placeholder: "your@email.com" },
-    Phone:    { label: "Phone Number",    type: "tel", placeholder: "+234 xxx xxx xxxx" },
+    WhatsApp:     { label: "WhatsApp Number", type: "tel", placeholder: "+1 xxx xxx xxxx" },
+    Email:        { label: "Email Address",   type: "email", placeholder: "your@email.com" },
+    "Phone call": { label: "Phone Number",    type: "tel", placeholder: "+1 xxx xxx xxxx" },
   };
   const meta = methodMeta[data.contactMethod];
 
@@ -607,9 +664,9 @@ function Page1({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
         />
       </QuestionBlock>
 
-      <QuestionBlock index={2} prompt="How can we reach you?">
+      <QuestionBlock index={2} prompt="What's the best way to reach you?">
         <div className="space-y-1">
-          <SegButtons options={["WhatsApp", "Email", "Phone"]} value={data.contactMethod} onPick={v => { set("contactMethod", v); set("contactValue", ""); }} />
+          <SegButtons options={["WhatsApp", "Email", "Phone call"]} value={data.contactMethod} onPick={v => { set("contactMethod", v); set("contactValue", ""); }} />
           <Reveal show={!!data.contactMethod}>
             {meta && (
               <Field
@@ -622,11 +679,11 @@ function Page1({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
         </div>
       </QuestionBlock>
 
-      <QuestionBlock index={3} prompt="Where do you live?" last>
+      <QuestionBlock index={3} prompt="Where are you travelling from?" last>
         <div>
           <Chips options={RESIDENCES} values={data.residence} onToggle={v => set("residence", data.residence === v ? "" : v)} />
           <Reveal show={data.residence === "Other"}>
-            <Area label="Tell us more" name="residenceOther" value={data.residenceOther} onChange={e => set("residenceOther", e.target.value)} rows={2} placeholder="Where do you live?" />
+            <Area label="Please specify" name="residenceOther" value={data.residenceOther} onChange={e => set("residenceOther", e.target.value)} rows={2} placeholder="Where are you travelling from?" />
           </Reveal>
         </div>
       </QuestionBlock>
@@ -634,70 +691,69 @@ function Page1({ data, set }: { data: FormData; set: (f: keyof FormData, v: stri
   );
 }
 
-function Page2({
-  data, set, toggle,
-}: {
-  data: FormData;
-  set: (f: keyof FormData, v: string) => void;
-  toggle: (f: keyof FormData, v: string) => void;
-}) {
+// Single-select chips that can be cleared by tapping the active one again.
+function pick<K extends keyof FormData>(data: FormData, set: SetFn, field: K) {
+  return (v: string) => set(field, (data[field] === v ? "" : v) as FormData[K]);
+}
+
+function Page2({ data, set, toggle }: { data: FormData; set: SetFn; toggle: ToggleFn }) {
   return (
     <div>
-      <QuestionBlock index={1} prompt="Is this your first time visiting, or are you a returner?">
-        <SegButtons options={["First timer", "Returnee"]} value={data.visitorType} onPick={v => set("visitorType", v)} />
+      <QuestionBlock index={4} prompt="When were you last home?">
+        <Chips options={LAST_HOME} values={data.lastHome} onToggle={pick(data, set, "lastHome")} />
       </QuestionBlock>
 
-      <QuestionBlock index={2} prompt="Roughly what timeframe are you thinking?">
-        <Chips
-          options={["September", "October", "November", "December", "Still deciding"]}
-          values={data.timeframe}
-          onToggle={v => set("timeframe", data.timeframe === v ? "" : v)}
-        />
+      <QuestionBlock index={5} prompt="When are you planning to arrive?">
+        <Chips options={ARRIVALS} values={data.arrival} onToggle={pick(data, set, "arrival")} />
       </QuestionBlock>
 
-      <QuestionBlock index={3} prompt="Do your family or friends here know you're coming?">
-        <SegButtons
-          options={["They know", "It's a surprise", "Some know, not all"]}
-          value={data.familyAware}
-          onPick={v => set("familyAware", v)}
-        />
+      <QuestionBlock index={6} prompt="How long are you staying?">
+        <Chips options={STAY_LENGTHS} values={data.stayLength} onToggle={pick(data, set, "stayLength")} />
       </QuestionBlock>
 
-      <QuestionBlock index={4} prompt="Why are you coming?" last>
+      <QuestionBlock index={7} prompt="Who's coming with you?">
+        <Chips options={COMPANIONS} values={data.companions} onToggle={pick(data, set, "companions")} />
+      </QuestionBlock>
+
+      <QuestionBlock index={8} prompt="What's bringing you home?" desc="Select all that apply.">
         <div>
           <Chips options={REASONS} values={data.reason} onToggle={v => toggle("reason", v)} multi />
           <Reveal show={data.reason.includes("Other")}>
             <Area label="Tell us more" name="reasonOther" value={data.reasonOther} onChange={e => set("reasonOther", e.target.value)} rows={2} placeholder="What's bringing you home?" />
           </Reveal>
-        </div>
-      </QuestionBlock>
-    </div>
-  );
-}
-
-function Page3({
-  data, set, toggle,
-}: {
-  data: FormData;
-  set: (f: keyof FormData, v: string) => void;
-  toggle: (f: keyof FormData, v: string) => void;
-}) {
-  return (
-    <div>
-      <QuestionBlock index={1} prompt="What's on your 'I need this handled' list?">
-        <div>
-          <Chips options={CHALLENGES} values={data.challenges} onToggle={v => toggle("challenges", v)} multi />
-          <Reveal show={data.challenges.includes("Other")}>
-            <Area label="Tell us more" name="challengesOther" value={data.challengesOther} onChange={e => set("challengesOther", e.target.value)} rows={2} placeholder="What else do you need handled?" />
+          <Reveal show={data.reason.includes(OWN_WEDDING)}>
+            <p className="mb-3 text-[0.92rem] text-white/80">Would you like help with your wedding plans?</p>
+            <SegButtons options={WEDDING_HELP} value={data.weddingHelp} onPick={v => set("weddingHelp", v)} />
           </Reveal>
         </div>
       </QuestionBlock>
 
-      <QuestionBlock index={2} prompt="Would you want help with things like airport pickup or getting around?">
-        <SegButtons options={["Yes", "No", "Maybe"]} value={data.wantsHelp} onPick={v => set("wantsHelp", v)} />
+      <QuestionBlock index={9} prompt="Where will you be staying?" last={!needsBudget(data.accommodation)}>
+        <Chips options={ACCOMMODATIONS} values={data.accommodation} onToggle={pick(data, set, "accommodation")} />
       </QuestionBlock>
 
-      <QuestionBlock index={3} prompt="What are you excited to experience?" last>
+      <Reveal show={needsBudget(data.accommodation)}>
+        <QuestionBlock index={10} prompt="What's your accommodation budget per night?" last>
+          <Chips options={BUDGETS} values={data.budget} onToggle={pick(data, set, "budget")} />
+        </QuestionBlock>
+      </Reveal>
+    </div>
+  );
+}
+
+function Page3({ data, set, toggle }: { data: FormData; set: SetFn; toggle: ToggleFn }) {
+  return (
+    <div>
+      <QuestionBlock index={11} prompt="What would you like handled for you?" desc="Select all that apply.">
+        <div>
+          <Chips options={NEEDS} values={data.needs} onToggle={v => toggle("needs", v)} multi />
+          <Reveal show={data.needs.includes("Other")}>
+            <Area label="Tell us more" name="needsOther" value={data.needsOther} onChange={e => set("needsOther", e.target.value)} rows={2} placeholder="What else would you like handled?" />
+          </Reveal>
+        </div>
+      </QuestionBlock>
+
+      <QuestionBlock index={12} prompt="What are you most excited to experience?" desc="Select all that apply." last>
         <div>
           <Chips options={EXCITEMENTS} values={data.excitedFor} onToggle={v => toggle("excitedFor", v)} multi />
           <Reveal show={data.excitedFor.includes("Other")}>
@@ -706,5 +762,65 @@ function Page3({
         </div>
       </QuestionBlock>
     </div>
+  );
+}
+
+function Page4({ data, set }: { data: FormData; set: SetFn }) {
+  return (
+    <div>
+      <QuestionBlock index={13} prompt="Would you like exclusive perks and discounts?">
+        <div>
+          <Chips
+            options={PERKS} values={data.perks}
+            onToggle={v => { pick(data, set, "perks")(v); set("partnerConsent", false); }}
+          />
+          <Reveal show={data.perks === PARTNER_OFFERS}>
+            <label className="flex items-start gap-3 cursor-pointer text-[0.86rem] leading-relaxed text-white/70">
+              <input
+                type="checkbox"
+                checked={data.partnerConsent}
+                onChange={e => set("partnerConsent", e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 cursor-pointer"
+                style={{ accentColor: GOLD }}
+              />
+              I agree that RÌNWÁ may share my details with selected partners so they can send me relevant offers.
+            </label>
+          </Reveal>
+        </div>
+      </QuestionBlock>
+
+      <QuestionBlock index={14} prompt="How did you hear about RÌNWÁ?">
+        <div>
+          <Chips options={HEARD_FROM} values={data.heardFrom} onToggle={pick(data, set, "heardFrom")} />
+          <Reveal show={data.heardFrom === "Other"}>
+            <Area label="Please specify" name="heardFromOther" value={data.heardFromOther} onChange={e => set("heardFromOther", e.target.value)} rows={2} placeholder="Where did you hear about us?" />
+          </Reveal>
+        </div>
+      </QuestionBlock>
+
+      <QuestionBlock
+        index={15}
+        prompt="Join the RÌNWÁ Diaspora WhatsApp community"
+        desc="We share exclusive experiences, partner perks, and tips for your trip."
+        last
+      >
+        <WhatsAppCommunityButton />
+      </QuestionBlock>
+    </div>
+  );
+}
+
+function WhatsAppCommunityButton() {
+  return (
+    <a
+      href={WHATSAPP_COMMUNITY}
+      target="_blank" rel="noopener noreferrer"
+      className="inline-flex items-center gap-2.5 rounded-md border px-5 py-3 text-sm font-medium transition-colors"
+      style={{ borderColor: `${GOLD}59`, background: `${GOLD}1a`, color: GOLD }}
+    >
+      <MessageCircle size={16} />
+      Join the community
+      <ArrowRight size={14} />
+    </a>
   );
 }
