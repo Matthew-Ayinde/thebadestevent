@@ -14,7 +14,7 @@ export default function HotelMedallionRsvpPage() {
         <p className="mt-8 text-xs uppercase tracking-[0.32em] text-(--hm-mist)">You are specially invited to the relaunch</p>
         <h1 className="mt-3 font-serif text-3xl leading-tight text-(--hm-cream) sm:text-4xl">
           {/* The Relaunch */}
-          <span className="block text-(--hm-accent-soft) italic">Wine &amp; Wings Cocktail Party</span>
+          <span className="block text-(--hm-accent-soft) italic">Wings &amp; Wine Cocktail Party</span>
         </h1>
 
         <dl className="mt-8 flex flex-col items-center gap-3 text-sm text-(--hm-mist)">

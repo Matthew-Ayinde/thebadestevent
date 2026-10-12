@@ -5,8 +5,8 @@
 
 export const MEDALLION_EVENT = {
   hotel: 'Hotel Medallion',
-  title: 'Relaunch — Wine & Wings Cocktail Party',
-  invitationLine: 'You are specially invited to Hotel Medallion’s Relaunch - Wine & Wings cocktail party',
+  title: 'Relaunch — Wings & Wine Cocktail Party',
+  invitationLine: 'You are specially invited to Hotel Medallion’s Relaunch - Wings & Wine cocktail party',
   dateLabel: 'October 30th, 2026',
   timeLabel: '6:00 PM - 10:00 PM',
   // Exact times for "Add to calendar" — keep in sync with timeLabel. Lagos is UTC+1 all year.
