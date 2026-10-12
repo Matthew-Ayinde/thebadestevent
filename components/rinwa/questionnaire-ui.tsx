@@ -43,7 +43,7 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <Label req={req}>{label}</Label>
+      {/* <Label req={req}>{label}</Label> */}
       <input
         type={type} name={name} value={value} onChange={onChange}
         placeholder={placeholder || label}
