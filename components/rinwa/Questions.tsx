@@ -303,7 +303,7 @@ function WelcomeScreen({ onBegin, onBook }: { onBegin: () => void; onBook: () =>
           </button>
         </div>
         <p className="mt-6 max-w-sm text-xs text-fg-faint leading-relaxed">
-          Prefer to talk it through? Book time directly with Rinwa instead of filling the questionnaire.
+          Prefer to talk it through? Book time directly with RÌNWÁ instead of filling the questionnaire.
         </p>
       </motion.div>
     </div>

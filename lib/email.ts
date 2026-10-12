@@ -313,6 +313,7 @@ export async function sendInquiryEmails({ submission, adminEmail }: InquiryEmail
     return true;
   };
 
+
   const sendUserEmail = async () => {
     const { error } = await resend.emails.send({
       from,
@@ -389,7 +390,7 @@ function buildAdminQuestionnaireEmailHtml(s: Record<string, any>) {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#041114;padding:40px 16px;">
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;">
-        <tr><td style="padding-bottom:24px;">
+        <tr><td style="padding-bottom:24px;">FF
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
               <td>

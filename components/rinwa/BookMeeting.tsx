@@ -255,7 +255,7 @@ function Intake({
   const errors = {
     fullName: fullName.trim().length < 2 ? "Please share your full name." : "",
     email: !EMAIL_RE.test(email.trim()) ? "Please enter a valid email address." : "",
-    note: note.trim().length < 10 ? "A sentence or two helps Rinwa prepare for your conversation." : "",
+    note: note.trim().length < 10 ? "A sentence or two helps RÌNWÁ prepare for your conversation." : "",
   };
   const show = (k: keyof typeof errors) => touched[k] && errors[k];
 
@@ -301,7 +301,7 @@ function Intake({
         Let&apos;s talk it through.
       </h2>
       <p className="mt-4 mb-9 max-w-lg text-[0.92rem] text-fg-muted leading-relaxed">
-        Share a little about yourself and what&apos;s on your mind. Next, you&apos;ll see Rinwa&apos;s calendar
+        Share a little about yourself and what&apos;s on your mind. Next, you&apos;ll see RÌNWÁ&apos;s calendar
         and choose a time that suits you.
       </p>
 
@@ -322,7 +322,7 @@ function Intake({
         <div className="border-t border-line-soft" />
 
         <div>
-          <FieldLabel id="topic-label">What would you like to discuss?</FieldLabel>
+          <FieldLabel id="topic-label">What would you like to discuss? (Reason for meeting )</FieldLabel>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="topic-label">
             {TOPICS.map(t => (
               <button
@@ -341,12 +341,12 @@ function Intake({
         </div>
 
         <label className="block">
-          <FieldLabel req>Reason for the meeting</FieldLabel>
+          <FieldLabel req>Tell us a bit more</FieldLabel>
           <textarea
             name="reason" rows={4} value={note}
             onChange={e => setNote(e.target.value)}
             onBlur={() => setTouched(t => ({ ...t, note: true }))}
-            placeholder="What would you like Rinwa to know before you meet?"
+            placeholder="What would you like RÌNWÁ to know before you meet?"
             aria-invalid={!!show("note")}
             maxLength={1200}
             className={`${inputCls} min-h-0 resize-none ${show("note") ? "border-danger/50" : "border-line"}`}
@@ -662,7 +662,7 @@ function Confirmed({ details, booking, onExit }: { details: Details; booking: Bo
 
       {slot && (
         <div className="mb-8 w-full max-w-md rounded-[1.6rem] border border-accent/25 bg-card backdrop-blur-xl px-6 py-5 shadow-card">
-          <p className="text-[0.66rem] uppercase tracking-[0.3em] text-accent mb-2">Your meeting with Rinwa</p>
+          <p className="text-[0.66rem] uppercase tracking-[0.3em] text-accent mb-2">Your meeting with RÌNWÁ</p>
           <p className="font-serif text-2xl text-fg leading-tight" style={{ fontFamily: "var(--font-serif)" }}>{slot.day}</p>
           <p className="mt-1 text-sm text-fg-muted">{slot.time}</p>
         </div>
@@ -670,8 +670,8 @@ function Confirmed({ details, booking, onExit }: { details: Details; booking: Bo
 
       <p className="max-w-md text-base text-fg-muted leading-relaxed mb-3">
         {booking
-          ? <>A calendar invite with the meeting details is on its way to <span className="text-fg break-all">{details.email}</span>.</>
-          : <>Rinwa will be in touch at <span className="text-fg break-all">{details.email}</span> within <span className="text-fg">48 hours</span> to find a time that works.</>}
+          ? <>A calendar invite with the meeting details is on its way to <br /> <span className="text-fg break-all">{details.email}</span>.</>
+          : <>RÌNWÁ will be in touch at <span className="text-fg break-all">{details.email}</span> within <span className="text-fg">48 hours</span> to find a time that works.</>}
       </p>
       {booking ? (
         <p className="mb-12 inline-flex items-center gap-2 text-sm text-fg-faint italic">
