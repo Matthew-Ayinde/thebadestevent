@@ -1,6 +1,8 @@
 // Single source of truth for the Hotel Medallion relaunch microsite.
 // Safe to import from client components — no secrets here.
 
+
+
 export const MEDALLION_EVENT = {
   hotel: 'Hotel Medallion',
   title: 'Relaunch — Wine & Wings Cocktail Party',
