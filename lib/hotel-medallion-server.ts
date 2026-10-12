@@ -2,7 +2,7 @@ import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 import QRCode from 'qrcode';
 import { Resend } from 'resend';
-import { MEDALLION_BASE_PATH, MEDALLION_EVENT, MEDALLION_QR_PREFIX, medallionQrPayload } from '@/lib/hotel-medallion';
+import { MEDALLION_BASE_PATH, MEDALLION_DIRECTIONS_URL, MEDALLION_EVENT, MEDALLION_QR_PREFIX, medallionQrPayload } from '@/lib/hotel-medallion';
 
 // ─── Ticket identifiers ──────────────────────────────────────────────────────
 
@@ -152,7 +152,8 @@ function buildInvitationHtml(guest: InvitationGuest) {
         </td></tr>
         <tr><td align="center" style="padding:22px 36px 0;font-family:Arial,Helvetica,sans-serif;">
           <p style="margin:0;font-size:15px;font-weight:bold;letter-spacing:0.06em;color:#00aef1;">${when}</p>
-          <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#c9d3ec;">${escapeHtml(e.venueAddress)}</p>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.6;"><a href="${escapeHtml(MEDALLION_DIRECTIONS_URL)}" style="color:#c9d3ec;text-decoration:underline;text-decoration-color:#2f6fa8;">${e.venueAddressLines.map(escapeHtml).join('<br>')}</a></p>
+          <p style="margin:10px 0 0;font-size:13px;"><a href="${escapeHtml(MEDALLION_DIRECTIONS_URL)}" style="color:#00aef1;font-weight:bold;text-decoration:none;">Get directions &rarr;</a></p>
         </td></tr>
         <tr><td align="center" style="padding:28px 36px 0;">
           <table cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;">
@@ -185,6 +186,7 @@ function buildInvitationText(guest: InvitationGuest) {
     e.invitationLine,
     e.timeLabel ? `${e.dateLabel} · ${e.timeLabel}` : e.dateLabel,
     e.venueAddress,
+    `Directions: ${MEDALLION_DIRECTIONS_URL}`,
     '',
     `Your entry code: ${guest.code}`,
     `Your QR ticket: ${ticketUrl(guest.token)}`,

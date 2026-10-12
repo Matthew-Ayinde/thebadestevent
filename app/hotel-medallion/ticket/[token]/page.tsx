@@ -5,7 +5,7 @@ import { connectDB } from '@/lib/mongodb';
 import { MedallionGuest } from '@/models/MedallionGuest';
 import { MEDALLION_EVENT } from '@/lib/hotel-medallion';
 import { ticketQrSvg } from '@/lib/hotel-medallion-server';
-import { AccentRule, MedallionWordmark, PrContact } from '@/components/hotel-medallion/MedallionBrand';
+import { AccentRule, MedallionWordmark, PrContact, VenueAddress, VenueMap } from '@/components/hotel-medallion/MedallionBrand';
 import { TicketActions } from '@/components/hotel-medallion/TicketActions';
 
 export const dynamic = 'force-dynamic';
@@ -64,7 +64,7 @@ export default async function TicketPage({ params }: { params: Promise<{ token: 
           <div className="flex items-start gap-3">
             <dt className="sr-only">Venue</dt>
             <MapPin className="mt-0.5 size-4 shrink-0 text-(--hm-accent)" aria-hidden />
-            <dd>{e.venueAddress}</dd>
+            <dd><VenueAddress /></dd>
           </div>
         </dl>
       </article>
@@ -74,6 +74,8 @@ export default async function TicketPage({ params }: { params: Promise<{ token: 
       <p className="mt-6 text-center text-xs text-(--hm-dim)">
         A copy of this pass has also been sent to your email.
       </p>
+
+      <VenueMap className="mt-10" />
 
       <footer className="mt-8">
         <PrContact />

@@ -6,14 +6,21 @@ export const MEDALLION_EVENT = {
   title: 'Relaunch — Wine & Wings Cocktail Party',
   invitationLine: 'You are specially invited to Hotel Medallion’s Relaunch - Wine & Wings cocktail party',
   dateLabel: 'October 30th, 2026',
-  // TODO: replace with the confirmed start time, e.g. '7:00 PM'. Hidden while empty.
   timeLabel: '7:00 PM',
-  // TODO: replace with the confirmed venue address.
-  venueAddress: 'Hotel Medallion — venue address to be announced',
+  venueAddressLines: ['Plot 61, Babatunde Anjous Avenue', 'Off Admiralty Way, Lekki Phase 1', 'Lagos, Nigeria'],
+  venueAddress: 'Plot 61, Babatunde Anjous Avenue, Off Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
+  // What Google Maps searches for — matches the hotel's own listing so the pin lands on the building.
+  mapsQuery: 'Hotel Medallion, Plot 61 Babatunde Anjous Avenue, Lekki Phase 1, Lagos, Nigeria',
   logoPath: '/hotel-medallion/logo.png',
   prContactName: 'RINWA',
   prContactEmail: 'info@rinwahospitality.com',
 } as const;
+
+// Opens turn-by-turn directions (the Maps app on phones) from wherever the guest is.
+export const MEDALLION_DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(MEDALLION_EVENT.mapsQuery)}`;
+
+// Keyless Google Maps embed for the in-page map.
+export const MEDALLION_MAP_EMBED_URL = `https://www.google.com/maps?q=${encodeURIComponent(MEDALLION_EVENT.mapsQuery)}&z=16&output=embed`;
 
 export const MEDALLION_BASE_PATH = '/hotel-medallion';
 

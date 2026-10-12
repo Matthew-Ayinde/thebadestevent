@@ -1,6 +1,6 @@
 import { CalendarDays, MapPin } from 'lucide-react';
 import { MEDALLION_EVENT } from '@/lib/hotel-medallion';
-import { AccentRule, MedallionWordmark, PrContact } from '@/components/hotel-medallion/MedallionBrand';
+import { AccentRule, MedallionWordmark, PrContact, VenueAddress, VenueMap } from '@/components/hotel-medallion/MedallionBrand';
 import { RsvpForm } from '@/components/hotel-medallion/RsvpForm';
 
 export default function HotelMedallionRsvpPage() {
@@ -26,7 +26,7 @@ export default function HotelMedallionRsvpPage() {
           <div className="flex items-start gap-2">
             <dt className="sr-only">Venue</dt>
             <MapPin className="mt-0.5 size-4 shrink-0 text-(--hm-accent)" aria-hidden />
-            <dd className="max-w-sm">{e.venueAddress}</dd>
+            <dd className="max-w-sm"><VenueAddress /></dd>
           </div>
         </dl>
       </header>
@@ -41,6 +41,8 @@ export default function HotelMedallionRsvpPage() {
         </p>
         <RsvpForm />
       </section>
+
+      <VenueMap className="mt-10" />
 
       <footer className="mt-10">
         <PrContact />

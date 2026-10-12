@@ -121,7 +121,7 @@ async function renderPass(token: string, code: string, name: string) {
   y += 50;
   ctx.fillStyle = MIST;
   ctx.font = `28px ${SANS}`;
-  for (const line of wrapLines(ctx, e.venueAddress, W - 240)) {
+  for (const line of e.venueAddressLines.flatMap((l) => wrapLines(ctx, l, W - 240))) {
     ctx.fillText(line, W / 2, y);
     y += 38;
   }
