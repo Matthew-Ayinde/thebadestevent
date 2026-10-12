@@ -13,6 +13,9 @@ export function SplashScreen() {
   const textEase = [0.25, 0.46, 0.45, 0.94] as const;
 
   useEffect(() => {
+    // The Hotel Medallion microsite carries its own brand — no RÌNWÁ splash there.
+    if (window.location.pathname.startsWith("/hotel-medallion")) return;
+
     // Check if we've already shown the splash in this session
     const hasShownSplash = sessionStorage.getItem("rinwa-splash-shown");
 

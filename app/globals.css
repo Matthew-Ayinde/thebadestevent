@@ -178,3 +178,33 @@ body {
   background: color-mix(in srgb, var(--accent) 35%, transparent);
   border-radius: 999px;
 }
+
+/* ─── Hotel Medallion microsite ───────────────────────────────────────────────
+   Deliberately distinct from the RÌNWÁ palette: deep navy + the logo’s sky blue,
+   always dark regardless of the site theme toggle. */
+.medallion {
+  color-scheme: dark;
+  --hm-ink: #040b1f;
+  --hm-deep: #06102a;
+  --hm-navy: #0a1a3f;
+  --hm-royal: #122a5c;
+  --hm-line: #23396e;
+  --hm-accent: #00aef1;
+  --hm-accent-soft: #7fd6f8;
+  --hm-cream: #f3efe4;
+  --hm-mist: #b3c0e0;
+  --hm-dim: #8a9bc6;
+  --hm-ok: #4ade80;
+  --hm-warn: #fbbf24;
+  --hm-bad: #f87171;
+  min-height: 100dvh;
+  color: var(--hm-cream);
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(59, 100, 200, 0.35), transparent 55%),
+    radial-gradient(circle at 90% 90%, rgba(0,174,241, 0.08), transparent 40%),
+    linear-gradient(180deg, var(--hm-navy) 0%, var(--hm-deep) 55%, var(--hm-ink) 100%);
+}
+
+.medallion ::selection {
+  background: rgba(0,174,241, 0.35);
+}
