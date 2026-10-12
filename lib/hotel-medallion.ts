@@ -6,7 +6,7 @@ export const MEDALLION_EVENT = {
   title: 'Relaunch — Wine & Wings Cocktail Party',
   invitationLine: 'You are specially invited to Hotel Medallion’s Relaunch - Wine & Wings cocktail party',
   dateLabel: 'October 30th, 2026',
-  timeLabel: '7:00 PM',
+  timeLabel: '5:00 PM - 10:00 PM',
   venueAddressLines: ['Plot 61, Babatunde Anjous Avenue', 'Off Admiralty Way, Lekki Phase 1', 'Lagos, Nigeria'],
   venueAddress: 'Plot 61, Babatunde Anjous Avenue, Off Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
   // What Google Maps searches for — matches the hotel's own listing so the pin lands on the building.
