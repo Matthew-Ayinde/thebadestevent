@@ -11,6 +11,7 @@ import {
   medallionQrPayload,
   outlookCalendarUrl,
 } from '@/lib/hotel-medallion';
+import { MEDALLION_EMAIL_LOGO_PNG_BASE64 } from '@/lib/hotel-medallion-email-logo';
 
 // ─── Ticket identifiers ──────────────────────────────────────────────────────
 
@@ -158,7 +159,7 @@ function buildInvitationHtml(guest: InvitationGuest) {
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0a1a3f;border:1px solid #23396e;border-radius:20px;">
         <tr><td align="center" style="padding:40px 32px 8px;">
-          <img src="${escapeHtml(siteUrl() + e.logoPath)}" width="72" height="72" alt="${escapeHtml(e.hotel)}" style="display:block;width:72px;height:72px;border:0;margin:0 auto 16px;">
+          <img src="cid:medallion-logo" width="72" height="72" alt="${escapeHtml(e.hotel)}" style="display:block;width:72px;height:72px;border:0;margin:0 auto 16px;">
           <div style="font-size:11px;letter-spacing:0.42em;text-transform:uppercase;color:#00aef1;font-family:Arial,Helvetica,sans-serif;">Hotel</div>
           <div style="font-size:30px;letter-spacing:0.16em;text-transform:uppercase;color:#f3efe4;margin-top:6px;">Medallion</div>
           <div style="width:48px;height:1px;background:#00aef1;margin:20px auto 0;"></div>
@@ -239,6 +240,11 @@ export async function sendMedallionInvitation(guest: InvitationGuest): Promise<{
       text: buildInvitationText(guest),
       attachments: [
         { filename: `hotel-medallion-${guest.code}.png`, content: qr, contentId: 'medallion-qr' },
+        {
+          filename: 'hotel-medallion-logo.png',
+          content: Buffer.from(MEDALLION_EMAIL_LOGO_PNG_BASE64, 'base64'),
+          contentId: 'medallion-logo',
+        },
       ],
     });
     if (error) return { sent: false, error: error.message };
