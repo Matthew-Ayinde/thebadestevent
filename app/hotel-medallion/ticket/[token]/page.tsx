@@ -4,9 +4,10 @@ import { CalendarDays, MapPin } from 'lucide-react';
 import { connectDB } from '@/lib/mongodb';
 import { MedallionGuest } from '@/models/MedallionGuest';
 import { MEDALLION_EVENT } from '@/lib/hotel-medallion';
-import { ticketQrSvg } from '@/lib/hotel-medallion-server';
+import { ticketQrSvg, ticketUrl } from '@/lib/hotel-medallion-server';
 import { AccentRule, MedallionWordmark, PrContact, VenueAddress, VenueMap } from '@/components/hotel-medallion/MedallionBrand';
 import { TicketActions } from '@/components/hotel-medallion/TicketActions';
+import { AddToCalendar } from '@/components/hotel-medallion/AddToCalendar';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,6 +71,8 @@ export default async function TicketPage({ params }: { params: Promise<{ token: 
       </article>
 
       <TicketActions token={token} code={guest.code} name={name} />
+
+      <AddToCalendar token={token} ticketUrl={ticketUrl(token)} className="mt-8" />
 
       <p className="mt-6 text-center text-xs text-(--hm-dim)">
         A copy of this pass has also been sent to your email.

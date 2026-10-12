@@ -2,7 +2,15 @@ import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 import QRCode from 'qrcode';
 import { Resend } from 'resend';
-import { MEDALLION_BASE_PATH, MEDALLION_DIRECTIONS_URL, MEDALLION_EVENT, MEDALLION_QR_PREFIX, medallionQrPayload } from '@/lib/hotel-medallion';
+import {
+  MEDALLION_BASE_PATH,
+  MEDALLION_DIRECTIONS_URL,
+  MEDALLION_EVENT,
+  MEDALLION_QR_PREFIX,
+  googleCalendarUrl,
+  medallionQrPayload,
+  outlookCalendarUrl,
+} from '@/lib/hotel-medallion';
 
 // ─── Ticket identifiers ──────────────────────────────────────────────────────
 
@@ -116,6 +124,15 @@ export function ticketUrl(token: string) {
   return `${siteUrl()}${MEDALLION_BASE_PATH}/ticket/${token}`;
 }
 
+function calendarLinks(token: string) {
+  const ticket = ticketUrl(token);
+  return [
+    { label: 'Apple / iPhone', href: `${siteUrl()}/api/hotel-medallion/calendar?t=${encodeURIComponent(token)}` },
+    { label: 'Google', href: googleCalendarUrl(ticket) },
+    { label: 'Outlook', href: outlookCalendarUrl(ticket) },
+  ];
+}
+
 function escapeHtml(value: string) {
   return value
     .replaceAll('&', '&amp;')
@@ -167,6 +184,12 @@ function buildInvitationHtml(guest: InvitationGuest) {
         <tr><td align="center" style="padding:24px 36px 0;">
           <a href="${link}" style="display:inline-block;padding:12px 28px;border-radius:999px;background:#00aef1;color:#0a1a3f;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;letter-spacing:0.08em;text-decoration:none;">View your ticket</a>
         </td></tr>
+        <tr><td align="center" style="padding:22px 36px 0;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#a9b8dc;">Add to your calendar</p>
+          <p style="margin:0;font-size:13px;line-height:1.8;">${calendarLinks(guest.token)
+            .map((c) => `<a href="${escapeHtml(c.href)}" style="color:#00aef1;font-weight:bold;text-decoration:none;">${escapeHtml(c.label)}</a>`)
+            .join('<span style="color:#23396e;">&nbsp;&nbsp;|&nbsp;&nbsp;</span>')}</p>
+        </td></tr>
         <tr><td align="center" style="padding:32px 36px 36px;">
           <div style="height:1px;background:#23396e;margin-bottom:20px;"></div>
           <p style="margin:0;font-size:12px;line-height:1.7;color:#8193bd;font-family:Arial,Helvetica,sans-serif;">For PR inquiries, contact ${escapeHtml(e.prContactName)} <a href="mailto:${escapeHtml(e.prContactEmail)}" style="color:#00aef1;text-decoration:none;">${escapeHtml(e.prContactEmail)}</a></p>
@@ -190,6 +213,9 @@ function buildInvitationText(guest: InvitationGuest) {
     '',
     `Your entry code: ${guest.code}`,
     `Your QR ticket: ${ticketUrl(guest.token)}`,
+    '',
+    'Add to your calendar:',
+    ...calendarLinks(guest.token).map((c) => `${c.label}: ${c.href}`),
     '',
     `For PR inquiries, contact ${e.prContactName} ${e.prContactEmail}`,
   ].join('\n');
