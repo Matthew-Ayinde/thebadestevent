@@ -6,6 +6,9 @@ import { authOptions } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { sendQuestionnaireEmails } from '@/lib/email';
+import { linkVisitorIdentity } from '@/lib/analytics/identify';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export const runtime = 'nodejs';
 
@@ -76,11 +79,22 @@ const Schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = await rateLimit(RATE_LIMITS.formSubmit, rateLimitKey(request.headers));
+    if (!limited.ok) return tooManyRequests(limited, 'Too many submissions. Please wait a few minutes and try again.');
+
     const body = await request.json();
     const validated = Schema.parse(body);
 
     await connectDB();
     const submission = await QuestionnaireSubmission.create(validated);
+    await linkVisitorIdentity(request, {
+      source: 'questionnaire',
+      submissionId: String(submission._id),
+      name: validated.fullName,
+      email: validated.email,
+      phone: validated.phone,
+      company: validated.company,
+    });
 
     const settings = await Settings.findOne().select('partnershipEmail');
     const adminEmail =

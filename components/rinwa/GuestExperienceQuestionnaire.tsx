@@ -7,6 +7,7 @@ import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { ArrowRight, Check, Wine, Sparkles, Disc3 } from "lucide-react";
 import { Area, SegButtons, Reveal, Shell, ScoreScale, Field } from "./questionnaire-ui";
+import { useFormAnalytics } from "@/lib/analytics/use-form-analytics";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────────
 // Same flat, hairline-bordered system as the rest of the site, using the
@@ -110,6 +111,7 @@ export default function GuestExperienceQuestionnaire() {
   const [step, setStep]             = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [data, setData]             = useState<FormData>(BLANK);
+  const { trackError, trackSubmitError } = useFormAnalytics("guest", step, TOTAL);
 
   function set(field: keyof FormData, value: string) {
     setData(prev => ({ ...prev, [field]: value }));
@@ -131,6 +133,7 @@ export default function GuestExperienceQuestionnaire() {
     const error = validate(step);
     if (error) {
       toast.error(error);
+      trackError(step, error);
       return;
     }
     setStep(s => s + 1);
@@ -146,6 +149,7 @@ export default function GuestExperienceQuestionnaire() {
     const error = validate(step);
     if (error) {
       toast.error(error);
+      trackError(step, error);
       return;
     }
     try {
@@ -162,7 +166,9 @@ export default function GuestExperienceQuestionnaire() {
       setStep(TOTAL + 1);
       requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast.error(message);
+      trackSubmitError(message);
     } finally {
       setSubmitting(false);
     }

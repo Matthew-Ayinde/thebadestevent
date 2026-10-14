@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
 import { SplashScreen } from "@/components/rinwa/SplashScreen";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
+import { ConsentBanner } from "@/components/analytics/ConsentBanner";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
 
@@ -107,7 +109,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SplashScreen />
+        <AnalyticsTracker />
         {children}
+        <ConsentBanner />
       </body>
     </html>
   );

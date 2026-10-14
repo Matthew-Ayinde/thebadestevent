@@ -2,6 +2,8 @@ import NextAuth, { type NextAuthOptions, type DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { connectDB } from "@/lib/mongodb";
 import { User } from "@/models/User";
+import { minutesUntil, rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { rateLimitKey } from "@/lib/client-ip";
 
 declare module "next-auth" {
   interface Session {
@@ -27,9 +29,19 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email", placeholder: "admin@example.com" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Invalid credentials");
+        }
+
+        // Brute-force protection: cap attempts per IP and per account.
+        const [byIp, byAccount] = await Promise.all([
+          rateLimit(RATE_LIMITS.login, rateLimitKey(req?.headers)),
+          rateLimit(RATE_LIMITS.loginAccount, `email:${credentials.email.toLowerCase().trim()}`),
+        ]);
+        if (!byIp.ok || !byAccount.ok) {
+          const wait = minutesUntil(byIp.ok ? byAccount : byIp);
+          throw new Error(`Too many sign-in attempts. Try again in ${wait} minute${wait === 1 ? "" : "s"}.`);
         }
 
         try {

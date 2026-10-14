@@ -11,6 +11,7 @@ import {
   Compass, Globe2, Luggage, MapPin, Ticket, Navigation,
 } from "lucide-react";
 import { Field, Area, SegButtons, Chips, Reveal, Shell, QuestionBlock } from "./questionnaire-ui";
+import { useFormAnalytics } from "@/lib/analytics/use-form-analytics";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────────
 // Same theme as the rest of the site (dark ground, serif display type, thin
@@ -283,6 +284,7 @@ export default function Questions() {
   const [step, setStep]           = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [data, setData]           = useState<FormData>(BLANK);
+  const { trackError, trackSubmitError } = useFormAnalytics("homecoming", step, TOTAL);
 
   function set<K extends keyof FormData>(field: K, value: FormData[K]) {
     setData(prev => ({ ...prev, [field]: value }));
@@ -330,6 +332,7 @@ export default function Questions() {
     const error = validate(step);
     if (error) {
       toast.error(error);
+      trackError(step, error);
       return;
     }
     setStep(s => s + 1);
@@ -345,6 +348,7 @@ export default function Questions() {
     const error = validate(step);
     if (error) {
       toast.error(error);
+      trackError(step, error);
       return;
     }
     try {
@@ -367,7 +371,9 @@ export default function Questions() {
       setStep(TOTAL + 1);
       requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast.error(message);
+      trackSubmitError(message);
     } finally {
       setSubmitting(false);
     }

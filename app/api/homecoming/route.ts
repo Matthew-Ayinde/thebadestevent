@@ -6,6 +6,9 @@ import { authOptions } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { sendHomecomingEmails } from '@/lib/email';
+import { linkVisitorIdentity } from '@/lib/analytics/identify';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export const runtime = 'nodejs';
 
@@ -72,11 +75,21 @@ const Schema = z
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = await rateLimit(RATE_LIMITS.formSubmit, rateLimitKey(request.headers));
+    if (!limited.ok) return tooManyRequests(limited, 'Too many submissions. Please wait a few minutes and try again.');
+
     const body = await request.json();
     const validated = Schema.parse(body);
 
     await connectDB();
     const submission = await HomecomingSubmission.create(validated);
+    await linkVisitorIdentity(request, {
+      source: 'homecoming',
+      submissionId: String(submission._id),
+      name: validated.name,
+      email: validated.contactMethod === 'Email' ? validated.contactValue : undefined,
+      phone: validated.contactMethod !== 'Email' ? validated.contactValue : undefined,
+    });
 
     const settings = await Settings.findOne().select('partnershipEmail');
     const adminEmail =
