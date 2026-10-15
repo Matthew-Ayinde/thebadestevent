@@ -1,7 +1,7 @@
 // The forms whose journeys are tracked step by step. Shared by the public form
 // hooks, the collect endpoint and the admin dashboard.
 
-export const FORM_IDS = ['questionnaire', 'meeting_request', 'job_application', 'medallion_rsvp'] as const;
+export const FORM_IDS = ['questionnaire', 'meeting_request', 'job_application', 'talent_circle', 'medallion_rsvp'] as const;
 export type FormId = (typeof FORM_IDS)[number];
 
 export const FORM_ACTIONS = ['start', 'step', 'error', 'submit', 'submit_error'] as const;
@@ -39,6 +39,13 @@ export const FORMS: Record<FormId, FormConfig> = {
     path: '/careers/*',
     steps: ['Application form'],
     startedMeans: 'Started filling in an application',
+  },
+  talent_circle: {
+    id: 'talent_circle',
+    label: 'Talent circle',
+    path: '/careers',
+    steps: ['Sign-up form'],
+    startedMeans: 'Started filling in the talent circle form',
   },
   medallion_rsvp: {
     id: 'medallion_rsvp',

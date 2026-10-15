@@ -25,7 +25,7 @@ export const getCareersCopy = cache(async () => {
   const settings: any = await Settings.findOne().select('partnershipEmail').lean();
   return {
     description:
-      'RÌNWÁ manages hiring for agencies and companies we partner with. Every role here belongs to one of those teams. We handle the applications, read each one with care, and introduce the right people to the employers who need them.',
+      'RÌNWÁ is a hospitality consultancy and talent advisory for the brands shaping how Africa eats, drinks, gathers and celebrates. We don’t just fill vacancies. We match the people who make experiences unforgettable with the teams who deserve them. Think of us as a bridge to your next move.',
     contactEmail: process.env.CAREERS_EMAIL || settings?.partnershipEmail || 'rinwahospitality@gmail.com',
   };
 });

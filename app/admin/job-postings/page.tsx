@@ -363,7 +363,12 @@ function RoleEditor({
 
       <EditorSection title="The role">
         <AdminInput label="Job title" id="role-title" value={draft.title} onChange={e => set('title', e.target.value)} required placeholder="e.g. Guest Experience Lead" />
-        <AdminInput label="Hiring company" id="role-company" value={draft.company} onChange={e => set('company', e.target.value)} required placeholder="The partner agency or company this role is for" />
+        <div>
+          <AdminInput label="Type of house" id="role-company" value={draft.company} onChange={e => set('company', e.target.value)} required placeholder="e.g. Boutique hotel, Members' club, Fine-dining restaurant" aria-describedby="role-company-hint" />
+          <p id="role-company-hint" className="mt-1.5 text-xs text-white/40">
+            Shown publicly on /careers. Describe the kind of place, not the brand. Partner brands stay confidential until RÌNWÁ makes the introduction.
+          </p>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <AdminInput label="Department" id="role-department" value={draft.department} onChange={e => set('department', e.target.value)} placeholder="e.g. Experiences" />
           <AdminInput label="Location" id="role-location" value={draft.location} onChange={e => set('location', e.target.value)} required placeholder="e.g. Lagos, Nigeria" />

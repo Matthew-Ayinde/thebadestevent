@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import { ArrowUpRight, Briefcase, Clock, MapPin, Mail } from 'lucide-react';
+import { ArrowRight, Briefcase, Mail } from 'lucide-react';
 import { formatClosingDate, type PublicJob } from '@/lib/careers';
 import { serif } from './CareersChrome';
 
@@ -11,7 +11,10 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 type Filter = { kind: 'all' } | { kind: 'department' | 'type'; value: string };
 
-export function CareersBoard({ jobs, description, contactEmail }: { jobs: PublicJob[]; description: string; contactEmail: string }) {
+// `children` renders between the hero and the roles list.
+export function CareersBoard({ jobs, description, contactEmail, children }: {
+  jobs: PublicJob[]; description: string; contactEmail: string; children?: React.ReactNode;
+}) {
   const reduced = useReducedMotion();
   const [filter, setFilter] = useState<Filter>({ kind: 'all' });
 
@@ -41,45 +44,69 @@ export function CareersBoard({ jobs, description, contactEmail }: { jobs: Public
       {/* Hero */}
       <section className="mx-auto w-full max-w-6xl px-5 pt-20 pb-16 sm:px-8 sm:pt-28 sm:pb-20">
         <motion.p {...rise()} className="mb-6 text-[0.66rem] uppercase tracking-[0.42em] text-accent">
-          Roles curated by RÌNWÁ
+          Talent, curated by RÌNWÁ
         </motion.p>
         <motion.h1
           {...rise(0.05)}
           className="max-w-4xl text-[clamp(2.8rem,8vw,6rem)] leading-[0.92] tracking-tight text-fg"
           style={serif}
         >
-          Your next role, thoughtfully placed.
+          You make the moment.
+          <br />
+          <em className="text-accent">We find the room.</em>
         </motion.h1>
         <motion.p {...rise(0.12)} className="mt-8 max-w-xl text-[0.95rem] leading-relaxed text-fg-muted sm:text-base">
           {description}
         </motion.p>
 
-        <motion.dl {...rise(0.2)} className="mt-12 grid max-w-2xl grid-cols-3 gap-px overflow-hidden rounded-[1.6rem] border border-line bg-line">
+        <motion.div {...rise(0.16)} className="mt-10 flex flex-wrap gap-3">
+          <a
+            href="#roles"
+            className="group inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-on-accent transition hover:bg-accent-hover"
+          >
+            View open roles
+            <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+          </a>
+          <a
+            href="#talent-circle"
+            className="inline-flex items-center rounded-full border border-line-strong bg-tint px-7 py-3.5 text-sm text-fg transition hover:border-accent/50 hover:bg-tint-strong"
+          >
+            Join the talent circle
+          </a>
+        </motion.div>
+
+        <motion.dl {...rise(0.22)} className="mt-14 grid grid-cols-3 gap-px overflow-hidden rounded-[1.6rem] border border-line bg-line">
           {[
             { k: 'Open roles', v: String(jobs.length) },
-            { k: 'Companies hiring', v: String(companies.length) },
-            { k: 'Managed by', v: 'RÌNWÁ' },
+            { k: 'Partner brands hiring', v: String(companies.length) },
+            { k: 'Every application', v: 'Read by a human', italic: true },
           ].map(item => (
             <div key={item.k} className="bg-card px-4 py-4 backdrop-blur-xl sm:px-6 sm:py-5">
-              <dt className="text-[0.66rem] uppercase tracking-[0.28em] text-fg-subtle">{item.k}</dt>
-              <dd className="mt-1.5 truncate text-lg text-fg sm:text-2xl" style={serif}>{item.v}</dd>
+              <dt className="text-[0.6rem] uppercase tracking-[0.24em] text-fg-subtle sm:text-[0.66rem] sm:tracking-[0.28em]">{item.k}</dt>
+              <dd className={`mt-1.5 text-lg leading-tight text-fg sm:text-2xl ${item.italic ? 'italic' : ''}`} style={serif}>{item.v}</dd>
             </div>
           ))}
         </motion.dl>
       </section>
 
+      {children}
+
       {/* Roles */}
       <section id="roles" aria-labelledby="roles-heading" className="mx-auto w-full max-w-6xl scroll-mt-8 px-5 sm:px-8">
-        <div className="mb-8 flex flex-col gap-6 border-t border-line-soft pt-10 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-10 flex flex-col gap-6 pt-24 sm:pt-28 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="mb-3 text-[0.66rem] uppercase tracking-[0.38em] text-accent">Open Roles</p>
-            <h2 id="roles-heading" className="text-[clamp(1.9rem,4vw,2.8rem)] leading-none text-fg" style={serif}>
-              {jobs.length === 0 ? 'Nothing open just now' : 'Find your place'}
+            <p className="mb-4 text-[0.66rem] uppercase tracking-[0.38em] text-accent">Open now</p>
+            <h2 id="roles-heading" className="text-[clamp(2.4rem,5.5vw,4rem)] leading-[1] tracking-tight text-fg" style={serif}>
+              {jobs.length === 0 ? 'Nothing open just now.' : 'Rooms looking for you.'}
             </h2>
           </div>
+          <p className="max-w-sm text-sm leading-relaxed text-fg-muted">
+            Partner brands stay confidential until we introduce you. You&apos;ll always know the kind of house, the area and the work before you apply.
+          </p>
+        </div>
 
           {jobs.length > 1 && chips.length > 1 && (
-            <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:px-0" role="toolbar" aria-label="Filter roles">
+            <div className="-mx-5 mb-6 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="toolbar" aria-label="Filter roles">
               {chips.map(chip => {
                 const active = sameFilter(chip, filter);
                 const label = chip.kind === 'all' ? 'All roles' : chip.value;
@@ -101,7 +128,6 @@ export function CareersBoard({ jobs, description, contactEmail }: { jobs: Public
               })}
             </div>
           )}
-        </div>
 
         {jobs.length === 0 ? (
           <EmptyState contactEmail={contactEmail} />
@@ -130,42 +156,49 @@ export function CareersBoard({ jobs, description, contactEmail }: { jobs: Public
 
 function RoleCard({ job }: { job: PublicJob }) {
   const closes = formatClosingDate(job.closingDate);
+  const tags = [job.department, job.type].filter(Boolean);
   return (
     <Link
       href={`/careers/${job.slug}`}
-      className="group relative flex items-center gap-5 overflow-hidden rounded-[1.8rem] border border-line bg-card p-6 shadow-card backdrop-blur-xl transition duration-500 hover:border-accent/35 hover:bg-field focus-visible:border-accent/60 focus-visible:outline-none sm:p-8"
+      className="group relative flex flex-col gap-6 overflow-hidden rounded-[1.8rem] border border-line bg-card p-6 shadow-card backdrop-blur-xl transition duration-500 hover:border-accent/35 hover:bg-field focus-visible:border-accent/60 focus-visible:outline-none sm:flex-row sm:items-center sm:p-8"
     >
       <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[2px] origin-top scale-y-0 bg-accent transition-transform duration-500 group-hover:scale-y-100" />
 
       <div className="min-w-0 flex-1">
-        <p className="mb-2 text-[0.66rem] uppercase tracking-[0.3em] text-accent">
-          {[job.company, job.department].filter(Boolean).join(' · ')}
-        </p>
-        <h3 className="text-[1.65rem] leading-[1.1] text-fg transition-colors sm:text-[2rem]" style={serif}>
+        {tags.length > 0 && (
+          <ul className="mb-3 flex flex-wrap gap-2">
+            {tags.map((tag, i) => (
+              <li
+                key={tag}
+                className={`rounded-full px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] ${
+                  i === 0 ? 'bg-accent/12 text-accent' : 'bg-tint-strong text-fg-muted'
+                }`}
+              >
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
+        <h3 className="text-[1.65rem] leading-[1.1] text-fg sm:text-[2rem]" style={serif}>
           {job.title}
         </h3>
-        <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[0.8rem] text-fg-muted">
-          <Meta icon={MapPin}>{job.location}</Meta>
-          <Meta icon={Briefcase}>{job.workplace}</Meta>
-          <Meta icon={Clock}>{job.type}</Meta>
-        </ul>
-        {closes && <p className="mt-4 text-xs italic text-fg-faint">Applications close {closes}</p>}
+        <p className="mt-1.5 text-sm text-fg-subtle">{[job.company, job.location].filter(Boolean).join(' · ')}</p>
+        {job.overview && <p className="mt-3 max-w-2xl text-[0.92rem] leading-relaxed text-fg-muted">{firstSentence(job.overview)}</p>}
+        {closes && <p className="mt-3 text-xs italic text-fg-faint">Applications close {closes}</p>}
       </div>
 
-      <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line text-fg-muted transition duration-500 group-hover:border-accent group-hover:bg-accent group-hover:text-on-accent sm:flex">
-        <ArrowUpRight size={18} className="transition-transform duration-500 group-hover:rotate-45" />
+      <span className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-full bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition group-hover:bg-accent-hover sm:self-center">
+        Apply for this role
+        <ArrowRight size={14} className="transition-transform duration-500 group-hover:translate-x-1" />
       </span>
     </Link>
   );
 }
 
-function Meta({ icon: Icon, children }: { icon: typeof MapPin; children: React.ReactNode }) {
-  return (
-    <li className="flex items-center gap-1.5">
-      <Icon size={13} className="text-accent" aria-hidden="true" />
-      {children}
-    </li>
-  );
+// Cards show one line on why the role is exciting; the full overview lives on the role page.
+function firstSentence(text: string) {
+  const sentence = text.trim().split(/(?<=[.!?])\s+/)[0];
+  return sentence.length > 180 ? `${sentence.slice(0, 177).trimEnd()}…` : sentence;
 }
 
 function EmptyState({ contactEmail }: { contactEmail: string }) {
@@ -178,15 +211,23 @@ function EmptyState({ contactEmail }: { contactEmail: string }) {
         No roles are open right now, but new ones arrive often.
       </p>
       <p className="mt-4 max-w-sm text-sm leading-relaxed text-fg-muted">
-        Our partners&apos; roles appear here as soon as they open. To be considered for future opportunities, introduce yourself and tell us what you&apos;re looking for.
+        The best opportunities often move before they&apos;re posted. Join the talent circle and you&apos;ll be first to hear when the right room opens up.
       </p>
-      <a
-        href={`mailto:${contactEmail}?subject=${encodeURIComponent('Future opportunities · RÌNWÁ Careers')}`}
-        className="group mt-8 inline-flex items-center gap-3 rounded-full border border-accent/35 bg-accent/10 px-7 py-3.5 text-xs font-semibold uppercase tracking-[0.24em] text-accent transition-all hover:border-accent/60 hover:bg-accent/18"
-      >
-        <Mail size={14} />
-        Say hello
-      </a>
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <a
+          href="#talent-circle"
+          className="inline-flex items-center rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-on-accent transition hover:bg-accent-hover"
+        >
+          Join the talent circle
+        </a>
+        <a
+          href={`mailto:${contactEmail}?subject=${encodeURIComponent('Future opportunities · RÌNWÁ Careers')}`}
+          className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-tint px-7 py-3.5 text-sm text-fg transition hover:border-accent/50 hover:bg-tint-strong"
+        >
+          <Mail size={14} />
+          Say hello
+        </a>
+      </div>
     </div>
   );
 }

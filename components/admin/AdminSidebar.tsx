@@ -21,6 +21,7 @@ import {
   LogOut,
   UserRoundCheck,
   BarChart3,
+  Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -35,6 +36,7 @@ const navItems = [
   { href: '/admin/meetings', label: 'Meetings', icon: CalendarDays },
   { href: '/admin/job-postings', label: 'Job Postings', icon: Briefcase },
   { href: '/admin/applications', label: 'Applications', icon: UserRoundCheck },
+  { href: '/admin/talent-circle', label: 'Talent Circle', icon: Sparkles },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },

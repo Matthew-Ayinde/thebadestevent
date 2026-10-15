@@ -44,10 +44,8 @@ export function ConsentBanner() {
           A warm welcome, on your terms
         </h2>
         <p id="consent-body" className="mt-2 text-sm leading-relaxed text-fg-muted">
-          We&apos;d like to use cookies to remember your visits and understand how you found us, including your
-          approximate location, device and IP address. If you share your details through one of our forms, we&apos;ll
-          link them to these visits so we can host you better. Prefer not to? We&apos;ll only count your visit
-          anonymously.{' '}
+          We&apos;d like to use cookies to remember your visits and understand how you found us. If you share your details through one of our forms, we&apos;ll
+          link them to these visits so we can host you better. {' '}
           <Link href="/privacy" className="text-accent underline underline-offset-4 hover:text-accent-hover">
             Privacy policy
           </Link>

@@ -9,6 +9,7 @@ import { QuestionnaireSubmission } from '@/models/QuestionnaireSubmission';
 import { MeetingRequest } from '@/models/MeetingRequest';
 import { JobApplication } from '@/models/JobApplication';
 import { MedallionGuest } from '@/models/MedallionGuest';
+import { TalentCircleMember } from '@/models/TalentCircleMember';
 import {
   bucketKeys,
   bucketOf,
@@ -94,6 +95,20 @@ const SUBMISSIONS: Record<FormId, { model: Model<any>; answers: AnswerSpec[]; co
         question: 'CV attached',
         value: { $cond: [{ $ifNull: ['$resume.publicId', false] }, 'With CV', 'No CV'] },
       },
+    ],
+  },
+  talent_circle: {
+    model: TalentCircleMember,
+    answers: [
+      { id: 'crafts', question: 'Craft', value: 'crafts', multi: true },
+      { id: 'experience', question: 'Years in hospitality', value: 'experience' },
+      { id: 'lookingFor', question: 'Looking for', value: 'lookingFor', multi: true },
+      { id: 'startWhen', question: 'Could start', value: 'startWhen' },
+      { id: 'city', question: 'Based in', value: 'city' },
+    ],
+    comments: [
+      { field: 'moment', question: 'A moment they made unforgettable' },
+      { field: 'dreamMove', question: 'Their dream move' },
     ],
   },
   medallion_rsvp: {

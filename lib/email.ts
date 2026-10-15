@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { describeHouse } from './careers';
 
 type InquiryEmailPayload = {
   submission: {
@@ -955,7 +956,7 @@ function buildApplicantEmailHtml({ application: a, job }: JobApplicationEmailPay
                 Thank you for applying,<br>${escapeHtml(a.fullName.split(' ')[0] || a.fullName)}.
               </h1>
               <p style="margin:0;font-size:15px;line-height:1.75;color:#a0bcba;">
-                Your application is safely with us. RÌNWÁ manages hiring for this role on behalf of ${escapeHtml(job.company || 'the hiring company')}, and every application is read by a person, with care.
+                Your application is safely with us. RÌNWÁ manages hiring for this role on behalf of ${escapeHtml(describeHouse(job.company))}, and every application is read by a person, with care.
               </p>
             </td></tr>
             <tr><td style="padding:0 32px 28px;">
@@ -973,7 +974,7 @@ function buildApplicantEmailHtml({ application: a, job }: JobApplicationEmailPay
               <p style="margin:0 0 20px;font-size:11px;text-transform:uppercase;letter-spacing:0.26em;color:#7dd3cf;">What happens next</p>
               <table width="100%" cellpadding="0" cellspacing="0">
                 ${step('1', 'We read your application', 'We review your experience and answers carefully against what the role needs.')}
-                ${step('2', 'We introduce you if there is a fit', 'If your profile matches, we will share it with ' + escapeHtml(job.company || 'the hiring company') + ' and contact you at ' + escapeHtml(a.email) + ' about next steps.')}
+                ${step('2', 'We introduce you if there is a fit', 'If your profile matches, we will share it with ' + escapeHtml(describeHouse(job.company)) + ' and contact you at ' + escapeHtml(a.email) + ' about next steps.')}
                 ${step('3', 'A conversation, not an interrogation', 'Interviews are about understanding how you think, what you value, and where you would thrive.')}
               </table>
             </td></tr>
@@ -1020,7 +1021,7 @@ export async function sendJobApplicationEmails(payload: JobApplicationEmailPaylo
       replyTo: a.email,
       subject: `[Application] ${a.fullName} — ${job.title}${job.company ? ` (${job.company})` : ''}`,
       text: [
-        `${a.fullName} applied for ${job.title}${job.company ? ` at ${job.company}` : ''}.`,
+        `${a.fullName} applied for ${job.title}${job.company ? ` (${job.company})` : ''}.`,
         '',
         `Email: ${a.email}`,
         `Phone: ${a.phone}`,
@@ -1046,12 +1047,12 @@ export async function sendJobApplicationEmails(payload: JobApplicationEmailPaylo
     const { error } = await resend.emails.send({
       from,
       to: a.email,
-      subject: `We've received your application — ${job.title}${job.company ? ` at ${job.company}` : ''}`,
+      subject: `We've received your application — ${job.title}`,
       text: [
         `Thank you for applying, ${a.fullName}.`,
         '',
         `Your application for ${job.title} (${job.location}) is safely with us.`,
-        `RÌNWÁ manages hiring for this role on behalf of ${job.company || 'the hiring company'}.`,
+        `RÌNWÁ manages hiring for this role on behalf of ${describeHouse(job.company)}.`,
         `If your profile matches what the role needs, we will share it with them and reach out at ${a.email}.`,
         '',
         'With warmth,',

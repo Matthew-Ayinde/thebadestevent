@@ -61,6 +61,7 @@ export const CONVERSION_LABELS: Record<string, string> = {
   meeting_request: 'Meeting request',
   job_application: 'Job application',
   medallion_rsvp: 'Medallion RSVP',
+  talent_circle: 'Talent circle',
   contact: 'Contact form',
 };
 

@@ -19,6 +19,7 @@ import {
   type FieldMode,
   type JobQuestion,
   type PublicJob,
+  describeHouse,
 } from '@/lib/careers';
 import { serif } from './CareersChrome';
 
@@ -213,7 +214,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
               )}
               {f.coverLetter !== 'off' && (
                 <AreaField name="coverLetter" label="Cover letter" req={f.coverLetter === 'required'} rows={7}
-                  maxLength={COVER_LETTER_MAX} placeholder={`Why this role, and why now? What would you bring to ${job.company}?`}
+                  maxLength={COVER_LETTER_MAX} placeholder={`Why this role, and why now? What would you bring to ${describeHouse(job.company)}?`}
                   value={v('coverLetter')} onChange={set('coverLetter')} onBlur={touch('coverLetter')} error={show('coverLetter')} />
               )}
             </div>
@@ -241,7 +242,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
 
       <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs leading-relaxed text-fg-faint sm:max-w-xs">
-          Your details are used only for this application and shared only with the company hiring for this role.
+          Your details are used only for this application and shared only with the team hiring for this role.
         </p>
         <button
           type="submit"
@@ -502,7 +503,7 @@ function Submitted({ job, firstName, email }: { job: PublicJob; firstName: strin
       </h2>
       <p className="mb-3 max-w-md text-base leading-relaxed text-fg-muted">
         We&apos;ve sent a confirmation to <span className="break-all text-fg">{email}</span>. We&apos;ll review your
-        application for <span className="text-fg">{job.title}</span>{' '}and, if there&apos;s a fit, introduce you to the hiring team at {job.company}.
+        application for <span className="text-fg">{job.title}</span>{' '}and, if there&apos;s a fit, introduce you to the team at {describeHouse(job.company)}.
       </p>
       <p className="mb-10 text-sm italic text-fg-faint">Don&apos;t see the email? Check your spam or promotions folder.</p>
 

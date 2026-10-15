@@ -4,7 +4,7 @@ import { ArrowDown, Briefcase, Building2, CalendarClock, Clock, MapPin, Wallet }
 import { CareersBackdrop, CareersFooter, CareersTopBar, serif } from '@/components/careers/CareersChrome';
 import { ApplicationForm } from '@/components/careers/ApplicationForm';
 import { getJobBySlug } from '@/lib/careers-server';
-import { closingDateEnd, formatClosingDate, type PublicJob } from '@/lib/careers';
+import { closingDateEnd, describeHouse, formatClosingDate, type PublicJob } from '@/lib/careers';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { job } = result;
   const description = job.overview.length > 160 ? `${job.overview.slice(0, 157).trimEnd()}…` : job.overview;
   return {
-    title: `${job.title} at ${job.company} · Careers`,
+    title: `${job.title} · ${job.company} · Careers`,
     description,
     alternates: { canonical: `/careers/${job.slug}` },
-    openGraph: { title: `${job.title} at ${job.company} · RÌNWÁ Careers`, description, url: `/careers/${job.slug}` },
+    openGraph: { title: `${job.title} · ${job.company} · RÌNWÁ Careers`, description, url: `/careers/${job.slug}` },
     robots: result.accepting ? undefined : { index: false },
   };
 }
@@ -33,6 +33,7 @@ const EMPLOYMENT_TYPE_SCHEMA: Record<string, string> = {
   Contract: 'CONTRACTOR',
   Internship: 'INTERN',
   Freelance: 'CONTRACTOR',
+  'Event-based': 'TEMPORARY',
 };
 
 function escapeHtml(value: string) {
@@ -51,9 +52,10 @@ function jobPostingJsonLd(job: PublicJob) {
     datePosted: job.createdAt,
     ...(job.closingDate ? { validThrough: closingDateEnd(job.closingDate).toISOString() } : {}),
     employmentType: EMPLOYMENT_TYPE_SCHEMA[job.type] ?? 'OTHER',
+    // Partner brands stay confidential, so RÌNWÁ is the named employer of record.
     hiringOrganization: {
       '@type': 'Organization',
-      name: job.company,
+      name: 'RÌNWÁ Hospitality & Experiences',
       sameAs: siteUrl,
       logo: `${siteUrl}/images/logo.png`,
     },
@@ -75,7 +77,7 @@ export default async function JobPage({ params }: Props) {
   const closes = formatClosingDate(job.closingDate);
 
   const facts = [
-    { icon: Building2, label: 'Hiring company', value: job.company },
+    { icon: Building2, label: 'Type of house', value: job.company },
     { icon: MapPin, label: 'Location', value: job.location },
     { icon: Briefcase, label: 'Workplace', value: job.workplace },
     { icon: Clock, label: 'Employment', value: job.type },
@@ -110,7 +112,7 @@ export default async function JobPage({ params }: Props) {
             ))}
           </ul>
           <p className="mt-6 max-w-2xl text-sm leading-relaxed text-fg-muted sm:text-[0.95rem]">
-            RÌNWÁ advises and liaises applications for this role on behalf of {job.company}.
+            RÌNWÁ advises and liaises applications for this role on behalf of {describeHouse(job.company)}. The brand stays confidential until we introduce you.
           </p>
         </section>
 

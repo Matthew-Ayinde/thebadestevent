@@ -6,7 +6,7 @@ import { z } from 'zod';
 export const JOB_STATUSES = ['draft', 'open', 'closed'] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];
 
-export const EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Freelance'] as const;
+export const EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Contract', 'Event-based', 'Internship', 'Freelance'] as const;
 export const WORKPLACE_TYPES = ['On-site', 'Hybrid', 'Remote'] as const;
 
 // How a standard application field is collected for a role.
@@ -87,6 +87,41 @@ export type PublicJob = {
   updatedAt: string;
 };
 
+// ─── Talent circle ───────────────────────────────────────────────────────────
+// Open sign-ups from /careers for people whose role isn't posted yet.
+
+export const TALENT_CRAFTS = ['Kitchen', 'Bar', 'Front of house', 'Events & production', 'Hotel operations'] as const;
+export const TALENT_WORK_TYPES = ['Full-time', 'Contract', 'Event-based', 'Residency or pop-up', 'Open to relocating'] as const;
+export const TALENT_EXPERIENCE = ['Less than 2 years', '2–5 years', '5–10 years', '10+ years'] as const;
+export const TALENT_START = ['Immediately', 'Within a month', 'In 1–3 months', 'Just exploring'] as const;
+
+export const TalentCircleSchema = z.object({
+  fullName: z.string().trim().min(2, 'Please share your full name').max(120),
+  email: z.string().trim().toLowerCase().email('Please enter a valid email address').max(200),
+  whatsapp: z
+    .string()
+    .trim()
+    .max(40)
+    .refine(v => (v.match(/\d/g) ?? []).length >= 7, 'Please enter a WhatsApp number we can reach you on'),
+  city: z.string().trim().min(2, 'Please tell us which city you’re based in').max(120),
+  crafts: z.array(z.enum(TALENT_CRAFTS)).min(1, 'Pick at least one area where you do your best work').max(TALENT_CRAFTS.length),
+  currentRole: z.string().trim().max(140).default(''),
+  experience: z.enum(TALENT_EXPERIENCE),
+  lookingFor: z.array(z.enum(TALENT_WORK_TYPES)).min(1, 'Pick at least one kind of work you’re after').max(TALENT_WORK_TYPES.length),
+  startWhen: z.enum(TALENT_START),
+  link: z
+    .string()
+    .trim()
+    .max(300)
+    .transform(normalizeUrl)
+    .refine(v => !v || isHttpUrl(v), 'Please enter a valid link')
+    .default(''),
+  moment: z.string().trim().max(ANSWER_MAX).default(''),
+  dreamMove: z.string().trim().max(400).default(''),
+  consent: z.literal(true, { errorMap: () => ({ message: 'Please confirm we can keep your details' }) }),
+});
+export type TalentCircleInput = z.infer<typeof TalentCircleSchema>;
+
 // ─── Validation ──────────────────────────────────────────────────────────────
 
 const listItems = (max: number) =>
@@ -113,7 +148,7 @@ export const JobQuestionSchema = z
 
 export const JobPostingInputSchema = z.object({
   title: z.string().trim().min(2, 'Title is required').max(140),
-  company: z.string().trim().min(2, 'Hiring company is required').max(140),
+  company: z.string().trim().min(2, 'Type of house is required').max(140),
   department: z.string().trim().max(80).default(''),
   location: z.string().trim().min(2, 'Location is required').max(140),
   workplace: z.enum(WORKPLACE_TYPES),
@@ -175,6 +210,19 @@ export function openJobsFilter(now = new Date()) {
     status: 'open',
     $or: [{ closingDate: { $exists: false } }, { closingDate: null }, { closingDate: { $gte: startOfToday } }],
   };
+}
+
+// The admin "Type of house" field (stored as `company`) usually describes the place, e.g. "Boutique hotel".
+// Reads it into a sentence: "a boutique hotel". Capitalised multi-word values ("Eko Hotel") are treated
+// as names and left alone.
+export function describeHouse(company?: string) {
+  const value = company?.trim();
+  if (!value) return 'the hiring team';
+  const words = value.split(/\s+/);
+  const isName = words.length > 1 && words.slice(1).some(w => /^\p{Lu}/u.test(w));
+  if (isName || /RÌNWÁ/i.test(value)) return value;
+  const lower = value.charAt(0).toLowerCase() + value.slice(1);
+  return `${/^[aeiou]/i.test(lower) ? 'an' : 'a'} ${lower}`;
 }
 
 export function formatClosingDate(closingDate?: string | Date | null) {

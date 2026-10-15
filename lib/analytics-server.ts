@@ -264,13 +264,14 @@ export function defined<T extends Record<string, unknown>>(obj: T): Partial<T> {
 
 /* ------------------------------------- Identify -------------------------------------- */
 
-export type ConversionSource = 'questionnaire' | 'meeting_request' | 'job_application' | 'medallion_rsvp' | 'contact';
+export type ConversionSource = 'questionnaire' | 'meeting_request' | 'job_application' | 'medallion_rsvp' | 'talent_circle' | 'contact';
 
 export const CONVERSION_LABELS: Record<ConversionSource, string> = {
   questionnaire: 'Questionnaire',
   meeting_request: 'Meeting request',
   job_application: 'Job application',
   medallion_rsvp: 'Medallion RSVP',
+  talent_circle: 'Talent circle',
   contact: 'Contact form',
 };
 
