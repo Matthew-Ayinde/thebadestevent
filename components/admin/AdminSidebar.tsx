@@ -26,7 +26,6 @@ import { useState } from 'react';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   // { href: '/admin/featured-events', label: 'Featured Events', icon: Trophy },
   // { href: '/admin/past-events', label: 'Past Events', icon: Archive },
   // { href: '/admin/hero-slides', label: 'Hero Slides', icon: MonitorPlay },
@@ -36,6 +35,7 @@ const navItems = [
   { href: '/admin/questionnaire', label: 'Questionnaire', icon: ClipboardList },
   { href: '/admin/ourdiaspora', label: 'Homecoming', icon: Home },
   { href: '/admin/ourguests', label: 'Guest Experience', icon: Sparkles },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },
 ];
