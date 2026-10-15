@@ -437,6 +437,11 @@ function VisitorDrawer({
                 <Field label="Postal code">{v.postalCode}</Field>
                 <Field label="Timezone">{v.timezone}</Field>
                 <Field label="IP address"><span className="font-mono text-xs">{v.ip}</span></Field>
+                {v.ipAddresses?.filter((ip: string) => ip !== v.ip).length > 0 && (
+                  <Field label="Other IPs seen">
+                    <span className="font-mono text-xs">{v.ipAddresses.filter((ip: string) => ip !== v.ip).join(', ')}</span>
+                  </Field>
+                )}
                 {v.latitude != null && v.longitude != null && (
                   <div className="col-span-2">
                     <Field label="Approx. coordinates">
@@ -460,10 +465,14 @@ function VisitorDrawer({
                 <Field label="Device">
                   <span className="inline-flex items-center gap-1.5"><DeviceIcon device={v.device} />{v.device}</span>
                 </Field>
-                <Field label="Screen">{v.screen}</Field>
+                <Field label="Model">{v.deviceModel}</Field>
                 <Field label="Browser">{[v.browser, v.browserVersion].filter(Boolean).join(' ')}</Field>
                 <Field label="Operating system">{[v.os, v.osVersion].filter(Boolean).join(' ')}</Field>
+                <Field label="Screen · window">{[v.screen, v.viewport].filter(Boolean).join(' · ')}</Field>
+                <Field label="Connection">{v.connection?.toUpperCase()}</Field>
+                <Field label="Appearance">{v.colorScheme && `${v.colorScheme[0].toUpperCase()}${v.colorScheme.slice(1)} mode`}</Field>
                 <Field label="Language">{v.language}</Field>
+                <Field label="Cookies accepted">{v.consentAt ? fmtDateTime(v.consentAt) : undefined}</Field>
                 <div className="col-span-2">
                   <Field label="User agent"><span className="font-mono text-[0.7rem] text-white/55">{v.userAgent}</span></Field>
                 </div>

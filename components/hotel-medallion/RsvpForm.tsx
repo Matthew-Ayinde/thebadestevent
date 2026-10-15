@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, MailCheck } from 'lucide-react';
+import { useSimpleFormAnalytics } from '@/lib/use-form-analytics';
 
 type Fields = { firstName: string; lastName: string; email: string };
 const EMPTY: Fields = { firstName: '', lastName: '', email: '' };
@@ -26,6 +27,7 @@ export function RsvpForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
   const [formError, setFormError] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'redirecting' | 'exists'>('idle');
+  const analytics = useSimpleFormAnalytics('medallion_rsvp');
 
   const set = (key: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFields((f) => ({ ...f, [key]: e.target.value }));
@@ -37,7 +39,10 @@ export function RsvpForm() {
     const found = validate(fields);
     setErrors(found);
     setFormError('');
-    if (Object.keys(found).length) return;
+    if (Object.keys(found).length) {
+      analytics.trackError(Object.values(found)[0] ?? 'Required fields missing');
+      return;
+    }
 
     setStatus('submitting');
     try {
@@ -48,6 +53,7 @@ export function RsvpForm() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+      analytics.markSubmitted();
 
       if (data.status === 'created') {
         setStatus('redirecting');
@@ -56,7 +62,9 @@ export function RsvpForm() {
         setStatus('exists');
       }
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setFormError(message);
+      analytics.trackSubmitError(message);
       setStatus('idle');
     }
   }
@@ -74,7 +82,7 @@ export function RsvpForm() {
         </p>
         <button
           type="button"
-          onClick={() => { setFields(EMPTY); setStatus('idle'); }}
+          onClick={() => { setFields(EMPTY); setStatus('idle'); analytics.reset(); }}
           className="mt-4 text-xs uppercase tracking-[0.2em] text-(--hm-accent) underline-offset-4 hover:underline"
         >
           Register someone else
@@ -86,7 +94,7 @@ export function RsvpForm() {
   const busy = status !== 'idle';
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-5">
+    <form onSubmit={handleSubmit} onFocus={analytics.markStarted} noValidate className="mt-6 space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
         {(['firstName', 'lastName'] as const).map((key) => (
           <div key={key}>

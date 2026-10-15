@@ -1,8 +1,10 @@
-import { randomUUID } from 'crypto';
+import { createHmac, randomUUID } from 'crypto';
 import { after, type NextRequest, type NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { AnalyticsVisitor } from '@/models/AnalyticsVisitor';
 import { AnalyticsEvent } from '@/models/AnalyticsEvent';
+import { getClientIp } from '@/lib/client-ip';
+import { CONSENT_COOKIE, consentFromCookie } from '@/lib/consent';
 
 export const VISITOR_COOKIE = 'rw_vid';
 export const SESSION_COOKIE = 'rw_sid';
@@ -27,6 +29,7 @@ export interface RequestContext {
   browserVersion?: string;
   os: string;
   osVersion?: string;
+  deviceModel?: string;
   isBot: boolean;
 }
 
@@ -121,7 +124,16 @@ export function parseUserAgent(ua: string) {
       ? 'Mobile'
       : 'Desktop';
 
-  return { browser, browserVersion, os, osVersion, device };
+  let deviceModel: string | undefined;
+  if (/iPhone/.test(ua)) deviceModel = 'iPhone';
+  else if (/iPad/.test(ua)) deviceModel = 'iPad';
+  else if (os === 'Android') {
+    const model = ua.match(/Android [\d.]+;(?: [a-z]{2}[-_][a-zA-Z]{2};)? ([^;)]+?)(?: Build\/|\))/)?.[1]?.trim();
+    // Chrome's reduced user agent replaces the model with "K".
+    if (model && model !== 'K' && model !== 'wv') deviceModel = model.slice(0, 60);
+  }
+
+  return { browser, browserVersion, os, osVersion, device, deviceModel };
 }
 
 /** Everything we can learn about a visitor from the request itself. Geo comes from the edge
@@ -131,12 +143,22 @@ export function getRequestContext(request: NextRequest): RequestContext {
   const countryCode = header(request, 'x-vercel-ip-country') ?? header(request, 'cf-ipcountry');
   const validCountry = countryCode && /^[A-Z]{2}$/i.test(countryCode) && countryCode !== 'XX' ? countryCode.toUpperCase() : undefined;
 
+  const ua = parseUserAgent(userAgent);
+
+  // Client Hints (requested site-wide via Accept-CH in next.config.ts): Chromium hides the
+  // Android model and the Windows 10/11 split from its user agent but shares them here.
+  const hint = (name: string) => request.headers.get(name)?.replace(/^"|"$/g, '').trim() || undefined;
+  const hintedModel = hint('sec-ch-ua-model');
+  if (hintedModel && hintedModel.length <= 60) ua.deviceModel = hintedModel;
+  const platformVersion = hint('sec-ch-ua-platform-version');
+  if (platformVersion) {
+    const major = Number(platformVersion.split('.')[0]);
+    if (ua.os === 'Windows' && major > 0) ua.osVersion = major >= 13 ? '11' : '10';
+    else if (ua.os === 'Android' || ua.os === 'macOS') ua.osVersion = platformVersion.split('.').slice(0, 2).join('.');
+  }
+
   return {
-    ip:
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      request.headers.get('x-real-ip') ||
-      request.headers.get('cf-connecting-ip') ||
-      undefined,
+    ip: getClientIp(request.headers),
     countryCode: validCountry,
     country: countryName(validCountry),
     region: header(request, 'x-vercel-ip-country-region') ?? header(request, 'cf-region'),
@@ -147,7 +169,7 @@ export function getRequestContext(request: NextRequest): RequestContext {
     timezone: header(request, 'x-vercel-ip-timezone') ?? header(request, 'cf-timezone'),
     userAgent: userAgent.slice(0, 512),
     isBot: !userAgent || BOT_UA.test(userAgent),
-    ...parseUserAgent(userAgent),
+    ...ua,
   };
 }
 
@@ -210,6 +232,31 @@ export function writeIds(response: NextResponse, visitorId: string, sessionId: s
   response.cookies.set(SESSION_COOKIE, sessionId, { ...base, maxAge: SESSION_MAX_AGE });
 }
 
+/** Removes the visitor/session cookies (after an opt-out). They are httpOnly, so only the server can. */
+export function clearIds(response: NextResponse) {
+  response.cookies.delete(VISITOR_COOKIE);
+  response.cookies.delete(SESSION_COOKIE);
+}
+
+/* ------------------------------------- Consent --------------------------------------- */
+
+/** True only when the browser accepted analytics cookies in the consent banner. */
+export function hasAnalyticsConsent(request: NextRequest) {
+  return consentFromCookie(request.cookies.get(CONSENT_COOKIE)?.value) === 'all';
+}
+
+/**
+ * Cookieless visitor id for people who haven't accepted analytics cookies: a keyed hash of the
+ * day, IP and browser. The IP itself is never stored, and the key rotates daily, so the same
+ * person can't be followed from one day to the next.
+ */
+export function anonymousVisitorId(request: NextRequest) {
+  const day = new Date().toISOString().slice(0, 10);
+  const secret = process.env.NEXTAUTH_SECRET || 'rinwa-analytics';
+  const material = [day, getClientIp(request.headers) ?? '', request.headers.get('user-agent') ?? ''].join('|');
+  return `anon-${createHmac('sha256', `${secret}:${day}`).update(material).digest('hex').slice(0, 32)}`;
+}
+
 /** Drops undefined/empty keys so a request without geo headers never wipes known values. */
 export function defined<T extends Record<string, unknown>>(obj: T): Partial<T> {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== '')) as Partial<T>;
@@ -235,13 +282,17 @@ interface IdentifyInput {
 }
 
 /**
- * Links a form submission to the browser that made it: attaches the self-reported name/email to the
- * visitor profile and records a conversion event. Runs after the response is sent and never throws,
- * so analytics can't slow down or break a form submission.
+ * Records a form submission as a conversion. With cookie consent it also links the self-reported
+ * name/email to the visitor profile; without consent the conversion is counted anonymously and no
+ * identity is stored. Runs after the response is sent and never throws, so analytics can't slow
+ * down or break a form submission.
  */
 export function identifyVisitor(request: NextRequest, input: IdentifyInput) {
-  const { visitorId, sessionId } = readIds(request);
+  const consented = hasAnalyticsConsent(request);
+  const ids = readIds(request);
+  const visitorId = consented ? ids.visitorId : anonymousVisitorId(request);
   if (!visitorId) return;
+  const sessionId = (consented ? ids.sessionId : undefined) ?? 'unknown';
   const ctx = getRequestContext(request);
   const path = (() => {
     try {
@@ -254,34 +305,39 @@ export function identifyVisitor(request: NextRequest, input: IdentifyInput) {
   after(async () => {
     try {
       await connectDB();
-      const email = input.email.trim().toLowerCase();
-      const name = input.name?.trim() || undefined;
-      const phone = input.phone?.trim() || undefined;
-      const now = new Date();
+      let visitor: { country?: string; countryCode?: string; region?: string; city?: string } | null = null;
 
-      const visitor = await AnalyticsVisitor.findOneAndUpdate(
-        { visitorId },
-        {
-          $set: defined({ email, name, phone, identifiedAt: now, lastSeenAt: now }),
-          $push: { identities: { $each: [defined({ email, name, phone, source: input.source, at: now })], $slice: -20 } },
-          $inc: { conversions: 1 },
-        },
-        { new: true }
-      );
-      if (!visitor) return;
+      if (consented) {
+        const email = input.email.trim().toLowerCase();
+        const name = input.name?.trim() || undefined;
+        const phone = input.phone?.trim() || undefined;
+        const now = new Date();
+        visitor = await AnalyticsVisitor.findOneAndUpdate(
+          { visitorId },
+          {
+            $set: defined({ email, name, phone, identifiedAt: now, lastSeenAt: now, ip: ctx.ip }),
+            $push: { identities: { $each: [defined({ email, name, phone, source: input.source, at: now })], $slice: -20 } },
+            $inc: { conversions: 1 },
+            ...(ctx.ip ? { $addToSet: { ipAddresses: ctx.ip } } : {}),
+          },
+          { new: true }
+        );
+        if (!visitor) return;
+      }
 
       await AnalyticsEvent.create({
         type: 'conversion',
         name: input.source,
         visitorId,
-        sessionId: sessionId ?? 'unknown',
+        sessionId,
+        consent: consented,
         path,
         source: 'Direct',
         ...defined({
-          country: visitor.country ?? ctx.country,
-          countryCode: visitor.countryCode ?? ctx.countryCode,
-          region: visitor.region ?? ctx.region,
-          city: visitor.city ?? ctx.city,
+          country: visitor?.country ?? ctx.country,
+          countryCode: visitor?.countryCode ?? ctx.countryCode,
+          region: visitor?.region ?? ctx.region,
+          city: visitor?.city ?? ctx.city,
           device: ctx.device,
           browser: ctx.browser,
           os: ctx.os,

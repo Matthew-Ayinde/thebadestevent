@@ -14,6 +14,12 @@ export interface Totals {
   pagesPerSession: number;
   conversions: number;
   conversionRate: number;
+  /** Unique visitors who accepted analytics cookies. */
+  consentedVisitors: number;
+  /** Share of visitors who accepted analytics cookies. */
+  consentRate: number;
+  /** Clicks on WhatsApp, phone and email links. */
+  contactClicks: number;
 }
 
 export interface SeriesPoint {
@@ -46,6 +52,8 @@ export interface Overview {
   languages: { _id: string; visitors: number }[];
   heatmap: number[][];
   conversionsByForm: { _id: string; count: number }[];
+  clickTargets: { _id: { kind: string; target: string }; label?: string; clicks: number; visitors: number }[];
+  clickKinds: { _id: string; clicks: number }[];
 }
 
 export const CONVERSION_LABELS: Record<string, string> = {
@@ -54,6 +62,15 @@ export const CONVERSION_LABELS: Record<string, string> = {
   job_application: 'Job application',
   medallion_rsvp: 'Medallion RSVP',
   contact: 'Contact form',
+};
+
+export const CLICK_LABELS: Record<string, string> = {
+  whatsapp: 'WhatsApp',
+  phone: 'Phone call',
+  email: 'Email',
+  social: 'Social profile',
+  outbound: 'Other website',
+  cta: 'Tracked button',
 };
 
 const nf = new Intl.NumberFormat('en-GB');

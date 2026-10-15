@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import bcryptjs from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import { User } from '@/models/User';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export async function POST(req: Request) {
   try {
@@ -10,6 +12,15 @@ export async function POST(req: Request) {
     const normalizedCode = String(code ?? '').trim().replace(/[\s-]/g, '');
 
     if (!normalizedEmail || !normalizedCode) return NextResponse.json({ error: 'Missing params' }, { status: 400 });
+
+    // A 6-digit code is guessable without a cap on attempts per IP and per account.
+    const [byIp, byAccount] = await Promise.all([
+      rateLimit(RATE_LIMITS.resetVerify, rateLimitKey(req.headers)),
+      rateLimit(RATE_LIMITS.resetVerify, `email:${normalizedEmail}`),
+    ]);
+    if (!byIp.ok || !byAccount.ok) {
+      return tooManyRequests(byIp.ok ? byAccount : byIp, 'Too many attempts. Please wait 15 minutes and try again.');
+    }
 
     if (!/^\d{6}$/.test(normalizedCode)) {
       return NextResponse.json({ error: 'Code must be 6 digits' }, { status: 400 });

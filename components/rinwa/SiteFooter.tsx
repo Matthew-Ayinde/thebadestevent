@@ -6,6 +6,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-7xl flex-col gap-3 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between">
         <p>© 2026 RÌNWÁ Hospitality & Experiences. All rights reserved.</p>
         <div>
+          <Link href="/privacy" className="mr-4">Privacy & Cookies</Link>
           <Link href={'/admin'}>Admin</Link>
         </div>
         <p>Hospitality, storytelling, and curated moments.</p>

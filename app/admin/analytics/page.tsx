@@ -9,7 +9,10 @@ import DateRangeFilter, { resolvePreset, type RangeValue } from '@/components/ad
 import TrendChart, { type ChartMetric } from '@/components/admin/analytics/TrendChart';
 import { BarList, Empty, Heatmap, Panel, ShareTiles } from '@/components/admin/analytics/Panels';
 import { Avatar, Flag, VisitorsTable } from '@/components/admin/analytics/Visitors';
+import FormAnalyticsView from '@/components/admin/analytics/FormAnalyticsView';
+import { FORMS, isFormId, type FormId } from '@/lib/analytics-forms';
 import {
+  CLICK_LABELS,
   CONVERSION_LABELS,
   delta,
   fmtCompact,
@@ -42,9 +45,16 @@ const KPIS: Kpi[] = [
   { key: 'bounceRate', label: 'Bounce rate', format: fmtPercent, invert: true, hint: 'Visits that viewed only one page' },
   { key: 'conversions', label: 'Form submissions', format: fmtCompact, chart: 'conversions', hint: 'Questionnaire, meeting, job, RSVP and contact forms' },
   { key: 'conversionRate', label: 'Conversion rate', format: fmtPercent, hint: 'Form submissions per visit' },
+  { key: 'contactClicks', label: 'Contact clicks', format: fmtCompact, hint: 'Clicks on WhatsApp, phone and email links' },
+  { key: 'consentRate', label: 'Cookie opt-in', format: fmtPercent, hint: 'Visitors who accepted analytics cookies; only they get full profiles' },
 ];
 
 const UNITS: [Granularity, string][] = [['day', 'Daily'], ['week', 'Weekly'], ['month', 'Monthly']];
+
+const VIEWS: { id: 'site' | FormId; label: string }[] = [
+  { id: 'site', label: 'Whole site' },
+  ...Object.values(FORMS).map((f) => ({ id: f.id, label: f.label })),
+];
 
 function daysIn(range: RangeValue) {
   return Math.round((Date.parse(range.to) - Date.parse(range.from)) / 86_400_000) + 1;
@@ -91,6 +101,8 @@ function AnalyticsDashboard() {
   const unit: Granularity = unitParam && UNITS.some(([u]) => u === unitParam) ? unitParam : defaultUnit(range);
   const metric = (searchParams.get('metric') as ChartMetric) || 'visitors';
   const compare = searchParams.get('compare') !== '0';
+  const viewParam = searchParams.get('view');
+  const view: 'site' | FormId = isFormId(viewParam) ? viewParam : 'site';
 
   const [data, setData] = useState<Overview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -155,6 +167,26 @@ function AnalyticsDashboard() {
         )}
       </div>
 
+      {/* Views — the whole site, or one form's journey; the filters below scope either */}
+      <div role="tablist" aria-label="Analytics view" className="mb-4 flex flex-wrap gap-1.5">
+        {VIEWS.map((v) => (
+          <button
+            key={v.id}
+            role="tab"
+            type="button"
+            aria-selected={view === v.id}
+            onClick={() => update({ view: v.id === 'site' ? null : v.id })}
+            className={`rounded-full border px-4 py-2 text-sm transition ${
+              view === v.id
+                ? 'border-teal-300/40 bg-teal-300/15 text-teal-100'
+                : 'border-white/10 text-white/60 hover:border-white/20 hover:text-white'
+            }`}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
       {/* Filters — one row, scoping everything below */}
       <div className="md:sticky md:top-0 z-20 -mx-4 sm:-mx-6 md:-mx-8 mb-6 flex flex-wrap items-center gap-2 border-b border-white/5 bg-[#07171a]/90 px-4 sm:px-6 md:px-8 py-3 backdrop-blur-xl">
         <DateRangeFilter value={range} onChange={changeRange} />
@@ -170,15 +202,17 @@ function AnalyticsDashboard() {
             </button>
           ))}
         </div>
-        <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm text-white/70 select-none">
-          <input
-            type="checkbox"
-            checked={compare}
-            onChange={(e) => update({ compare: e.target.checked ? null : '0' })}
-            className="accent-teal-500"
-          />
-          Compare to previous period
-        </label>
+        {view === 'site' && (
+          <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm text-white/70 select-none">
+            <input
+              type="checkbox"
+              checked={compare}
+              onChange={(e) => update({ compare: e.target.checked ? null : '0' })}
+              className="accent-teal-500"
+            />
+            Compare to previous period
+          </label>
+        )}
         <button
           onClick={() => setRefreshKey((k) => k + 1)}
           className="ml-auto rounded-xl border border-white/12 bg-white/5 p-2.5 text-white/60 hover:bg-white/8 hover:text-white transition"
@@ -189,12 +223,14 @@ function AnalyticsDashboard() {
         </button>
       </div>
 
-      {!data ? (
+      {view !== 'site' ? (
+        <FormAnalyticsView form={view} from={range.from} to={range.to} tz={tz} unit={unit} refreshKey={refreshKey} />
+      ) : !data ? (
         <div className="py-32">{isLoading ? <LoadingSpinner /> : <Empty>Analytics could not be loaded.</Empty>}</div>
       ) : (
         <div className={`space-y-6 transition-opacity duration-200 ${isLoading ? 'opacity-50' : ''}`}>
           {/* KPI tiles — tiles with a chart icon drive the trend chart */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
             {KPIS.map((k) => {
               const selected = k.chart === metric;
               const Tag = k.chart ? 'button' : 'div';
@@ -365,6 +401,32 @@ function AnalyticsDashboard() {
               <BarList
                 valueLabel="Submissions"
                 items={data.conversionsByForm.map((c) => ({ key: c._id, label: CONVERSION_LABELS[c._id] ?? c._id, value: c.count }))}
+              />
+            </Panel>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-5">
+            <Panel title="Clicks" subtitle="WhatsApp, phone, email, social and outbound links" className="lg:col-span-3">
+              <BarList
+                valueLabel="Clicks"
+                items={data.clickTargets.map((c) => ({
+                  key: `${c._id.kind}:${c._id.target}`,
+                  label: (
+                    <span>
+                      <span className="mr-2 text-[0.65rem] uppercase tracking-widest text-white/40">{CLICK_LABELS[c._id.kind] ?? c._id.kind}</span>
+                      {c._id.target}
+                    </span>
+                  ),
+                  title: c.label ? `${c.label} → ${c._id.target}` : c._id.target,
+                  value: c.clicks,
+                  meta: `${fmtNumber(c.visitors)} ${c.visitors === 1 ? 'person' : 'people'}`,
+                }))}
+              />
+            </Panel>
+            <Panel title="Click types" subtitle="What people reached for" className="lg:col-span-2">
+              <BarList
+                valueLabel="Clicks"
+                items={data.clickKinds.map((c) => ({ key: c._id, label: CLICK_LABELS[c._id] ?? c._id, value: c.clicks }))}
               />
             </Panel>
           </div>

@@ -7,6 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import BookMeeting from "./BookMeeting";
 import { ThemeToggle } from "./ThemeToggle";
+import { useFormAnalytics } from "@/lib/use-form-analytics";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,7 @@ export default function Questions() {
   const [submitting, setSubmitting] = useState(false);
   const [data, setData]           = useState<FormData>(BLANK);
   const [meeting, setMeeting]     = useState(false);
+  const { trackError, trackSubmitError } = useFormAnalytics("questionnaire", step, TOTAL);
 
   function set(field: keyof FormData, value: string) {
     setData(prev => ({ ...prev, [field]: value }));
@@ -121,6 +123,7 @@ export default function Questions() {
   function next() {
     if (step === 1 && (!data.fullName || !data.email || !data.phone || !data.company)) {
       toast.error("Please complete all required fields before continuing.");
+      trackError(step, "Please complete all required fields before continuing.");
       return;
     }
     setStep(s => s + 1);
@@ -147,7 +150,9 @@ export default function Questions() {
       setStep(TOTAL + 1);
       requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast.error(message);
+      trackSubmitError(message);
     } finally {
       setSubmitting(false);
     }

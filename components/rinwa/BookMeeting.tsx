@@ -6,6 +6,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ExternalLink, Mail, PenLine } from "lucide-react";
 import { useTheme } from "./ThemeToggle";
+import { useFormAnalytics } from "@/lib/use-form-analytics";
 
 // ─── Cal.com config ────────────────────────────────────────────────────────────
 
@@ -126,6 +127,12 @@ export default function BookMeeting({ onExit }: { onExit: () => void }) {
   const [details, setDetails] = useState<Details | null>(null);
   const [request, setRequest] = useState<{ id: string; token: string } | null>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
+  // Journey: 1 = your details, 2 = pick a time, 3 = booked.
+  const { trackError, trackSubmitError } = useFormAnalytics(
+    "meeting_request",
+    stage === "intake" ? 1 : stage === "calendar" ? 2 : 3,
+    2
+  );
 
   useEffect(() => {
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }));
@@ -176,7 +183,13 @@ export default function BookMeeting({ onExit }: { onExit: () => void }) {
       <AnimatePresence mode="wait">
         {stage === "intake" && (
           <motion.div key="intake" className="w-full max-w-2xl" variants={variants} initial="enter" animate="center" exit="exit" transition={transition}>
-            <Intake initial={details} existing={request} onDone={handleIntake} />
+            <Intake
+              initial={details}
+              existing={request}
+              onDone={handleIntake}
+              onInvalid={(message) => trackError(1, message)}
+              onSubmitError={trackSubmitError}
+            />
           </motion.div>
         )}
         {stage === "calendar" && details && (
@@ -234,11 +247,13 @@ const inputCls =
   "w-full min-h-[52px] rounded-2xl border bg-field px-4 py-3.5 text-fg text-sm placeholder:text-fg-faint outline-none transition focus:border-accent/50 focus:shadow-[0_0_0_4px_var(--ring)]";
 
 function Intake({
-  initial, existing, onDone,
+  initial, existing, onDone, onInvalid, onSubmitError,
 }: {
   initial: Details | null;
   existing: { id: string; token: string } | null;
   onDone: (d: Details, req: { id: string; token: string }) => void;
+  onInvalid: (message: string) => void;
+  onSubmitError: (message: string) => void;
 }) {
   const [fullName, setFullName] = useState(initial?.fullName ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
@@ -262,7 +277,10 @@ function Intake({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ fullName: true, email: true, note: true });
-    if (errors.fullName || errors.email || errors.note) return;
+    if (errors.fullName || errors.email || errors.note) {
+      onInvalid(errors.fullName || errors.email || errors.note);
+      return;
+    }
 
     const d: Details = { fullName: fullName.trim(), email: email.trim(), topic, note: note.trim(), reason };
 
@@ -283,7 +301,9 @@ function Intake({
       if (!res.ok) throw new Error(json.error || "Something went wrong. Please try again.");
       onDone(d, { id: json.id, token: json.token });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast.error(message);
+      onSubmitError(message);
     } finally {
       setSubmitting(false);
     }

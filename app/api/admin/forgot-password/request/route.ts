@@ -3,9 +3,14 @@ import bcryptjs from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import { User } from '@/models/User';
 import { sendEmail } from '@/lib/email';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export async function POST(req: Request) {
   try {
+    const limited = await rateLimit(RATE_LIMITS.resetRequest, rateLimitKey(req.headers));
+    if (!limited.ok) return tooManyRequests(limited, 'Too many reset requests. Please wait 15 minutes and try again.');
+
     const { email } = await req.json();
     const normalizedEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
 

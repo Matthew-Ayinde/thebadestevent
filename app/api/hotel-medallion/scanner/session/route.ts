@@ -5,6 +5,8 @@ import {
   createScannerSession,
   isScannerConfigured,
 } from '@/lib/hotel-medallion-server';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export const runtime = 'nodejs';
 
@@ -12,6 +14,10 @@ export async function POST(request: NextRequest) {
   if (!isScannerConfigured()) {
     return NextResponse.json({ error: 'Scanner access is not configured on the server.' }, { status: 503 });
   }
+
+  // The door passcode is short; cap guesses per IP.
+  const limited = await rateLimit(RATE_LIMITS.scannerLogin, rateLimitKey(request.headers));
+  if (!limited.ok) return tooManyRequests(limited, 'Too many attempts. Please wait 15 minutes and try again.');
 
   const body = await request.json().catch(() => ({}));
   const passcode = typeof body?.passcode === 'string' ? body.passcode : '';

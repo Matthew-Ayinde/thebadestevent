@@ -12,6 +12,8 @@ export interface IAnalyticsEvent extends Document {
   visitorId: string;
   sessionId: string;
   isNewSession: boolean;
+  /** false for cookieless counts from visitors who did not accept analytics cookies. */
+  consent: boolean;
 
   path: string;
   title?: string;
@@ -37,6 +39,10 @@ export interface IAnalyticsEvent extends Document {
   language?: string;
   timezone?: string;
   screen?: string;
+  deviceModel?: string;
+  viewport?: string;
+  colorScheme?: string;
+  connection?: string;
 
   createdAt: Date;
 }
@@ -48,6 +54,8 @@ const AnalyticsEventSchema = new Schema<IAnalyticsEvent>(
     visitorId: { type: String, required: true },
     sessionId: { type: String, required: true },
     isNewSession: { type: Boolean, default: false },
+    // Events recorded before the consent banner existed predate this field; count them as consented.
+    consent: { type: Boolean, default: true },
 
     path: { type: String, required: true },
     title: String,
@@ -73,6 +81,10 @@ const AnalyticsEventSchema = new Schema<IAnalyticsEvent>(
     language: String,
     timezone: String,
     screen: String,
+    deviceModel: String,
+    viewport: String,
+    colorScheme: String,
+    connection: String,
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

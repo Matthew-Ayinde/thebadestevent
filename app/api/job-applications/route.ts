@@ -24,6 +24,8 @@ import {
   type ApplicationStatus,
   type FieldMode,
 } from '@/lib/careers';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export const runtime = 'nodejs';
 
@@ -84,6 +86,9 @@ export async function POST(request: NextRequest) {
   let uploadedPublicId: string | null = null;
 
   try {
+    const limited = await rateLimit(RATE_LIMITS.formSubmit, `job:${rateLimitKey(request.headers)}`);
+    if (!limited.ok) return tooManyRequests(limited, 'Too many submissions. Please wait a few minutes and try again.');
+
     let form: FormData;
     try {
       form = await request.formData();

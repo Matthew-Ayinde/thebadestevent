@@ -1,6 +1,7 @@
 import type { PipelineStage } from 'mongoose';
 import { AnalyticsEvent } from '@/models/AnalyticsEvent';
 import { AnalyticsVisitor } from '@/models/AnalyticsVisitor';
+import { AnalyticsClick } from '@/models/AnalyticsClick';
 
 export type Granularity = 'day' | 'week' | 'month';
 
@@ -83,7 +84,7 @@ export function previousRange(range: DateRange): DateRange {
   return { from, to, tz: range.tz, start: zonedMidnight(from, range.tz), end: range.start };
 }
 
-function bucketOf(date: string, unit: Granularity) {
+export function bucketOf(date: string, unit: Granularity) {
   if (unit === 'month') return `${date.slice(0, 7)}-01`;
   if (unit === 'week') {
     const { y, m, d } = parts(date);
@@ -93,7 +94,7 @@ function bucketOf(date: string, unit: Granularity) {
   return date;
 }
 
-function bucketKeys(range: DateRange, unit: Granularity) {
+export function bucketKeys(range: DateRange, unit: Granularity) {
   const keys: string[] = [];
   for (let d = range.from; d <= range.to; d = addDays(d, 1)) {
     const k = bucketOf(d, unit);
@@ -120,14 +121,22 @@ async function periodSummary(range: DateRange, unit: Granularity) {
   const match = { type: 'pageview', createdAt: { $gte: range.start, $lt: range.end } };
   const bucket = { $dateTrunc: { date: '$createdAt', unit, timezone: range.tz, startOfWeek: 'monday' } };
 
-  const [[facets], conversionRows, newVisitorRows] = await Promise.all([
+  const [[facets], conversionRows, newVisitorRows, contactClicks] = await Promise.all([
     AnalyticsEvent.aggregate([
       { $match: match },
       {
         $facet: {
           totals: [
-            { $group: { _id: null, pageviews: { $sum: 1 }, visitors: { $addToSet: '$visitorId' } } },
-            { $project: { _id: 0, pageviews: 1, visitors: sizeOf('$visitors') } },
+            {
+              $group: {
+                _id: null,
+                pageviews: { $sum: 1 },
+                visitors: { $addToSet: '$visitorId' },
+                // Cookieless (no-consent) visitors have no profile and can't be recognised as returning.
+                consented: { $addToSet: { $cond: [{ $ne: ['$consent', false] }, '$visitorId', '$REMOVE'] } },
+              },
+            },
+            { $project: { _id: 0, pageviews: 1, visitors: sizeOf('$visitors'), consented: sizeOf('$consented') } },
           ],
           sessions: [
             { $group: { _id: '$sessionId', views: { $sum: 1 }, engaged: { $sum: '$engagedMs' } } },
@@ -163,6 +172,10 @@ async function periodSummary(range: DateRange, unit: Granularity) {
       { $match: { firstSeenAt: { $gte: range.start, $lt: range.end } } },
       { $group: { _id: { $dateTrunc: { date: '$firstSeenAt', unit, timezone: range.tz, startOfWeek: 'monday' } }, count: { $sum: 1 } } },
     ] as PipelineStage[]),
+    AnalyticsClick.countDocuments({
+      createdAt: { $gte: range.start, $lt: range.end },
+      kind: { $in: ['whatsapp', 'phone', 'email'] },
+    }),
   ]);
 
   const byKey = new Map<string, SeriesPoint>(
@@ -173,7 +186,7 @@ async function periodSummary(range: DateRange, unit: Granularity) {
   for (const row of conversionRows) { const p = point(row._id); if (p) p.conversions = row.count; }
   for (const row of newVisitorRows) { const p = point(row._id); if (p) p.newVisitors = row.count; }
 
-  const t = facets.totals[0] ?? { pageviews: 0, visitors: 0 };
+  const t = facets.totals[0] ?? { pageviews: 0, visitors: 0, consented: 0 };
   const s = facets.sessions[0] ?? { sessions: 0, bounces: 0, avgDurationMs: 0, pagesPerSession: 0 };
   const conversions = conversionRows.reduce((n: number, r: { count: number }) => n + r.count, 0);
   const newVisitors = newVisitorRows.reduce((n: number, r: { count: number }) => n + r.count, 0);
@@ -182,7 +195,10 @@ async function periodSummary(range: DateRange, unit: Granularity) {
     totals: {
       visitors: t.visitors,
       newVisitors,
-      returningVisitors: Math.max(0, t.visitors - newVisitors),
+      returningVisitors: Math.max(0, t.consented - newVisitors),
+      consentedVisitors: t.consented,
+      consentRate: t.visitors ? t.consented / t.visitors : 0,
+      contactClicks,
       pageviews: t.pageviews,
       sessions: s.sessions,
       bounceRate: s.sessions ? s.bounces / s.sessions : 0,
@@ -205,7 +221,8 @@ async function breakdowns(range: DateRange) {
     { $limit: limit },
   ];
 
-  const [[facets], conversionsByForm] = await Promise.all([
+  const clickRange = { createdAt: { $gte: range.start, $lt: range.end } };
+  const [[facets], conversionsByForm, clickTargets, clickKinds] = await Promise.all([
     AnalyticsEvent.aggregate([
       { $match: match },
       {
@@ -277,13 +294,25 @@ async function breakdowns(range: DateRange) {
       { $group: { _id: '$name', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]),
+    AnalyticsClick.aggregate([
+      { $match: clickRange },
+      { $group: { _id: { kind: '$kind', target: '$target' }, label: { $last: '$label' }, clicks: { $sum: 1 }, visitors: { $addToSet: '$visitorId' } } },
+      { $project: { label: 1, clicks: 1, visitors: sizeOf('$visitors') } },
+      { $sort: { clicks: -1 } },
+      { $limit: 12 },
+    ]),
+    AnalyticsClick.aggregate([
+      { $match: clickRange },
+      { $group: { _id: '$kind', clicks: { $sum: 1 } } },
+      { $sort: { clicks: -1 } },
+    ]),
   ]);
 
   // $dayOfWeek: 1 = Sunday … 7 = Saturday; re-index to Monday = 0.
   const heatmap = Array.from({ length: 7 }, () => Array<number>(24).fill(0));
   for (const row of facets.heatmap) heatmap[(row._id.dow + 5) % 7][row._id.hour] = row.pageviews;
 
-  return { ...facets, heatmap, conversionsByForm };
+  return { ...facets, heatmap, conversionsByForm, clickTargets, clickKinds };
 }
 
 export async function getOverview(range: DateRange, unit: Granularity) {

@@ -4,6 +4,8 @@ import { connectDB } from '@/lib/mongodb';
 import { identifyVisitor } from '@/lib/analytics-server';
 import { MedallionGuest, type IMedallionGuest } from '@/models/MedallionGuest';
 import { generateTicketCode, generateTicketToken, sendMedallionInvitation } from '@/lib/hotel-medallion-server';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export const runtime = 'nodejs';
 
@@ -44,6 +46,9 @@ async function resendToExisting(email: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = await rateLimit(RATE_LIMITS.rsvpSubmit, rateLimitKey(request.headers));
+    if (!limited.ok) return tooManyRequests(limited, 'Too many submissions. Please wait a few minutes and try again.');
+
     const parsed = Schema.safeParse(await request.json());
 
     if (parsed.success && parsed.data.website) {

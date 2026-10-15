@@ -4,6 +4,8 @@ import { authOptions } from '@/auth';
 import { connectDB } from '@/lib/mongodb';
 import { AnalyticsVisitor } from '@/models/AnalyticsVisitor';
 import { AnalyticsEvent } from '@/models/AnalyticsEvent';
+import { AnalyticsClick } from '@/models/AnalyticsClick';
+import { AnalyticsFormEvent } from '@/models/AnalyticsFormEvent';
 
 export const runtime = 'nodejs';
 
@@ -52,6 +54,8 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     const [visitor] = await Promise.all([
       AnalyticsVisitor.deleteOne({ visitorId: id }),
       AnalyticsEvent.deleteMany({ visitorId: id }),
+      AnalyticsClick.deleteMany({ visitorId: id }),
+      AnalyticsFormEvent.deleteMany({ visitorId: id }),
     ]);
     if (!visitor.deletedCount) return NextResponse.json({ error: 'Visitor not found', code: 'NOT_FOUND' }, { status: 404 });
     return NextResponse.json({ success: true }, { status: 200 });

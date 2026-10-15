@@ -7,6 +7,8 @@ import { authOptions } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { sendInquiryEmails } from '@/lib/email';
+import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
+import { rateLimitKey } from '@/lib/client-ip';
 
 export const runtime = 'nodejs';
 
@@ -28,6 +30,9 @@ const ContactSubmissionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = await rateLimit(RATE_LIMITS.formSubmit, `contact:${rateLimitKey(request.headers)}`);
+    if (!limited.ok) return tooManyRequests(limited, 'Too many submissions. Please wait a few minutes and try again.');
+
     const body = await request.json();
     const validated = ContactSubmissionSchema.parse(body);
     const industries = validated.industries?.length

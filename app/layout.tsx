@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { themeInitScript } from "@/lib/theme";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
+import { ConsentBanner } from "@/components/analytics/ConsentBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -116,6 +117,7 @@ export default function RootLayout({
         <SplashScreen />
         {children}
         <AnalyticsTracker />
+        <ConsentBanner />
         <Analytics />
         <SpeedInsights />
       </body>

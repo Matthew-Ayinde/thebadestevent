@@ -22,6 +22,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.7,
     },
+    {
+      url: `${siteUrl}/privacy`,
+      lastModified: new Date("2026-10-15"),
+      changeFrequency: "yearly",
+      priority: 0.2,
+    },
     ...jobs.map(job => ({
       url: `${siteUrl}/careers/${job.slug}`,
       lastModified: new Date(job.updatedAt),

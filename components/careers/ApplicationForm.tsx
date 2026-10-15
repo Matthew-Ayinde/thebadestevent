@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { useSimpleFormAnalytics } from '@/lib/use-form-analytics';
 import { ArrowRight, Check, FileText, UploadCloud, X } from 'lucide-react';
 import {
   ANSWER_MAX,
@@ -75,6 +76,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
   const [resume, setResume] = useState<File | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
+  const analytics = useSimpleFormAnalytics('job_application');
 
   const v = (key: string) => values[key] ?? '';
   const set = (key: string) => (value: string) => setValues(prev => ({ ...prev, [key]: value }));
@@ -105,10 +107,12 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
     const ext = fileExtension(file.name);
     if (!(RESUME_EXTENSIONS as readonly string[]).includes(ext)) {
       toast.error('Please upload a PDF or Word document.');
+      analytics.trackError('Résumé: unsupported file type');
       return;
     }
     if (file.size > RESUME_MAX_BYTES) {
       toast.error(`That file is ${formatBytes(file.size)}. Please keep it under ${formatBytes(RESUME_MAX_BYTES)}.`);
+      analytics.trackError('Résumé: file too large');
       return;
     }
     setResume(file);
@@ -118,6 +122,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
     e.preventDefault();
     const keys = Object.keys(errors);
     if (keys.length) {
+      analytics.trackError(errors[keys[0]] || 'Required fields missing');
       setTouched(Object.fromEntries(keys.map(k => [k, true])));
       const el = document.getElementById(fieldId(keys[0]));
       el?.focus({ preventScroll: true });
@@ -147,9 +152,12 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
           json.error || (res.status === 413 ? 'Your file is too large. Please upload a smaller résumé.' : 'Something went wrong. Please try again.')
         );
       }
+      analytics.markSubmitted();
       onSubmitted(v('fullName').trim().split(/\s+/)[0], v('email').trim());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Something went wrong. Please try again.', { duration: 6000 });
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      toast.error(message, { duration: 6000 });
+      analytics.trackSubmitError(message);
     } finally {
       setSubmitting(false);
     }
@@ -160,7 +168,7 @@ function Form({ job, onSubmitted }: { job: PublicJob; onSubmitted: (firstName: s
   const num = (g: string) => String(groups.indexOf(g) + 1).padStart(2, '0');
 
   return (
-    <form onSubmit={submit} noValidate>
+    <form onSubmit={submit} onFocus={analytics.markStarted} noValidate>
       <p className="mb-5 text-[0.66rem] uppercase tracking-[0.38em] text-accent">Apply</p>
       <h2 id="apply-heading" className="text-[clamp(2.2rem,5vw,3.4rem)] leading-[1.02] tracking-tight text-fg" style={serif}>
         Introduce yourself.

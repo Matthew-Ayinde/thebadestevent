@@ -26,7 +26,9 @@ export interface IAnalyticsVisitor extends Document {
   identifiedAt?: Date;
   identities: IVisitorIdentity[];
 
+  consentAt?: Date;
   ip?: string;
+  ipAddresses: string[];
   country?: string;
   countryCode?: string;
   region?: string;
@@ -43,6 +45,10 @@ export interface IAnalyticsVisitor extends Document {
   os?: string;
   osVersion?: string;
   screen?: string;
+  deviceModel?: string;
+  viewport?: string;
+  colorScheme?: string;
+  connection?: string;
   userAgent?: string;
 
   firstSource?: string;
@@ -85,7 +91,9 @@ const AnalyticsVisitorSchema = new Schema<IAnalyticsVisitor>(
     identifiedAt: Date,
     identities: { type: [IdentitySchema], default: [] },
 
+    consentAt: Date,
     ip: String,
+    ipAddresses: { type: [String], default: [] },
     country: String,
     countryCode: String,
     region: String,
@@ -102,6 +110,10 @@ const AnalyticsVisitorSchema = new Schema<IAnalyticsVisitor>(
     os: String,
     osVersion: String,
     screen: String,
+    deviceModel: String,
+    viewport: String,
+    colorScheme: String,
+    connection: String,
     userAgent: String,
 
     firstSource: String,
