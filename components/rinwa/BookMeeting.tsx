@@ -104,7 +104,16 @@ type Stage = "intake" | "calendar" | "done";
 interface Details { fullName: string; email: string; topic: string; note: string; reason: string }
 interface Booking { uid?: string; startTime?: string; endTime?: string }
 
-const TOPICS = ["Planning an event", "Brand partnership", "Hospitality consulting", "Press & media", "Something else"];
+const TOPICS = [
+  "Hospitality Consulting",
+  "Guest Experience Design",
+  "Brand Partnership",
+  "Staff Assessment & Training",
+  "Launch Day Readiness",
+  "Event & Project Management",
+  "Press & Media",
+  "Something else",
+];
 
 const STEPS = CAL_LINK
   ? [
