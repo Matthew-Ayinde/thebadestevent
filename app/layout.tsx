@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     siteName: "RÌNWÁ Hospitality & Experiences",
     title: "RÌNWÁ Hospitality & Experiences",
     description:
-      "A culture-first hospitality brand offering strategic brand positioning, cultural matchmaking, and high-profile experiences for high-net-worth individuals across Lagos, Africa, and Canada.",
+      "RÌNWÁ helps hospitality brands in Lagos and across the diaspora deliver thoughtful experiences that earn guest loyalty. From strategy and launch readiness to service team development and operational standards, we build the foundations for hospitality that guest return to.",
     images: [
       {
         url: "https://res.cloudinary.com/matthew-ayinde/image/upload/v1780477515/rinwa-green_iu1he9.png",

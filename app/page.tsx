@@ -22,7 +22,7 @@ const organizationJsonLd = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   logo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/favicon.ico`,
   description:
-    "A culture-first hospitality and experiences brand curating intentional moments for hospitality-led brands, creative founders, and tourism ecosystems.",
+    "RÌNWÁ helps hospitality brands in Lagos and across the diaspora deliver thoughtful experiences that earn guest loyalty. From strategy and launch readiness to service team development and operational standards, we build the foundations for hospitality that guest return to.",
   sameAs: [
     "https://instagram.com/rinwahospitality",
     "https://x.com/rinwahospitality",
