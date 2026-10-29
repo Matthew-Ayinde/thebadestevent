@@ -62,7 +62,7 @@ export default function ExperienceHub() {
           Backdrop={JourneyBackdrop}
           eyebrow="Homecoming"
           title={["My Homecoming", "Experience"]}
-          body="Coming home this holiday or still making plans? Loop in the diaspora. If Nigeria is on the group chat's mind this ember season, this is where your plans come together. Share this with your people."
+          body="Coming home for detty December? Loop in the diaspora. If Nigeria is on the group chat's mind this ember season, this is where your plans come together. Share this with your people."
           cta="Plan Your Homecoming"
         />
       </div>
