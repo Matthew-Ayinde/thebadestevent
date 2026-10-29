@@ -145,7 +145,10 @@ function escapeHtml(value: string) {
 
 type InvitationGuest = { firstName: string; lastName: string; email: string; token: string; code: string };
 
-function buildInvitationHtml(guest: InvitationGuest) {
+// The morning-of reminder reuses the invitation layout with a different lead line and subject.
+const REMINDER_LINE = `A reminder: ${MEDALLION_EVENT.hotel}’s Relaunch - Wings & Wine cocktail party is today. We look forward to welcoming you.`;
+
+function buildInvitationHtml(guest: InvitationGuest, reminder = false) {
   const e = MEDALLION_EVENT;
   const name = escapeHtml(`${guest.firstName} ${guest.lastName}`);
   const when = escapeHtml(e.timeLabel ? `${e.dateLabel} · ${e.timeLabel}` : e.dateLabel);
@@ -166,7 +169,7 @@ function buildInvitationHtml(guest: InvitationGuest) {
         </td></tr>
         <tr><td align="center" style="padding:24px 36px 0;">
           <p style="margin:0 0 6px;font-size:13px;color:#a9b8dc;font-family:Arial,Helvetica,sans-serif;">Dear ${name},</p>
-          <p style="margin:0;font-size:22px;line-height:1.45;color:#f3efe4;">${escapeHtml(e.invitationLine)}</p>
+          <p style="margin:0;font-size:22px;line-height:1.45;color:#f3efe4;">${escapeHtml(reminder ? REMINDER_LINE : e.invitationLine)}</p>
         </td></tr>
         <tr><td align="center" style="padding:22px 36px 0;font-family:Arial,Helvetica,sans-serif;">
           <p style="margin:0;font-size:15px;font-weight:bold;letter-spacing:0.06em;color:#00aef1;">${when}</p>
@@ -202,12 +205,12 @@ function buildInvitationHtml(guest: InvitationGuest) {
 </html>`;
 }
 
-function buildInvitationText(guest: InvitationGuest) {
+function buildInvitationText(guest: InvitationGuest, reminder = false) {
   const e = MEDALLION_EVENT;
   return [
     `Dear ${guest.firstName} ${guest.lastName},`,
     '',
-    e.invitationLine,
+    reminder ? REMINDER_LINE : e.invitationLine,
     e.timeLabel ? `${e.dateLabel} · ${e.timeLabel}` : e.dateLabel,
     e.venueAddress,
     `Directions: ${MEDALLION_DIRECTIONS_URL}`,
@@ -223,7 +226,11 @@ function buildInvitationText(guest: InvitationGuest) {
 }
 
 /** Sends the invitation to the guest only — never copied to an admin inbox. */
-export async function sendMedallionInvitation(guest: InvitationGuest): Promise<{ sent: boolean; error?: string }> {
+export async function sendMedallionInvitation(
+  guest: InvitationGuest,
+  options: { reminder?: boolean; scheduledAt?: string } = {}
+): Promise<{ sent: boolean; error?: string }> {
+  const { reminder = false, scheduledAt } = options;
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.MEDALLION_EMAIL_FROM || process.env.RESEND_FROM;
   if (!apiKey) return { sent: false, error: 'RESEND_API_KEY is not configured' };
@@ -235,9 +242,12 @@ export async function sendMedallionInvitation(guest: InvitationGuest): Promise<{
       from,
       to: guest.email,
       replyTo: MEDALLION_EVENT.prContactEmail,
-      subject: `Your invitation — ${MEDALLION_EVENT.hotel} Relaunch, ${MEDALLION_EVENT.dateLabel}`,
-      html: buildInvitationHtml(guest),
-      text: buildInvitationText(guest),
+      subject: reminder
+        ? `Today — ${MEDALLION_EVENT.hotel} Relaunch, ${MEDALLION_EVENT.timeLabel}`
+        : `Your invitation — ${MEDALLION_EVENT.hotel} Relaunch, ${MEDALLION_EVENT.dateLabel}`,
+      html: buildInvitationHtml(guest, reminder),
+      text: buildInvitationText(guest, reminder),
+      scheduledAt,
       attachments: [
         { filename: `hotel-medallion-${guest.code}.png`, content: qr, contentId: 'medallion-qr' },
         {

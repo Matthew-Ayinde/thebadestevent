@@ -9,6 +9,7 @@ export interface IMedallionGuest extends Document {
   checkedInAt?: Date | null;
   emailSentAt?: Date | null;
   emailError?: string | null;
+  reminderSentAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +24,7 @@ const MedallionGuestSchema = new Schema<IMedallionGuest>(
     checkedInAt: { type: Date, default: null, index: true },
     emailSentAt: { type: Date, default: null },
     emailError: { type: String, default: null },
+    reminderSentAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

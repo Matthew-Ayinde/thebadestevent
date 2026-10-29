@@ -10,7 +10,7 @@ export const MEDALLION_EVENT = {
   dateLabel: 'October 30th, 2026',
   timeLabel: '6:00 PM - 10:00 PM',
   // Exact times for "Add to calendar" — keep in sync with timeLabel. Lagos is UTC+1 all year.
-  startsAt: '2026-10-30T17:00:00+01:00',
+  startsAt: '2026-10-30T18:00:00+01:00',
   endsAt: '2026-10-30T22:00:00+01:00',
   venueAddressLines: ['Plot 61, Babatunde Anjous Avenue', 'Off Admiralty Way, Lekki Phase 1', 'Lagos, Nigeria'],
   venueAddress: 'Plot 61, Babatunde Anjous Avenue, Off Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
@@ -45,7 +45,7 @@ export type CheckInResult =
 const calendarTitle = `${MEDALLION_EVENT.hotel} ${MEDALLION_EVENT.title}`;
 const calendarLocation = `${MEDALLION_EVENT.hotel}, ${MEDALLION_EVENT.venueAddress}`;
 
-/** `2026-10-30T17:00:00+01:00` → `20261030T160000Z` */
+/** `2026-10-30T18:00:00+01:00` → `20261030T170000Z` */
 export function calendarUtcStamp(iso: string) {
   return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
