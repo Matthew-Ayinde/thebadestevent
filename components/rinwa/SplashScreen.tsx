@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 
+export const SPLASH_KEY = "rinwa-splash-shown";
+// Fired on window once the splash has fully animated away.
+export const SPLASH_DONE_EVENT = "rinwa-splash-done";
 
 export function SplashScreen() {
   const [showSplash, setShowSplash] = useState(false);
@@ -13,21 +16,15 @@ export function SplashScreen() {
   const textEase = [0.25, 0.46, 0.45, 0.94] as const;
 
   useEffect(() => {
-    // Check if we've already shown the splash in this session
-    const hasShownSplash = sessionStorage.getItem("rinwa-splash-shown");
+    // sessionStorage is scoped to the tab, so the splash shows once per tab
+    // and again in any new tab.
+    const hasShownSplash = sessionStorage.getItem(SPLASH_KEY);
 
     if (!hasShownSplash) {
       setShowSplash(true);
-    //   sessionStorage.setItem("rinwa-splash-shown", "true");
 
-      // Auto-dismiss after 5 seconds
-      const timer = setTimeout(() => {
-        setIsAnimatingOut(true);
-        // Allow animation to complete before hiding
-        setTimeout(() => {
-          setShowSplash(false);
-        }, 1000);
-      }, 3000);
+      // Auto-dismiss after 3 seconds
+      const timer = setTimeout(handleDismiss, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -37,9 +34,14 @@ export function SplashScreen() {
   }, []);
 
   const handleDismiss = () => {
+    // Mark as shown on dismiss (not on mount) so React StrictMode's
+    // double-run of the effect doesn't leave the splash stuck open.
+    sessionStorage.setItem(SPLASH_KEY, "true");
     setIsAnimatingOut(true);
+    // Allow animation to complete before hiding
     setTimeout(() => {
       setShowSplash(false);
+      window.dispatchEvent(new Event(SPLASH_DONE_EVENT));
     }, 1000);
   };
 

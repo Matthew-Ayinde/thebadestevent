@@ -4,18 +4,28 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { OPEN_CONSENT_EVENT, readConsent, writeConsent, type ConsentChoice } from '@/lib/consent';
+import { SPLASH_DONE_EVENT, SPLASH_KEY } from '@/components/rinwa/SplashScreen';
 
 export function ConsentBanner() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Wait a moment so the banner doesn't fight the splash screen for attention.
-    const timer = readConsent() === null ? window.setTimeout(() => setOpen(true), 1200) : undefined;
+    let timer: number | undefined;
+    const showSoon = () => {
+      timer = window.setTimeout(() => setOpen(true), 1200);
+    };
+    if (readConsent() === null) {
+      // Don't show over the splash screen: if it hasn't run yet in this tab, wait until it's gone.
+      if (sessionStorage.getItem(SPLASH_KEY)) showSoon();
+      else window.addEventListener(SPLASH_DONE_EVENT, showSoon, { once: true });
+    }
+
     const reopen = () => setOpen(true);
     window.addEventListener(OPEN_CONSENT_EVENT, reopen);
     return () => {
       window.clearTimeout(timer);
+      window.removeEventListener(SPLASH_DONE_EVENT, showSoon);
       window.removeEventListener(OPEN_CONSENT_EVENT, reopen);
     };
   }, []);
