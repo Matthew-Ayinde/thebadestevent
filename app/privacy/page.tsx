@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/privacy' },
 };
 
-const CONTACT_EMAIL = 'rinwahospitality@gmail.com';
+const CONTACT_EMAIL = 'info@rinwahospitality.com';
 const UPDATED = 'October 30, 2026';
 
 const SECTIONS = [
@@ -18,7 +18,6 @@ const SECTIONS = [
   { id: 'stories', title: 'Came Home stories and photos' },
   { id: 'cookies', title: 'Cookies we use' },
   { id: 'how-we-use', title: 'How we use it, and why we may' },
-  { id: 'sharing', title: 'Who we share it with' },
   { id: 'transfers', title: 'Where it is stored' },
   { id: 'retention', title: 'How long we keep it' },
   { id: 'security', title: 'How we protect it' },
@@ -250,28 +249,6 @@ export default function PrivacyPage() {
           <p>
             We don&apos;t make decisions about you using only automated means, and we don&apos;t use your information
             for advertising profiles.
-          </p>
-        </Section>
-
-        <Section id="sharing" title="Who we share it with">
-          <p>
-            <Strong>We do not sell your personal information</Strong>, and we don&apos;t share it with anyone for
-            their own marketing unless you explicitly ask us to (for example, by opting in to partner offers).
-          </p>
-          <p>
-            We use a small number of trusted service providers that store or process information for us, under our
-            instructions and only to provide their service:
-          </p>
-          <ul className="list-disc space-y-1.5 pl-5">
-            <li><Strong>Vercel</Strong>: hosts our website.</li>
-            <li><Strong>MongoDB Atlas</Strong>: stores form submissions and analytics data.</li>
-            <li><Strong>Cloudinary</Strong>: stores and serves photos uploaded with Came Home stories.</li>
-            <li><Strong>Resend</Strong>: sends our confirmation and notification emails.</li>
-          </ul>
-          <p>
-            If you click a WhatsApp, phone, email or social media link on our site, that service&apos;s own privacy
-            policy applies to what happens next. We may also disclose information if the law requires it, or to
-            protect our rights or someone&apos;s safety.
           </p>
         </Section>
 
