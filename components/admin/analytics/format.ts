@@ -67,4 +67,5 @@ export const SOURCE_LABELS: Record<string, string> = {
   questionnaire: 'Event questionnaire',
   homecoming: 'Homecoming',
   'guest-experience': 'Guest check-in',
+  feedback: 'Came Home stories',
 };

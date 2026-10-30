@@ -3,6 +3,7 @@ import { AnalyticsEvent } from '@/models/AnalyticsEvent';
 import { AnalyticsFormEvent } from '@/models/AnalyticsFormEvent';
 import { GuestExperienceSubmission } from '@/models/GuestExperienceSubmission';
 import { HomecomingSubmission } from '@/models/HomecomingSubmission';
+import { HomecomingStory } from '@/models/HomecomingStory';
 import { parseRange, requireAdmin } from '@/lib/analytics/admin-query';
 import { addDays, bucketKeys, daysBetween, startOfDayInZone } from '@/lib/analytics/dates';
 import { sourceFacets, sourceRows } from '@/lib/analytics/breakdowns';
@@ -67,6 +68,20 @@ const SUBMISSIONS: Record<
       { id: 'perks', question: 'Perks & discounts', value: 'perks' },
       { id: 'heardFrom', question: 'Heard about RÌNWÁ from', value: otherOr('heardFrom', 'heardFromOther') },
       { id: 'contactMethod', question: 'Preferred contact', value: 'contactMethod' },
+    ],
+  },
+  feedback: {
+    model: HomecomingStory,
+    answers: [
+      { id: 'movedFrom', question: 'Moved back from', value: 'movedFrom' },
+      { id: 'yearReturned', question: 'Year returned', value: { $toString: '$yearReturned' } },
+      { id: 'creditAs', question: 'Credited as', value: 'creditAs' },
+      { id: 'contentConsent', question: 'Consented to sharing', value: { $cond: ['$contentConsent', 'Yes', 'No'] } },
+    ],
+    comments: [
+      { field: 'wishedHelpWith', question: 'Wished they had help with' },
+      { field: 'wishPrepared', question: 'Wish they had been prepared for' },
+      { field: 'landingThoughts', question: 'First thoughts on landing' },
     ],
   },
 };

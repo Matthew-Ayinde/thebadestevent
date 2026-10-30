@@ -1,7 +1,7 @@
 // The multi-step questionnaires whose journeys are tracked. Shared by the
 // public form hook, the collect endpoint and the admin dashboard.
 
-export const FORM_IDS = ['guest', 'homecoming'] as const;
+export const FORM_IDS = ['guest', 'homecoming', 'feedback'] as const;
 export type FormId = (typeof FORM_IDS)[number];
 
 export const FORM_ACTIONS = ['start', 'step', 'error', 'submit', 'submit_error'] as const;
@@ -27,6 +27,12 @@ export const FORMS: Record<FormId, FormConfig> = {
     label: 'Homecoming',
     path: '/ourdiaspora',
     steps: ['About you', 'Your trip', 'What you need', 'Perks'],
+  },
+  feedback: {
+    id: 'feedback',
+    label: 'Came Home stories',
+    path: '/feedback',
+    steps: ['About you', 'Your story', 'Looking back'],
   },
 };
 
