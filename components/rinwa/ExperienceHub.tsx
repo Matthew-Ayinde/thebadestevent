@@ -1,20 +1,23 @@
 "use client";
 
 // ─── Experience Hub ─────────────────────────────────────────────────────────────
-// The front door: two full-bleed panels, split down the middle, each leading
-// into its own intake flow. No photography on hand, so each side gets a
+// The front door: three full-bleed panels side by side (stacked below lg),
+// each leading into its own flow. No photography on hand, so each gets a
 // quiet, code-drawn backdrop in its own accent instead — teal for the
-// nightlife/guest-experience side, gold for the homecoming/travel side —
-// echoing the two flows they lead to. Flat surfaces throughout: solid fills,
-// hairline borders, no glow, no gradient on anything a person touches.
+// nightlife/guest-experience side, gold for the homecoming/travel side,
+// paper cream for the Came Home stories (the colour of the passport page
+// they get stamped on). Flat surfaces throughout: solid fills, hairline
+// borders, no glow, no gradient on anything a person touches.
 
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Wine, Sparkles, Disc3, Compass, Globe2, Plane } from "lucide-react";
+import { Wine, Sparkles, Disc3, Compass, Globe2, Plane, Quote } from "lucide-react";
+import { RinwaStamp } from "./RinwaStamp";
 
 const TEAL = "#7dd3cf";
 const GOLD = "#e8c07a";
+const PAPER = "#eadcc4";
 const INK = "#04100f";
 
 // The JourneyBackdrop plane travels in a single straight line (lower-left to
@@ -33,7 +36,7 @@ export default function ExperienceHub() {
   const reduced = useReducedMotion();
 
   return (
-    <div className="relative flex flex-col min-h-screen md:h-screen bg-[#030f12]">
+    <div className="relative flex flex-col min-h-screen lg:h-screen bg-[#030f12]">
       {/* Shared brand lockup, sitting over both panels */}
       <div className="relative z-30 flex flex-col items-center shrink-0 pt-12 pb-9 sm:pt-14 sm:pb-11 px-6 text-center">
         <Image src="/images/logo.png" alt="RÌNWÁ" width={68} height={68} className="opacity-90 mb-3" />
@@ -41,9 +44,7 @@ export default function ExperienceHub() {
         <p className="mt-3 text-sm text-white/60">Your bridge between coming home and building at home.</p>
       </div>
 
-      <div className="relative grid md:grid-cols-2 flex-1">
-        <div className="hidden md:block absolute inset-y-0 left-1/2 w-px bg-white/10 z-20" />
-
+      <div className="relative grid lg:grid-cols-3 flex-1">
         <Panel
           href="/ourguests"
           accent={TEAL}
@@ -65,6 +66,17 @@ export default function ExperienceHub() {
           body="Coming home for detty December? Loop in the diaspora. If Nigeria is on the group chat's mind this ember season, this is where your plans come together. Share this with your people."
           cta="Plan Your Homecoming"
         />
+
+        <Panel
+          href="/feedback"
+          accent={PAPER}
+          reduced={reduced}
+          Backdrop={StoryBackdrop}
+          eyebrow="Came Home Stories"
+          title={["My Return", "Story"]}
+          body="Already made the move back? Tell us how coming home really felt: the good, the hard, and what you wish you'd known. Then read the stories of others who did it too."
+          cta="Share Your Story"
+        />
       </div>
     </div>
   );
@@ -82,7 +94,7 @@ function Panel({
   return (
     <Link
       href={href}
-      className="group relative flex flex-col items-center justify-center text-center px-8 py-20 sm:py-28 md:py-0 md:h-full overflow-hidden border-b border-white/10 md:border-b-0"
+      className="group relative flex flex-col items-center justify-center text-center px-8 py-20 sm:py-28 lg:py-0 lg:h-full overflow-hidden border-b border-white/10 lg:border-b-0 lg:[&:not(:first-child)]:border-l"
     >
       <div className="absolute inset-0">
         <Backdrop reduced={reduced} />
@@ -204,6 +216,45 @@ function JourneyBackdrop({ reduced }: { reduced: boolean | null }) {
       >
         <Plane size={34} style={{ transform: `rotate(${PLANE_ANGLE}deg)` }} />
       </motion.div>
+    </>
+  );
+}
+
+function StoryBackdrop({ reduced }: { reduced: boolean | null }) {
+  return (
+    <>
+      <div
+        className="absolute inset-0"
+        style={{ background: "radial-gradient(ellipse 120% 70% at 50% -8%, #22201b 0%, #131411 45%, #0b0c0b 100%)" }}
+      />
+      <DotGrid color={PAPER} />
+      {/* The Came Home seal, slowly turning — the same stamp the story form ends on */}
+      <motion.div
+        className="absolute"
+        style={{ opacity: 0.08, right: "-70px", top: "8%" }}
+        animate={reduced ? undefined : { rotate: 360 }}
+        transition={reduced ? undefined : { duration: 90, repeat: Infinity, ease: "linear" }}
+      >
+        <RinwaStamp size={240} color={PAPER} />
+      </motion.div>
+      {/* Two tilted instant prints, like the photos on the stories wall */}
+      <motion.div
+        className="hidden sm:block absolute left-[10%] bottom-[14%] -rotate-[8deg] rounded-[3px] border p-2 pb-7"
+        style={{ borderColor: `${PAPER}24` }}
+        animate={reduced ? undefined : { y: [0, -8, 0] }}
+        transition={reduced ? undefined : { duration: 9, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="h-20 w-16 rounded-[2px]" style={{ background: `${PAPER}0d` }} />
+      </motion.div>
+      <div
+        className="hidden lg:block absolute left-[22%] bottom-[10%] rotate-[6deg] rounded-[3px] border p-1.5 pb-5"
+        style={{ borderColor: `${PAPER}1a` }}
+      >
+        <div className="h-12 w-10 rounded-[2px]" style={{ background: `${PAPER}0a` }} />
+      </div>
+      <div className="hidden sm:block absolute top-[16%] left-[12%] -rotate-6" style={{ color: PAPER, opacity: 0.1 }}>
+        <Quote size={48} strokeWidth={0.7} />
+      </div>
     </>
   );
 }

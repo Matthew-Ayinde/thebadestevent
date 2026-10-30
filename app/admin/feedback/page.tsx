@@ -16,7 +16,7 @@ function Detail({ label, value }: { label: string; value?: string | number }) {
   return (
     <div>
       <p className="text-xs uppercase text-white/40 tracking-widest mb-1">{label}</p>
-      <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{value}</p>
+      <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line [overflow-wrap:anywhere]">{value}</p>
     </div>
   );
 }
@@ -54,6 +54,10 @@ export default function FeedbackAdminPage() {
   const [page, setPage]               = useState(1);
   const [totalPages, setTotalPages]   = useState(1);
   const [total, setTotal]             = useState(0);
+  const [featuredCount, setFeaturedCount] = useState(0);
+  const [wallSize, setWallSize]           = useState(8);
+  // Set when the wall is full: the story waiting to go on, and the one it would replace.
+  const [wallFull, setWallFull] = useState<{ row: any; oldest?: { id: string; name: string } } | null>(null);
 
   useEffect(() => { fetch_(page); }, [page]);
 
@@ -67,6 +71,8 @@ export default function FeedbackAdminPage() {
       setPage(data.page || p);
       setTotalPages(data.totalPages || 1);
       setTotal(data.total || 0);
+      setFeaturedCount(data.featuredCount ?? 0);
+      if (data.wallSize) setWallSize(data.wallSize);
     } catch {
       toast.error('Failed to load stories');
     } finally {
@@ -74,25 +80,45 @@ export default function FeedbackAdminPage() {
     }
   }
 
-  async function toggleFeatured(row: any) {
+  async function toggleFeatured(row: any, replaceOldest = false) {
     try {
       setTogglingId(row._id);
       const res = await fetch(`/api/feedback/${row._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ featured: !row.featured }),
+        body: JSON.stringify({ featured: !row.featured, replaceOldest }),
       });
       const data = await res.json().catch(() => ({}));
+      if (res.status === 409 && data.code === 'WALL_FULL') {
+        if (data.wallSize) setWallSize(data.wallSize);
+        setWallFull({ row, oldest: data.oldest || undefined });
+        return;
+      }
       if (!res.ok) throw new Error(data.error || `Update failed (${res.status})`);
-      const update = (s: any) => (s._id === row._id ? { ...s, featured: data.featured } : s);
+      const update = (s: any) => {
+        if (s._id === row._id) return { ...s, featured: data.featured };
+        if (s._id === data.replacedId) return { ...s, featured: false };
+        return s;
+      };
       setSubmissions(prev => prev.map(update));
       setSelected((prev: any) => (prev ? update(prev) : prev));
-      toast.success(data.featured ? 'Added to the stories wall' : 'Removed from the stories wall');
+      if (typeof data.featuredCount === 'number') setFeaturedCount(data.featuredCount);
+      toast.success(
+        data.replacedId ? 'Swapped onto the stories wall'
+          : data.featured ? 'Added to the stories wall' : 'Removed from the stories wall'
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Update failed');
     } finally {
       setTogglingId(null);
     }
+  }
+
+  async function confirmReplace() {
+    if (!wallFull) return;
+    const { row } = wallFull;
+    setWallFull(null);
+    await toggleFeatured(row, true);
   }
 
   async function handleDelete() {
@@ -174,6 +200,14 @@ export default function FeedbackAdminPage() {
             Stories shared on <a href="/feedback" target="_blank" className="text-teal-200 hover:underline">/feedback</a>.
             Star a story to feature it on the wall (only stories shared with consent).
           </p>
+        </div>
+        <div
+          className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm ${
+            featuredCount >= wallSize ? 'border-teal-300/40 bg-teal-300/15 text-teal-100' : 'border-white/12 bg-white/5 text-white/70'
+          }`}
+        >
+          <Star size={14} fill={featuredCount > 0 ? 'currentColor' : 'none'} />
+          <span><span className="font-semibold tabular-nums">{featuredCount}</span> of {wallSize} on the wall</span>
         </div>
       </div>
 
@@ -282,6 +316,20 @@ export default function FeedbackAdminPage() {
           </div>
         )}
       </AdminModal>
+
+      <ConfirmationDialog
+        isOpen={!!wallFull}
+        title="The wall is full"
+        message={
+          wallFull?.oldest
+            ? `The wall holds ${wallSize} stories. Featuring ${displayName(wallFull.row)}'s story will take ${wallFull.oldest.name}'s off the wall (it has been up the longest).`
+            : `The wall holds ${wallSize} stories. Featuring this one will take the longest-featured story off the wall.`
+        }
+        onConfirm={confirmReplace}
+        onCancel={() => setWallFull(null)}
+        isLoading={!!wallFull && togglingId === wallFull.row._id}
+        confirmText="Replace"
+      />
 
       <ConfirmationDialog
         isOpen={!!deleteId}

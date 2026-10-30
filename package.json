@@ -6,7 +6,8 @@
     "dev": "next dev -p 8000",
     "build": "next build",
     "start": "next start",
-    "seed": "node --env-file=.env.local --import tsx scripts/seed.ts"
+    "seed": "node --env-file=.env.local --import tsx scripts/seed.ts",
+    "seed:stories": "node --env-file=.env.local --import tsx scripts/seed-stories.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

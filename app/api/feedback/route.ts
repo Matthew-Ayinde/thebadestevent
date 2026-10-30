@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { connectDB } from '@/lib/mongodb';
 import { CLOUDINARY_ROOT_FOLDER, deleteCloudinaryAssets } from '@/lib/cloudinary';
-import { CREDIT_OPTIONS, HomecomingStory } from '@/models/HomecomingStory';
+import { CREDIT_OPTIONS, HomecomingStory, WALL_SIZE } from '@/models/HomecomingStory';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
@@ -153,7 +153,10 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
 
     await connectDB();
-    const total = await HomecomingStory.countDocuments();
+    const [total, featuredCount] = await Promise.all([
+      HomecomingStory.countDocuments(),
+      HomecomingStory.countDocuments({ featured: true }),
+    ]);
     const totalPages = Math.max(1, Math.ceil(total / limit));
     const currentPage = Math.min(page, totalPages);
 
@@ -162,7 +165,7 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .skip((currentPage - 1) * limit);
 
-    return NextResponse.json({ submissions, total, limit, page: currentPage, totalPages }, { status: 200 });
+    return NextResponse.json({ submissions, total, limit, page: currentPage, totalPages, featuredCount, wallSize: WALL_SIZE }, { status: 200 });
   } catch (error) {
     console.error('Homecoming story fetch error:', error);
     return NextResponse.json({ error: 'Failed to fetch stories' }, { status: 500 });

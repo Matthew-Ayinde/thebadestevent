@@ -448,6 +448,13 @@ function StepLookingBack({ data, set }: { data: FormData; set: SetFn }) {
         last
       >
         <SegButtons options={CONSENT} value={data.contentConsent} onPick={v => set("contentConsent", v)} />
+        <p className="mt-4 text-[0.8rem] leading-relaxed text-white/40">
+          Read how we handle your story and photo in our{" "}
+          <Link href="/privacy#stories" target="_blank" className="underline underline-offset-4 hover:text-white/70">
+            privacy policy
+          </Link>
+          .
+        </p>
       </QuestionBlock>
     </div>
   );
@@ -507,14 +514,20 @@ function StampedEntry({ entry }: { entry: Stamped }) {
           </div>
 
           <div className="mt-6 flex gap-5 sm:gap-7">
-            <div className="h-32 w-24 shrink-0 overflow-hidden rounded-[2px] ring-1 sm:h-36 sm:w-28" style={{ background: "#e6ddcf", ["--tw-ring-color" as any]: `${INK}40` }}>
-              {entry.photo ? (
-                /* eslint-disable-next-line @next/next/no-img-element -- local object URL */
-                <img src={entry.photo} alt="" className="h-full w-full object-cover grayscale-[35%] sepia-[20%]" />
-              ) : (
+            {entry.photo ? (
+              // The frame takes the photo's own shape so nothing is cropped.
+              <div className="shrink-0 self-start rounded-[2px] p-1 ring-1" style={{ background: "#e6ddcf", ["--tw-ring-color" as any]: `${INK}40` }}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
+                <img
+                  src={entry.photo} alt=""
+                  className="block h-auto max-h-40 w-auto max-w-[6.5rem] object-contain grayscale-[35%] sepia-[20%] sm:max-h-48 sm:max-w-[9rem]"
+                />
+              </div>
+            ) : (
+              <div className="h-32 w-24 shrink-0 overflow-hidden rounded-[2px] ring-1 sm:h-36 sm:w-28" style={{ background: "#e6ddcf", ["--tw-ring-color" as any]: `${INK}40` }}>
                 <RinwaStamp size={96} color={`${INK}`} className="m-auto mt-5 opacity-25 sm:mt-7" />
-              )}
-            </div>
+              </div>
+            )}
             <dl className="grid min-w-0 flex-1 gap-3.5 text-sm">
               <EntryLine label="Name" value={entry.displayName} />
               <EntryLine label="Moved back from" value={entry.movedFrom} />

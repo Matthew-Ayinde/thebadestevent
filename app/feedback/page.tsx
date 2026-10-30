@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import CameHome from "@/components/rinwa/CameHome";
 import { connectDB } from "@/lib/mongodb";
-import { HomecomingStory, toPublicStory, type IHomecomingStory, type PublicStory } from "@/models/HomecomingStory";
+import { HomecomingStory, WALL_SIZE, toPublicStory, type IHomecomingStory, type PublicStory } from "@/models/HomecomingStory";
 
 export const metadata: Metadata = {
   title: "Came Home Stories",
@@ -13,13 +13,11 @@ export const metadata: Metadata = {
 // this page; the timer is a backstop.
 export const revalidate = 600;
 
-const WALL_SIZE = 8;
-
 async function featuredStories(): Promise<PublicStory[]> {
   try {
     await connectDB();
     const docs = await HomecomingStory.find({ featured: true, contentConsent: true })
-      .sort({ updatedAt: -1 })
+      .sort({ featuredAt: -1, updatedAt: -1 })
       .limit(WALL_SIZE);
     return docs.map((d: IHomecomingStory) => toPublicStory(d));
   } catch (error) {

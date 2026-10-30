@@ -1,6 +1,6 @@
 import { connectDB } from '@/lib/mongodb';
 import { deleteCloudinaryAssets } from '@/lib/cloudinary';
-import { HomecomingStory } from '@/models/HomecomingStory';
+import { HomecomingStory, WALL_SIZE } from '@/models/HomecomingStory';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/auth';
 import { revalidatePath } from 'next/cache';
@@ -14,7 +14,15 @@ async function isAdmin() {
   return !!session && (session.user as any).role === 'admin';
 }
 
-const PatchSchema = z.object({ featured: z.boolean() });
+const PatchSchema = z.object({
+  featured: z.boolean(),
+  // When the wall is full, take the longest-featured story off to make room.
+  replaceOldest: z.boolean().optional(),
+});
+
+function creditName(s: { creditAs: string; name?: string }) {
+  return s.creditAs === 'Anonymous' || !s.name ? 'Anonymous' : s.name;
+}
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -23,7 +31,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const { id } = await params;
-    const { featured } = PatchSchema.parse(await request.json());
+    const { featured, replaceOldest } = PatchSchema.parse(await request.json());
 
     await connectDB();
     const story = await HomecomingStory.findById(id);
@@ -34,11 +42,41 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'This person did not consent to their story being shared' }, { status: 400 });
     }
 
-    story.featured = featured;
-    await story.save();
+    let replacedId: string | undefined;
+    if (featured && !story.featured) {
+      const onWall = await HomecomingStory.countDocuments({ featured: true });
+      if (onWall >= WALL_SIZE) {
+        // Stories featured before featuredAt existed sort first, i.e. as oldest.
+        const oldest = await HomecomingStory.findOne({ featured: true }).sort({ featuredAt: 1, updatedAt: 1 });
+        if (!replaceOldest) {
+          return NextResponse.json(
+            {
+              error: `The wall holds ${WALL_SIZE} stories`,
+              code: 'WALL_FULL',
+              wallSize: WALL_SIZE,
+              oldest: oldest && { id: String(oldest._id), name: creditName(oldest) },
+            },
+            { status: 409 }
+          );
+        }
+        if (oldest) {
+          oldest.featured = false;
+          oldest.featuredAt = undefined;
+          await oldest.save();
+          replacedId = String(oldest._id);
+        }
+      }
+    }
+
+    if (story.featured !== featured) {
+      story.featured = featured;
+      story.featuredAt = featured ? new Date() : undefined;
+      await story.save();
+    }
     revalidatePath('/feedback');
 
-    return NextResponse.json({ success: true, featured: story.featured }, { status: 200 });
+    const featuredCount = await HomecomingStory.countDocuments({ featured: true });
+    return NextResponse.json({ success: true, featured: story.featured, featuredCount, replacedId }, { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 });

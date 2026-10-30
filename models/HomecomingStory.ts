@@ -3,6 +3,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 export const CREDIT_OPTIONS = ['Full name', 'Nickname', 'Anonymous'] as const;
 export type CreditOption = (typeof CREDIT_OPTIONS)[number];
 
+/** How many featured stories fit on the /feedback wall. */
+export const WALL_SIZE = 8;
+
 export interface IHomecomingStory extends Document {
   creditAs: CreditOption;
   name?: string;
@@ -21,6 +24,8 @@ export interface IHomecomingStory extends Document {
   contentConsent: boolean;
   // Only consented stories can be featured; featured ones show on /feedback.
   featured: boolean;
+  /** When it was last put on the wall; the wall shows newest first. */
+  featuredAt?: Date;
   status: string;
   createdAt: Date;
   updatedAt: Date;
@@ -44,6 +49,7 @@ const HomecomingStorySchema = new Schema<IHomecomingStory>(
     landingThoughts: { type: String },
     contentConsent: { type: Boolean, required: true },
     featured: { type: Boolean, default: false, index: true },
+    featuredAt: { type: Date },
     status: { type: String, default: 'new' },
   },
   { timestamps: true }

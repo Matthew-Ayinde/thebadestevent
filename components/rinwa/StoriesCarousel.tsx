@@ -151,7 +151,7 @@ function StoryPrint({ story }: { story: PublicStory }) {
               alt={`${story.displayName}'s homecoming photo`}
               fill
               sizes="(min-width: 768px) 320px, 300px"
-              className="object-cover pointer-events-none"
+              className="object-contain pointer-events-none"
               draggable={false}
             />
           ) : (
@@ -178,16 +178,16 @@ function StoryWords({ story, expanded, onToggle }: { story: PublicStory; expande
   const long = story.story.length > 360;
   return (
     <div className="flex min-w-0 flex-col justify-center">
-      <p className="mb-5 flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.34em]" style={{ color: ACCENT }}>
-        <MapPin size={12} />
-        From {story.movedFrom} · Home since {story.yearReturned}
+      <p className="mb-5 flex items-start gap-2 text-[0.62rem] uppercase leading-relaxed tracking-[0.34em]" style={{ color: ACCENT }}>
+        <MapPin size={12} className="mt-[0.2em] shrink-0" />
+        <span className="min-w-0 [overflow-wrap:anywhere]">From {story.movedFrom} · Home since {story.yearReturned}</span>
       </p>
 
       {story.landingThoughts && (
         <blockquote className="mb-6">
           <Quote size={22} className="mb-2 opacity-40" style={{ color: ACCENT }} />
           <p
-            className="font-serif text-[clamp(1.45rem,3.2vw,2.1rem)] leading-[1.15] tracking-tight text-white"
+            className="font-serif text-[clamp(1.45rem,3.2vw,2.1rem)] leading-[1.15] tracking-tight text-white [overflow-wrap:anywhere]"
             style={{ fontFamily: "var(--font-serif)" }}
           >
             {story.landingThoughts}
@@ -197,7 +197,7 @@ function StoryWords({ story, expanded, onToggle }: { story: PublicStory; expande
       )}
 
       <p
-        className={`whitespace-pre-line leading-relaxed text-white/65 ${story.landingThoughts ? "text-[0.95rem]" : "font-serif text-xl text-white/85"} ${expanded ? "" : "line-clamp-6"}`}
+        className={`whitespace-pre-line leading-relaxed text-white/65 [overflow-wrap:anywhere] ${story.landingThoughts ? "text-[0.95rem]" : "font-serif text-xl text-white/85"} ${expanded ? "" : "line-clamp-6"}`}
         style={story.landingThoughts ? undefined : { fontFamily: "var(--font-serif)" }}
       >
         {story.story}
