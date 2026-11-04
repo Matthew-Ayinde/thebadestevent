@@ -27,6 +27,6 @@ async function featuredStories(): Promise<PublicStory[]> {
   }
 }
 
-export default async function FeedbackPage() {
+export default async function IlewaPage() {
   return <CameHome stories={await featuredStories()} />;
 }

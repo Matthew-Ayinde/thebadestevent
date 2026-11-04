@@ -3,16 +3,22 @@ import mongoose, { Schema, Document } from 'mongoose';
 export const CREDIT_OPTIONS = ['Full name', 'Nickname', 'Anonymous'] as const;
 export type CreditOption = (typeof CREDIT_OPTIONS)[number];
 
-/** How many featured stories fit on the /feedback wall. */
+export const STAGE_OPTIONS = ['Returned', 'Extended', 'Incoming'] as const;
+export type StageOption = (typeof STAGE_OPTIONS)[number];
+
+/** How many featured stories fit on the /ilewa wall. */
 export const WALL_SIZE = 8;
 
 export interface IHomecomingStory extends Document {
+  /** Missing on stories submitted before the question was added. */
+  stage?: StageOption;
   creditAs: CreditOption;
   name?: string;
   movedFrom: string;
   photoUrl?: string;
   story: string;
-  yearReturned: number;
+  /** Not asked of Incoming storytellers, who haven't moved back yet. */
+  yearReturned?: number;
   instagram?: string;
   tiktok?: string;
   twitter?: string;
@@ -22,7 +28,7 @@ export interface IHomecomingStory extends Document {
   wishPrepared?: string;
   landingThoughts?: string;
   contentConsent: boolean;
-  // Only consented stories can be featured; featured ones show on /feedback.
+  // Only consented stories can be featured; featured ones show on /ilewa.
   featured: boolean;
   /** When it was last put on the wall; the wall shows newest first. */
   featuredAt?: Date;
@@ -33,12 +39,13 @@ export interface IHomecomingStory extends Document {
 
 const HomecomingStorySchema = new Schema<IHomecomingStory>(
   {
+    stage: { type: String, enum: STAGE_OPTIONS },
     creditAs: { type: String, enum: CREDIT_OPTIONS, required: true },
     name: { type: String },
     movedFrom: { type: String, required: true },
     photoUrl: { type: String },
     story: { type: String, required: true },
-    yearReturned: { type: Number, required: true },
+    yearReturned: { type: Number },
     instagram: { type: String },
     tiktok: { type: String },
     twitter: { type: String },
@@ -64,7 +71,7 @@ export interface PublicStory {
   id: string;
   displayName: string;
   movedFrom: string;
-  yearReturned: number;
+  yearReturned?: number;
   photoUrl?: string;
   story: string;
   landingThoughts?: string;

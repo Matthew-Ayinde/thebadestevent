@@ -8,14 +8,16 @@
 // accent by putting `--accent: <color>` in the inline style of its root
 // element — every primitive below just reads `var(--accent)`, so the same
 // components work for a teal flow and a gold flow without a prop passed
-// down through every layer.
+// down through every layer. A flow on a light surface can also set --q-text,
+// --q-muted, --q-faint, --q-line and --q-fill; unset, they fall back to the
+// dark theme.
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import React from "react";
 
 export const inputCls =
-  "w-full min-h-[52px] rounded-md border border-white/14 bg-white/[0.04] px-4 py-3.5 text-white text-sm placeholder:text-white/25 outline-none transition-colors duration-150";
+  "w-full min-h-[52px] rounded-md border border-[var(--q-line,rgba(255,255,255,0.14))] bg-[var(--q-fill,rgba(255,255,255,0.04))] px-4 py-3.5 text-[var(--q-text,#fff)] text-sm placeholder:text-[var(--q-faint,rgba(255,255,255,0.25))] outline-none transition-colors duration-150";
 
 function focusOn(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
   e.currentTarget.style.borderColor = "var(--accent)";
@@ -26,7 +28,7 @@ function focusOff(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
 
 export function Label({ children, req }: { children: React.ReactNode; req?: boolean }) {
   return (
-    <span className="block text-[0.68rem] uppercase tracking-[0.26em] text-white/42 mb-3">
+    <span className="block text-[0.68rem] uppercase tracking-[0.26em] text-[var(--q-muted,rgba(255,255,255,0.42))] mb-3">
       {children}
       {req && <span className="ml-1" style={{ color: "var(--accent)" }}>*</span>}
     </span>
@@ -95,7 +97,7 @@ export function SegButtons({
               className="flex-1 py-3.5 px-4 rounded-md border text-sm font-medium transition-colors"
               style={active
                 ? { borderColor: "var(--accent)", background: "var(--accent)", color: "var(--accent-ink, #041114)" }
-                : { borderColor: "rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.55)" }
+                : { borderColor: "var(--q-line, rgba(255,255,255,0.14))", background: "var(--q-fill, rgba(255,255,255,0.03))", color: "var(--q-muted, rgba(255,255,255,0.55))" }
               }
             >
               {opt}
@@ -194,14 +196,14 @@ export function QuestionBlock({
   index: number; prompt: string; desc?: string; last?: boolean; children: React.ReactNode;
 }) {
   return (
-    <div className={last ? "" : "mb-7 pb-7 border-b border-white/10"}>
+    <div className={last ? "" : "mb-7 pb-7 border-b border-[var(--q-line,rgba(255,255,255,0.1))]"}>
       <div className="flex items-baseline gap-3 mb-4">
         <span className="shrink-0 text-[0.72rem] font-semibold tabular-nums" style={{ color: "var(--accent)" }}>
           {String(index).padStart(2, "0")}
         </span>
         <div className="min-w-0">
-          <p className="text-[0.98rem] sm:text-[1.05rem] font-medium text-white leading-snug">{prompt}</p>
-          {desc && <p className="mt-1.5 text-[0.82rem] text-white/45 leading-relaxed">{desc}</p>}
+          <p className="text-[0.98rem] sm:text-[1.05rem] font-medium text-[var(--q-text,#fff)] leading-snug">{prompt}</p>
+          {desc && <p className="mt-1.5 text-[0.82rem] text-[var(--q-muted,rgba(255,255,255,0.45))] leading-relaxed">{desc}</p>}
         </div>
       </div>
       {children}

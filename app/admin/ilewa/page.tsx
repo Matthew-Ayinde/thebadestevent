@@ -44,7 +44,7 @@ function FeaturedBadge({ row }: { row: any }) {
   return <span className="rounded-full border border-white/12 bg-white/6 px-2.5 py-1 text-xs text-white/70">Can share</span>;
 }
 
-export default function FeedbackAdminPage() {
+export default function IlewaAdminPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [isLoading, setIsLoading]     = useState(true);
   const [selected, setSelected]       = useState<any | null>(null);
@@ -64,7 +64,7 @@ export default function FeedbackAdminPage() {
   async function fetch_(p = 1) {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/feedback?page=${p}&limit=${PAGE_SIZE}`);
+      const res = await fetch(`/api/ilewa?page=${p}&limit=${PAGE_SIZE}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setSubmissions(data.submissions || []);
@@ -83,7 +83,7 @@ export default function FeedbackAdminPage() {
   async function toggleFeatured(row: any, replaceOldest = false) {
     try {
       setTogglingId(row._id);
-      const res = await fetch(`/api/feedback/${row._id}`, {
+      const res = await fetch(`/api/ilewa/${row._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ featured: !row.featured, replaceOldest }),
@@ -125,7 +125,7 @@ export default function FeedbackAdminPage() {
     if (!deleteId) return;
     try {
       setIsDeleting(true);
-      const res = await fetch(`/api/feedback/${deleteId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/ilewa/${deleteId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       toast.success('Story deleted');
       setDeleteId(null);
@@ -164,6 +164,7 @@ export default function FeedbackAdminPage() {
         </div>
       ),
     },
+    { key: 'stage', label: 'Right now' },
     { key: 'movedFrom', label: 'Moved from' },
     { key: 'yearReturned', label: 'Returned' },
     { key: 'photoUrl', label: 'Photo', render: (_: any, row: any) => (row.photoUrl ? 'Yes' : '—') },
@@ -197,7 +198,7 @@ export default function FeedbackAdminPage() {
         <div>
           <h1 className="font-serif text-2xl sm:text-4xl text-white/90">Came Home Stories</h1>
           <p className="text-white/50 mt-1 md:mt-2 text-sm md:text-base">
-            Stories shared on <a href="/feedback" target="_blank" className="text-teal-200 hover:underline">/feedback</a>.
+            Stories shared on <a href="/ilewa" target="_blank" className="text-teal-200 hover:underline">/ilewa</a>.
             Star a story to feature it on the wall (only stories shared with consent).
           </p>
         </div>
@@ -226,7 +227,7 @@ export default function FeedbackAdminPage() {
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-white/90 font-medium truncate">{displayName(row)}</p>
-                    <p className="text-white/55 text-xs mt-1 truncate">{row.movedFrom} · {row.yearReturned}</p>
+                    <p className="text-white/55 text-xs mt-1 truncate">{[row.stage, row.movedFrom, row.yearReturned].filter(Boolean).join(' · ')}</p>
                     <div className="mt-2"><FeaturedBadge row={row} /></div>
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
@@ -302,7 +303,8 @@ export default function FeedbackAdminPage() {
 
             <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-4 space-y-4">
               <Detail label="Credited as" value={`${displayName(selected)} (${selected.creditAs})`} />
-              <Detail label="Moved back from" value={selected.movedFrom} />
+              <Detail label="Right now" value={selected.stage} />
+              <Detail label={selected.stage === 'Incoming' ? 'Living in' : 'Moved back from'} value={selected.movedFrom} />
               <Detail label="Year returned" value={selected.yearReturned} />
               <Detail label="Social handles" value={handles(selected)} />
             </div>

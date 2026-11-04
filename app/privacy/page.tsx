@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const CONTACT_EMAIL = 'info@rinwahospitality.com';
-const UPDATED = 'October 30, 2026';
+const UPDATED = 'November 4, 2026';
 
 const SECTIONS = [
   { id: 'who-we-are', title: 'Who we are' },
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <Strong>Came Home stories:</Strong> how you would like to be credited (full name, nickname or
-              anonymous), where you moved back from, the year you returned, an optional photo, your story, any social
+              anonymous), where you are in your move, where you moved back from or live now, the year you returned, an optional photo, your story, any social
               media handles you choose to add, whether we may tag you, your answers about your move, and whether you
               allow us to share your story. See <a href="#stories" className="text-teal-200 underline underline-offset-4">Came Home stories and photos</a>.
             </li>

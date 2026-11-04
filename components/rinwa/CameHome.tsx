@@ -12,7 +12,7 @@ import { RinwaStamp } from "./RinwaStamp";
 
 const ACCENT = "#7dd3cf";
 
-// ─── /feedback — Came Home ─────────────────────────────────────────────────────
+// ─── /ilewa — Came Home ────────────────────────────────────────────────────────
 // A wall of stories from people who've moved back home, then a form to add
 // your own. The RÌNWÁ leaf floats behind everything as a watermark and the
 // Came Home seal turns slowly beside the hero; the same seal is what gets
@@ -85,7 +85,7 @@ export default function CameHome({ stories }: { stories: PublicStory[] }) {
               className="relative max-w-3xl"
             >
               <p className="mb-6 text-[0.62rem] uppercase tracking-[0.5em]" style={{ color: `${ACCENT}b3` }}>
-                Ìlé wá · Came Home
+                Ìlé wa · Came Home
               </p>
               <h1
                 className="font-serif text-[clamp(2.9rem,8vw,5.75rem)] leading-[0.92] tracking-tight text-white"
@@ -94,8 +94,9 @@ export default function CameHome({ stories }: { stories: PublicStory[] }) {
                 We left. <span style={{ color: ACCENT }}>We came home.</span>
               </h1>
               <p className="mt-7 max-w-xl text-base leading-relaxed text-white/55 sm:text-lg">
-                Real stories from people who made the move back: what brought them home, what surprised
-                them, and what they wish they&apos;d known. Read theirs, then tell us yours.
+                What brought them back, what surprised them, and what they wish they&rsquo;d known; all
+                written down by the people who did it. Trial visits, extended stays, full relocations.
+                Read theirs. Then add yours.
               </p>
               <button
                 type="button" onClick={toForm}
@@ -115,7 +116,7 @@ export default function CameHome({ stories }: { stories: PublicStory[] }) {
             <div>
               <p className="mb-3 text-[0.6rem] uppercase tracking-[0.38em] text-white/35">The wall</p>
               <h2 id="stories-heading" className="font-serif text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-white" style={{ fontFamily: "var(--font-serif)" }}>
-                Stories from home
+                THE HALL OF RETURNEES
               </h2>
             </div>
           </div>
@@ -134,7 +135,7 @@ export default function CameHome({ stories }: { stories: PublicStory[] }) {
           <div className="mb-12 text-center">
             <p className="mb-4 text-[0.6rem] uppercase tracking-[0.45em]" style={{ color: `${ACCENT}b3` }}>Your turn</p>
             <h2 className="font-serif text-[clamp(2.1rem,5.5vw,3.4rem)] leading-[1.02] tracking-tight text-white" style={{ fontFamily: "var(--font-serif)" }}>
-              Tell us how you came home.
+              Tell us why you came home.
             </h2>
             <p className="mx-auto mt-4 max-w-md text-[0.95rem] leading-relaxed text-white/50">
               It takes about five minutes. Share as much or as little as you like.

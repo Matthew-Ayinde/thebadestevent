@@ -9,13 +9,29 @@ import { Area, Field, QuestionBlock, Reveal, SegButtons, inputCls } from "./ques
 import { RinwaStamp } from "./RinwaStamp";
 import { useFormAnalytics } from "@/lib/analytics/use-form-analytics";
 
-const ACCENT = "#7dd3cf";
-const PAPER = "#f4efe7";
-const INK = "#0f6e6a";
+// Brand palette. Gold is 2.2:1 on paper, so it is for rules and on dark
+// backgrounds only, never for text on the form.
+const PAPER = "#F3EDE0";
+const RUST = "#8C4423";
+const TEAL = "#2E6B66";
+const GOLD = "#C9983F";
+const TEXT = "#22302f";
+const INK = TEAL;
+
+const FORM_THEME = {
+  "--accent": TEAL,
+  "--accent-ink": PAPER,
+  "--q-text": TEXT,
+  "--q-muted": `${TEXT}c4`,
+  "--q-faint": `${TEXT}8c`,
+  "--q-line": `${TEXT}33`,
+  "--q-fill": "#fbf8f1",
+} as React.CSSProperties;
 
 // ─── Types & options ───────────────────────────────────────────────────────────
 
 interface FormData {
+  stage: string;
   creditAs: string;
   name: string;
   movedFrom: string;
@@ -30,6 +46,7 @@ interface FormData {
 }
 
 const BLANK: FormData = {
+  stage: "",
   creditAs: "", name: "",
   movedFrom: "", yearReturned: "",
   story: "",
@@ -38,6 +55,39 @@ const BLANK: FormData = {
   wishedHelpWith: "", wishPrepared: "", landingThoughts: "",
   contentConsent: "",
 };
+
+const STAGES = [
+  { value: "Returned", desc: "I’ve made the move back" },
+  { value: "Extended", desc: "I’m here, open-ended, still deciding" },
+  { value: "Incoming", desc: "I’m still abroad and weighing it" },
+];
+
+// Incoming storytellers haven't come home yet, so the questions and their
+// entry are worded differently and there is no year to ask for.
+const STAGE_COPY: Record<string, { from: string; fromDesc: string; year: string; entryFrom: string; entryWhen: string }> = {
+  Returned: {
+    from: "Where did you move back from?",
+    fromDesc: "The city and country you were living in before coming home.",
+    year: "What year did you come home?",
+    entryFrom: "Moved back from",
+    entryWhen: "Came home",
+  },
+  Extended: {
+    from: "Where were you living before you came?",
+    fromDesc: "The city and country you were living in before this stay.",
+    year: "What year did you arrive?",
+    entryFrom: "Came from",
+    entryWhen: "Arrived",
+  },
+  Incoming: {
+    from: "Where are you living now?",
+    fromDesc: "The city and country you're in today.",
+    year: "",
+    entryFrom: "Living in",
+    entryWhen: "Status",
+  },
+};
+const copyFor = (stage: string) => STAGE_COPY[stage] ?? STAGE_COPY.Returned;
 
 const CREDIT = ["Full name", "Nickname", "Anonymous"];
 const TAG = ["Yes, tag me", "No, thanks"];
@@ -81,8 +131,10 @@ async function shrinkPhoto(file: File): Promise<File> {
 
 interface Stamped {
   displayName: string;
+  fromLabel: string;
   movedFrom: string;
-  yearReturned: string;
+  whenLabel: string;
+  when: string;
   entryNo: string;
   photo: string | null;
   shared: boolean;
@@ -109,15 +161,17 @@ const StoryForm = forwardRef<HTMLDivElement>(function StoryForm(_, ref) {
 
   const hasHandle = !!(data.instagram.trim() || data.tiktok.trim() || data.twitter.trim() || data.linkedin.trim());
   const canTag = data.creditAs !== "Anonymous" && hasHandle;
+  const incoming = data.stage === "Incoming";
 
   function validate(s: number): string | null {
     switch (s) {
       case 1:
+        if (!data.stage) return "Let us know where you are right now.";
         if (!data.creditAs) return "Let us know how you'd like to be credited.";
         if (data.creditAs !== "Anonymous" && !data.name.trim())
           return data.creditAs === "Nickname" ? "Please enter your nickname." : "Please enter your full name.";
-        if (!data.movedFrom.trim()) return "Please tell us where you moved back from.";
-        if (!data.yearReturned) return "Please choose the year you came home.";
+        if (!data.movedFrom.trim()) return incoming ? "Please tell us where you're living now." : "Please tell us where you moved back from.";
+        if (!incoming && !data.yearReturned) return "Please choose the year you came home.";
         return null;
       case 2:
         if (data.story.trim().length < 20) return "Please share a little more of your story.";
@@ -173,28 +227,31 @@ const StoryForm = forwardRef<HTMLDivElement>(function StoryForm(_, ref) {
       setSubmitting(true);
       const body = new FormData();
       body.append("data", JSON.stringify({
+        stage: data.stage,
         creditAs: data.creditAs,
         name: data.creditAs === "Anonymous" ? "" : data.name,
         movedFrom: data.movedFrom,
-        yearReturned: Number(data.yearReturned),
+        yearReturned: incoming ? undefined : Number(data.yearReturned),
         story: data.story,
         instagram: data.instagram, tiktok: data.tiktok, twitter: data.twitter, linkedin: data.linkedin,
         wantsTag: canTag && data.wantsTag === TAG[0],
         wishedHelpWith: data.wishedHelpWith,
         wishPrepared: data.wishPrepared,
-        landingThoughts: data.landingThoughts,
+        landingThoughts: incoming ? "" : data.landingThoughts,
         contentConsent: data.contentConsent === CONSENT_YES,
       }));
       if (photo) body.append("photo", photo);
 
-      const res = await fetch("/api/feedback", { method: "POST", body });
+      const res = await fetch("/api/ilewa", { method: "POST", body });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || "Submission failed");
 
       setStamped({
         displayName: data.creditAs === "Anonymous" ? "Anonymous" : data.name.trim(),
+        fromLabel: copyFor(data.stage).entryFrom,
         movedFrom: data.movedFrom.trim(),
-        yearReturned: data.yearReturned,
+        whenLabel: copyFor(data.stage).entryWhen,
+        when: incoming ? data.stage : data.yearReturned,
         entryNo: String(json.id ?? "").slice(-6).toUpperCase(),
         photo: preview,
         shared: data.contentConsent === CONSENT_YES,
@@ -209,11 +266,16 @@ const StoryForm = forwardRef<HTMLDivElement>(function StoryForm(_, ref) {
     }
   }
 
-  const meta = STEPS[step - 1];
+  const meta = step === TOTAL && incoming
+    ? { ...STEPS[step - 1], tag: "03 — Looking ahead", title: "Looking ahead to the move" }
+    : STEPS[step - 1];
+  // Numbering runs on across steps, skipping questions this person isn't asked.
+  const storyStart = incoming ? 4 : 5;
+  const reflectStart = storyStart + (canTag ? 4 : 3);
 
   return (
-    <div ref={ref} style={{ ["--accent" as any]: ACCENT, ["--accent-ink" as any]: "#041114" }}>
-      <Toaster position="top-center" toastOptions={{ style: { background: "#07171a", color: "#f5f0e8", border: `1px solid ${ACCENT}33` } }} />
+    <div ref={ref} style={FORM_THEME}>
+      <Toaster position="top-center" toastOptions={{ style: { background: PAPER, color: TEXT, border: `1px solid ${RUST}66` } }} />
       <div ref={topRef} className="scroll-mt-24" />
 
       <AnimatePresence mode="wait" initial={false}>
@@ -228,47 +290,49 @@ const StoryForm = forwardRef<HTMLDivElement>(function StoryForm(_, ref) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: reduced ? 0 : -14 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-lg p-6 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] sm:p-9"
+            style={{ background: PAPER }}
           >
             {/* Step header */}
             <div className="mb-5 flex items-center justify-between">
-              <p className="text-[0.6rem] uppercase tracking-[0.38em]" style={{ color: ACCENT }}>{meta.tag}</p>
-              <p className="text-[0.6rem] uppercase tracking-[0.3em] text-white/30">Step {step} of {TOTAL}</p>
+              <p className="text-[0.6rem] uppercase tracking-[0.38em]" style={{ color: RUST }}>{meta.tag}</p>
+              <p className="text-[0.6rem] uppercase tracking-[0.3em] text-[#22302f]/75">Step {step} of {TOTAL}</p>
             </div>
             <div className="mb-3 flex gap-1.5" aria-hidden>
               {STEPS.map((_, i) => (
-                <div key={i} className="h-[2px] flex-1 rounded-full transition-colors duration-500" style={{ background: i < step ? ACCENT : "rgba(255,255,255,0.1)" }} />
+                <div key={i} className="h-[2px] flex-1 rounded-full transition-colors duration-500" style={{ background: i < step ? GOLD : `${TEXT}1f` }} />
               ))}
             </div>
             <div className="mb-8 mt-7">
-              <h3 className="font-serif text-[clamp(1.7rem,4.5vw,2.6rem)] leading-[1.1] tracking-tight text-white" style={{ fontFamily: "var(--font-serif)" }}>
+              <h3 className="font-serif text-[clamp(1.7rem,4.5vw,2.6rem)] leading-[1.1] tracking-tight text-[#22302f]" style={{ fontFamily: "var(--font-serif)" }}>
                 {meta.title}
               </h3>
-              <p className="mt-3 text-[0.9rem] leading-relaxed text-white/50">{meta.desc}</p>
+              <p className="mt-3 text-[0.9rem] leading-relaxed text-[#22302f]/75">{meta.desc}</p>
             </div>
 
-            <div className="rounded-lg border border-white/12 bg-[#030f12] p-6 sm:p-8">
+            <div className="border-t pt-7" style={{ borderColor: `${TEXT}33` }}>
               {step === 1 && <StepAboutYou data={data} set={set} />}
               {step === 2 && (
                 <StepYourStory
-                  data={data} set={set} canTag={canTag}
+                  data={data} set={set} canTag={canTag} start={storyStart}
                   preview={preview} onPick={pickPhoto} onClear={clearPhoto}
                 />
               )}
-              {step === 3 && <StepLookingBack data={data} set={set} />}
+              {step === 3 && <StepLookingBack data={data} set={set} start={reflectStart} />}
             </div>
 
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-8 flex items-center justify-between">
               <button
                 type="button" onClick={back} disabled={step === 1}
-                className="flex items-center gap-2 rounded-md border border-white/14 bg-white/[0.03] px-5 py-3 text-sm text-white/60 transition-colors hover:border-white/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex items-center gap-2 rounded-md border border-[#22302f]/25 bg-transparent px-5 py-3 text-sm text-[#22302f]/75 transition-colors hover:border-[#22302f]/50 hover:text-[#22302f] disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronLeft size={14} />
                 Back
               </button>
               <button
                 type="button" onClick={step < TOTAL ? next : submit} disabled={submitting}
-                className="group flex items-center gap-2 rounded-md px-7 py-3.5 text-sm font-semibold text-[#041114] transition-[filter] hover:[filter:brightness(1.1)] disabled:cursor-not-allowed disabled:opacity-55"
-                style={{ background: ACCENT }}
+                className="group flex items-center gap-2 rounded-md px-7 py-3.5 text-sm font-semibold transition-[filter] hover:[filter:brightness(1.1)] disabled:cursor-not-allowed disabled:opacity-55"
+                style={{ background: TEAL, color: PAPER }}
               >
                 {submitting ? "Sending…" : step < TOTAL ? "Continue" : "Submit my story"}
                 {!submitting && (step < TOTAL ? <ChevronRight size={14} /> : <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />)}
@@ -287,10 +351,53 @@ export default StoryForm;
 
 type SetFn = <K extends keyof FormData>(f: K, v: FormData[K]) => void;
 
+function StageChoice({ value, onPick }: { value: string; onPick: (v: string) => void }) {
+  return (
+    <div role="radiogroup" aria-label="Where are you right now?" className="grid gap-2.5">
+      {STAGES.map(s => {
+        const active = value === s.value;
+        return (
+          <label
+            key={s.value}
+            className="flex cursor-pointer items-center gap-3.5 rounded-md border px-4 py-3.5 text-sm transition-colors focus-within:outline-2 focus-within:outline-offset-2"
+            style={{
+              borderColor: active ? RUST : "var(--q-line)",
+              background: active ? `${RUST}14` : "var(--q-fill)",
+              outlineColor: RUST,
+            }}
+          >
+            <input
+              type="radio" name="stage" value={s.value} checked={active}
+              onChange={() => onPick(s.value)}
+              className="sr-only"
+            />
+            <span
+              aria-hidden
+              className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border"
+              style={{ borderColor: active ? RUST : `${TEXT}73` }}
+            >
+              {active && <span className="h-2.5 w-2.5 rounded-full" style={{ background: RUST }} />}
+            </span>
+            <span style={{ color: TEXT }}>
+              <span className="font-semibold">{s.value}</span> — {s.desc}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 function StepAboutYou({ data, set }: { data: FormData; set: SetFn }) {
+  const incoming = data.stage === "Incoming";
+  const copy = copyFor(data.stage);
   return (
     <div>
-      <QuestionBlock index={1} prompt="How would you like to be credited?" desc="This is the name we'd use if we share your story.">
+      <QuestionBlock index={1} prompt="Where are you right now?">
+        <StageChoice value={data.stage} onPick={v => set("stage", v)} />
+      </QuestionBlock>
+
+      <QuestionBlock index={2} prompt="How would you like to be credited?" desc="This is the name we'd use if we share your story.">
         <div>
           <SegButtons options={CREDIT} value={data.creditAs} onPick={v => set("creditAs", v)} />
           <Reveal show={data.creditAs === "Full name" || data.creditAs === "Nickname"}>
@@ -301,54 +408,57 @@ function StepAboutYou({ data, set }: { data: FormData; set: SetFn }) {
             />
           </Reveal>
           <Reveal show={data.creditAs === "Anonymous"}>
-            <p className="text-[0.85rem] leading-relaxed text-white/45">
+            <p className="text-[0.85rem] leading-relaxed text-[#22302f]/75">
               No problem. Your story will appear without a name, and we won&apos;t tag you anywhere.
             </p>
           </Reveal>
         </div>
       </QuestionBlock>
 
-      <QuestionBlock index={2} prompt="Where did you move back from?" desc="The city and country you were living in before coming home.">
+      <QuestionBlock index={3} prompt={copy.from} desc={copy.fromDesc} last={incoming}>
         <Field label="e.g. Toronto, Canada" name="movedFrom" value={data.movedFrom} onChange={e => set("movedFrom", e.target.value)} />
       </QuestionBlock>
 
-      <QuestionBlock index={3} prompt="What year did you come home?" last>
-        <select
-          name="yearReturned"
-          value={data.yearReturned}
-          onChange={e => set("yearReturned", e.target.value)}
-          className={`${inputCls} appearance-none cursor-pointer ${data.yearReturned ? "" : "text-white/25"}`}
-          style={{ backgroundImage: "none" }}
-        >
-          <option value="" disabled className="bg-[#030f12] text-white/40">Choose a year</option>
-          {YEARS.map(y => <option key={y} value={y} className="bg-[#030f12] text-white">{y}</option>)}
-        </select>
-      </QuestionBlock>
+      {!incoming && (
+        <QuestionBlock index={4} prompt={copy.year} last>
+          <select
+            name="yearReturned"
+            value={data.yearReturned}
+            onChange={e => set("yearReturned", e.target.value)}
+            className={`${inputCls} appearance-none cursor-pointer`}
+            style={{ backgroundImage: "none", color: data.yearReturned ? undefined : "var(--q-muted)" }}
+          >
+            <option value="" disabled>Choose a year</option>
+            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </QuestionBlock>
+      )}
     </div>
   );
 }
 
 function StepYourStory({
-  data, set, canTag, preview, onPick, onClear,
+  data, set, canTag, start, preview, onPick, onClear,
 }: {
-  data: FormData; set: SetFn; canTag: boolean;
+  data: FormData; set: SetFn; canTag: boolean; start: number;
   preview: string | null; onPick: (f: File | undefined) => void; onClear: () => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const incoming = data.stage === "Incoming";
 
   return (
     <div>
-      <QuestionBlock index={4} prompt="Add a photo from your journey" desc="A throwback from before you left, or a moment from life back home. Optional.">
+      <QuestionBlock index={start} prompt="Add a photo from your journey" desc={incoming ? "A throwback from before you left, or a moment from a trip home. Optional." : "A throwback from before you left, or a moment from life back home. Optional."}>
         {preview ? (
           <div className="flex items-center gap-5">
             {/* eslint-disable-next-line @next/next/no-img-element -- local object URL preview */}
-            <img src={preview} alt="Your chosen photo" className="h-28 w-24 rounded-sm object-cover ring-1 ring-white/15" />
+            <img src={preview} alt="Your chosen photo" className="h-28 w-24 rounded-sm object-cover ring-1 ring-[#22302f]/20" />
             <div className="space-y-2">
-              <button type="button" onClick={() => fileRef.current?.click()} className="block text-sm font-medium" style={{ color: ACCENT }}>
+              <button type="button" onClick={() => fileRef.current?.click()} className="block text-sm font-medium" style={{ color: TEAL }}>
                 Choose a different photo
               </button>
-              <button type="button" onClick={onClear} className="flex items-center gap-1.5 text-sm text-white/45 hover:text-white/75">
+              <button type="button" onClick={onClear} className="flex items-center gap-1.5 text-sm text-[#22302f]/75 hover:text-[#22302f]">
                 <X size={13} /> Remove
               </button>
             </div>
@@ -362,13 +472,13 @@ function StepYourStory({
             onDrop={e => { e.preventDefault(); setDragging(false); onPick(e.dataTransfer.files?.[0]); }}
             className="flex w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 py-9 text-center transition-colors"
             style={{
-              borderColor: dragging ? ACCENT : "rgba(255,255,255,0.18)",
-              background: dragging ? `${ACCENT}10` : "rgba(255,255,255,0.02)",
+              borderColor: dragging ? TEAL : `${TEXT}4d`,
+              background: dragging ? `${TEAL}10` : "var(--q-fill)",
             }}
           >
-            <ImagePlus size={22} style={{ color: ACCENT }} />
-            <span className="text-sm text-white/75">Tap to choose a photo, or drop one here</span>
-            <span className="text-xs text-white/35">JPG, PNG, WebP or HEIC</span>
+            <ImagePlus size={22} style={{ color: TEAL }} />
+            <span className="text-sm text-[#22302f]/85">Tap to choose a photo, or drop one here</span>
+            <span className="text-xs text-[#22302f]/75">JPG, PNG, WebP or HEIC</span>
           </button>
         )}
         <input
@@ -377,22 +487,28 @@ function StepYourStory({
         />
       </QuestionBlock>
 
-      <QuestionBlock index={5} prompt="Tell us your homecoming story" desc="What brought you back, and what has it been like since? Write as much or as little as feels right.">
+      <QuestionBlock
+        index={start + 1}
+        prompt={incoming ? "Tell us where you are with the decision" : "Tell us your homecoming story"}
+        desc={incoming
+          ? "What's pulling you home, and what's holding you back? Write as much or as little as feels right."
+          : "What brought you back, and what has it been like since? Write as much or as little as feels right."}
+      >
         <div>
           <textarea
             name="story" rows={6} value={data.story}
             onChange={e => set("story", e.target.value)}
             maxLength={4000}
-            placeholder="I knew it was time to come home when…"
+            placeholder={incoming ? "I started thinking about coming home when…" : "I knew it was time to come home when…"}
             className={`${inputCls} min-h-0 resize-y`}
             onFocus={e => (e.currentTarget.style.borderColor = "var(--accent)")}
             onBlur={e => (e.currentTarget.style.borderColor = "")}
           />
-          <p className="mt-1.5 text-right text-[0.68rem] tabular-nums text-white/30">{data.story.length} / 4000</p>
+          <p className="mt-1.5 text-right text-[0.68rem] tabular-nums text-[#22302f]/75">{data.story.length} / 4000</p>
         </div>
       </QuestionBlock>
 
-      <QuestionBlock index={6} prompt="Where can people find you online?" desc="Optional. Add any handles you're happy to share." last={!canTag}>
+      <QuestionBlock index={start + 2} prompt="Where can people find you online?" desc="Optional. Add any handles you're happy to share." last={!canTag}>
         <div className="grid gap-3 sm:grid-cols-2">
           <HandleInput icon={<Instagram size={15} />} label="Instagram" value={data.instagram} onChange={v => set("instagram", v)} />
           <HandleInput icon={<Music2 size={15} />} label="TikTok" value={data.tiktok} onChange={v => set("tiktok", v)} />
@@ -402,7 +518,7 @@ function StepYourStory({
       </QuestionBlock>
 
       <Reveal show={canTag}>
-        <QuestionBlock index={7} prompt="Can we tag you when we share your story?" last>
+        <QuestionBlock index={start + 3} prompt="Can we tag you when we share your story?" last>
           <SegButtons options={TAG} value={data.wantsTag} onPick={v => set("wantsTag", v)} />
         </QuestionBlock>
       </Reveal>
@@ -413,7 +529,7 @@ function StepYourStory({
 function HandleInput({ icon, label, value, onChange }: { icon: React.ReactNode; label: string; value: string; onChange: (v: string) => void }) {
   return (
     <label className="relative block">
-      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/35">{icon}</span>
+      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#22302f]/75">{icon}</span>
       <input
         value={value} onChange={e => onChange(e.target.value)}
         placeholder={label} aria-label={`${label} handle`}
@@ -426,31 +542,44 @@ function HandleInput({ icon, label, value, onChange }: { icon: React.ReactNode; 
   );
 }
 
-function StepLookingBack({ data, set }: { data: FormData; set: SetFn }) {
+function StepLookingBack({ data, set, start }: { data: FormData; set: SetFn; start: number }) {
+  const incoming = data.stage === "Incoming";
   return (
     <div>
-      <QuestionBlock index={8} prompt="If you'd had one trusted person, service or platform in your corner, what would you have wanted help with?">
+      <QuestionBlock
+        index={start}
+        prompt={incoming
+          ? "If you had one trusted person, service or platform in your corner, what would you want help with?"
+          : "If you'd had one trusted person, service or platform in your corner, what would you have wanted help with?"}
+      >
         <Area label="Your answer" name="wishedHelpWith" value={data.wishedHelpWith} onChange={e => set("wishedHelpWith", e.target.value)} placeholder="Finding a place to live, schools, paperwork, making friends…" />
       </QuestionBlock>
 
-      <QuestionBlock index={9} prompt="What's one thing about coming home you wish someone had prepared you for?">
-        <Area label="Your answer" name="wishPrepared" value={data.wishPrepared} onChange={e => set("wishPrepared", e.target.value)} placeholder="Nobody told me…" />
+      <QuestionBlock
+        index={start + 1}
+        prompt={incoming
+          ? "What's one thing about coming home you'd want someone to prepare you for?"
+          : "What's one thing about coming home you wish someone had prepared you for?"}
+      >
+        <Area label="Your answer" name="wishPrepared" value={data.wishPrepared} onChange={e => set("wishPrepared", e.target.value)} placeholder={incoming ? "I'd want to know…" : "Nobody told me…"} />
       </QuestionBlock>
 
-      <QuestionBlock index={10} prompt="Take us back to the moment you landed. What was going through your mind?">
-        <Area label="Your answer" name="landingThoughts" value={data.landingThoughts} onChange={e => set("landingThoughts", e.target.value)} placeholder="The heat hit me first, then…" />
-      </QuestionBlock>
+      {!incoming && (
+        <QuestionBlock index={start + 2} prompt="Take us back to the moment you landed. What was going through your mind?">
+          <Area label="Your answer" name="landingThoughts" value={data.landingThoughts} onChange={e => set("landingThoughts", e.target.value)} placeholder="The heat hit me first, then…" />
+        </QuestionBlock>
+      )}
 
       <QuestionBlock
-        index={11}
+        index={start + (incoming ? 2 : 3)}
         prompt="Can RÌNWÁ share your story?"
         desc="With your permission, we may feature your story and photo on our website, social media and other RÌNWÁ content, credited the way you chose above. You can ask us to take it down at any time. If you'd rather keep it private, we'll only use your answers to improve how we support people coming home."
         last
       >
         <SegButtons options={CONSENT} value={data.contentConsent} onPick={v => set("contentConsent", v)} />
-        <p className="mt-4 text-[0.8rem] leading-relaxed text-white/40">
+        <p className="mt-4 text-[0.8rem] leading-relaxed text-[#22302f]/75">
           Read how we handle your story and photo in our{" "}
-          <Link href="/privacy#stories" target="_blank" className="underline underline-offset-4 hover:text-white/70">
+          <Link href="/privacy#stories" target="_blank" className="underline underline-offset-4 hover:text-[#22302f]">
             privacy policy
           </Link>
           .
@@ -497,14 +626,14 @@ function StampedEntry({ entry }: { entry: Stamped }) {
           className="relative overflow-hidden rounded-md p-6 text-left shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] sm:p-9"
           style={{
             background: PAPER,
-            color: "#22302f",
+            color: TEXT,
             backgroundImage: `repeating-radial-gradient(circle at 85% 110%, transparent 0 14px, ${INK}0d 14px 15px), repeating-linear-gradient(0deg, transparent 0 31px, ${INK}0a 31px 32px)`,
           }}
         >
           <div className="flex items-start justify-between gap-4 border-b pb-4" style={{ borderColor: `${INK}33` }}>
             <div>
               <p className="text-[0.58rem] font-semibold uppercase tracking-[0.36em]" style={{ color: INK }}>RÌNWÁ · Homecoming register</p>
-              <p className="mt-1 font-serif text-2xl" style={{ fontFamily: "var(--font-serif)" }}>Ìlé wá · Came Home</p>
+              <p className="mt-1 font-serif text-2xl" style={{ fontFamily: "var(--font-serif)" }}>Ìlé wa · Came Home</p>
             </div>
             {entry.entryNo && (
               <p className="shrink-0 text-right font-mono text-[0.66rem] uppercase tracking-[0.18em]" style={{ color: `${INK}cc` }}>
@@ -530,8 +659,8 @@ function StampedEntry({ entry }: { entry: Stamped }) {
             )}
             <dl className="grid min-w-0 flex-1 gap-3.5 text-sm">
               <EntryLine label="Name" value={entry.displayName} />
-              <EntryLine label="Moved back from" value={entry.movedFrom} />
-              <EntryLine label="Came home" value={entry.yearReturned} />
+              <EntryLine label={entry.fromLabel} value={entry.movedFrom} />
+              <EntryLine label={entry.whenLabel} value={entry.when} />
               <EntryLine label="Story received" value={today} />
             </dl>
           </div>
@@ -581,20 +710,18 @@ function StampedEntry({ entry }: { entry: Stamped }) {
         transition={{ delay: reduced ? 0.5 : impact + 0.45, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="mt-12 flex flex-col items-center"
       >
-        <p className="mb-4 text-[0.6rem] uppercase tracking-[0.45em]" style={{ color: `${ACCENT}b3` }}>Stamped &amp; received</p>
+        <p className="mb-4 text-[0.6rem] uppercase tracking-[0.45em]" style={{ color: GOLD }}>Stamped &amp; received</p>
         <h3 className="max-w-xl font-serif text-[clamp(2rem,5.5vw,3.2rem)] leading-[1.05] tracking-tight text-white" style={{ fontFamily: "var(--font-serif)" }}>
-          Welcome home. Thank you for sharing your story.
+          Everyone documents the leaving. Nobody documents what happens after you return.
         </h3>
         <p className="mt-4 max-w-md text-[0.95rem] leading-relaxed text-white/55">
-          Every story helps us make the road home a little smoother for the next person.
-          {entry.shared
-            ? " If yours is chosen for the wall, you'll see it here soon."
-            : " Your story stays private, between you and the RÌNWÁ team."}
+          ILÉ WA by RÌNWÁ is the African diaspora&rsquo;s reference point — trial visits, extended stays and relocations, documented by the people who did it.
+          {!entry.shared && " Your story stays private, between you and the RÌNWÁ team."}
         </p>
         <Link
           href="/"
           className="group mt-10 inline-flex items-center gap-3 rounded-md border px-8 py-4 text-xs font-semibold uppercase tracking-[0.28em] transition-colors"
-          style={{ borderColor: `${ACCENT}59`, background: `${ACCENT}1a`, color: ACCENT }}
+          style={{ borderColor: `${GOLD}59`, background: `${GOLD}1a`, color: GOLD }}
         >
           Back to Home
           <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />

@@ -1,4 +1,4 @@
-// Seeds sample "Came Home" stories for previewing the /feedback wall.
+// Seeds sample "Came Home" stories for previewing the /ilewa wall.
 //   npm run seed:stories            add the samples (replacing earlier samples)
 //   npm run seed:stories -- --remove  delete the samples only
 // Samples are marked with status 'seed'; real submissions are never touched.

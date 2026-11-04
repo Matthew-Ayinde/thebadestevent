@@ -36,7 +36,7 @@ const navItems = [
   { href: '/admin/questionnaire', label: 'Questionnaire', icon: ClipboardList },
   { href: '/admin/ourdiaspora', label: 'Homecoming', icon: Home },
   { href: '/admin/ourguests', label: 'Guest Experience', icon: Sparkles },
-  { href: '/admin/feedback', label: 'Came Home Stories', icon: BookHeart },
+  { href: '/admin/ilewa', label: 'Came Home Stories', icon: BookHeart },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },

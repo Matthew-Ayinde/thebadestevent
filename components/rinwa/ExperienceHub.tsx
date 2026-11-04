@@ -68,7 +68,7 @@ export default function ExperienceHub() {
         />
 
         <Panel
-          href="/feedback"
+          href="/ilewa"
           accent={PAPER}
           reduced={reduced}
           Backdrop={StoryBackdrop}

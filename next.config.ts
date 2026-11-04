@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // /feedback was renamed to /ilewa; keep shared links, bookmarks and tabs
+      // opened before the rename working.
+      { source: "/feedback", destination: "/ilewa", permanent: true },
+      { source: "/admin/feedback", destination: "/admin/ilewa", permanent: true },
+      { source: "/api/feedback/:path*", destination: "/api/ilewa/:path*", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

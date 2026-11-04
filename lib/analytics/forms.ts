@@ -11,6 +11,8 @@ export interface FormConfig {
   id: FormId;
   label: string;
   path: string;
+  /** Earlier URLs of this form, so traffic recorded before a rename still counts. */
+  previousPaths?: string[];
   /** Step names, in order; step numbers are 1-based. */
   steps: string[];
 }
@@ -31,10 +33,17 @@ export const FORMS: Record<FormId, FormConfig> = {
   feedback: {
     id: 'feedback',
     label: 'Came Home stories',
-    path: '/feedback',
+    path: '/ilewa',
+    previousPaths: ['/feedback'],
     steps: ['About you', 'Your story', 'Looking back'],
   },
 };
+
+/** Mongo filter matching page views of a form under its current or earlier URLs. */
+export function formPathFilter(formId: FormId) {
+  const { path, previousPaths = [] } = FORMS[formId];
+  return { $in: [path, ...previousPaths] };
+}
 
 export function isFormId(value: string | null | undefined): value is FormId {
   return !!value && (FORM_IDS as readonly string[]).includes(value);

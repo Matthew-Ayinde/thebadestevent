@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { connectDB } from '@/lib/mongodb';
 import { CLOUDINARY_ROOT_FOLDER, deleteCloudinaryAssets } from '@/lib/cloudinary';
-import { CREDIT_OPTIONS, HomecomingStory, WALL_SIZE } from '@/models/HomecomingStory';
+import { CREDIT_OPTIONS, HomecomingStory, STAGE_OPTIONS, WALL_SIZE } from '@/models/HomecomingStory';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,6 +29,9 @@ const handle = optionalText(80).transform(v => v?.replace(/^@+/, '') || undefine
 
 const Schema = z
   .object({
+    stage: z.enum(STAGE_OPTIONS, {
+      errorMap: () => ({ message: 'Please let us know where you are right now' }),
+    }),
     creditAs: z.enum(CREDIT_OPTIONS, {
       errorMap: () => ({ message: 'Please choose how you would like to be credited' }),
     }),
@@ -39,7 +42,8 @@ const Schema = z
       .number()
       .int()
       .min(1960, 'Please choose the year you returned')
-      .max(new Date().getFullYear(), 'Please choose the year you returned'),
+      .max(new Date().getFullYear(), 'Please choose the year you returned')
+      .optional(),
     instagram: handle,
     tiktok: handle,
     twitter: handle,
@@ -51,6 +55,9 @@ const Schema = z
     contentConsent: z.boolean({ required_error: 'Please let us know if we can share your story' }),
   })
   .superRefine((d, ctx) => {
+    if (d.stage !== 'Incoming' && d.yearReturned === undefined) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['yearReturned'], message: 'Please choose the year you returned' });
+    }
     if (d.creditAs !== 'Anonymous' && !d.name) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -65,6 +72,7 @@ const Schema = z
   .transform(d => ({
     ...d,
     name: d.creditAs === 'Anonymous' ? undefined : d.name,
+    yearReturned: d.stage === 'Incoming' ? undefined : d.yearReturned,
     // Tagging an anonymous storyteller would reveal who they are.
     wantsTag: d.creditAs !== 'Anonymous' && d.wantsTag,
   }));

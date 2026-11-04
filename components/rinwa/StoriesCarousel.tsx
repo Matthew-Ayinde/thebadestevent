@@ -163,7 +163,7 @@ function StoryPrint({ story }: { story: PublicStory }) {
           )}
         </div>
         <p className="absolute bottom-3.5 left-4 right-16 truncate font-serif text-lg" style={{ fontFamily: "var(--font-serif)", color: "#2b3a3a" }}>
-          {story.movedFrom} → Home, {story.yearReturned}
+          {story.movedFrom} → Home{story.yearReturned ? `, ${story.yearReturned}` : ""}
         </p>
       </div>
       <RinwaStamp
@@ -180,7 +180,7 @@ function StoryWords({ story, expanded, onToggle }: { story: PublicStory; expande
     <div className="flex min-w-0 flex-col justify-center">
       <p className="mb-5 flex items-start gap-2 text-[0.62rem] uppercase leading-relaxed tracking-[0.34em]" style={{ color: ACCENT }}>
         <MapPin size={12} className="mt-[0.2em] shrink-0" />
-        <span className="min-w-0 [overflow-wrap:anywhere]">From {story.movedFrom} · Home since {story.yearReturned}</span>
+        <span className="min-w-0 [overflow-wrap:anywhere]">From {story.movedFrom} · {story.yearReturned ? `Home since ${story.yearReturned}` : "Still abroad"}</span>
       </p>
 
       {story.landingThoughts && (
@@ -233,10 +233,10 @@ function EmptyWall({ onShare }: { onShare: () => void }) {
     <div className="relative overflow-hidden rounded-xl border border-dashed border-white/15 bg-[#030f12] px-6 py-16 text-center sm:px-12">
       <RinwaStamp size={150} color={ACCENT} worn className="mx-auto mb-8 -rotate-12 opacity-50" />
       <h3 className="font-serif text-[clamp(1.6rem,4vw,2.4rem)] leading-tight text-white" style={{ fontFamily: "var(--font-serif)" }}>
-        The first story on this wall could be yours.
+        The first hundred entries are being written now. One of them could be yours.
       </h3>
       <p className="mx-auto mt-3 max-w-md text-[0.95rem] leading-relaxed text-white/50">
-        We&apos;re gathering stories from people who made the move back home. Share yours below.
+        A few questions, your own words, anonymous if you&rsquo;d rather.
       </p>
       <button
         type="button" onClick={onShare}

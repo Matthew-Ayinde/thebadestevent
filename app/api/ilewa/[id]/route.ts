@@ -73,7 +73,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       story.featuredAt = featured ? new Date() : undefined;
       await story.save();
     }
-    revalidatePath('/feedback');
+    revalidatePath('/ilewa');
 
     const featuredCount = await HomecomingStory.countDocuments({ featured: true });
     return NextResponse.json({ success: true, featured: story.featured, featuredCount, replacedId }, { status: 200 });
@@ -99,7 +99,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
     await deleteCloudinaryAssets([result.photoUrl]);
-    if (result.featured) revalidatePath('/feedback');
+    if (result.featured) revalidatePath('/ilewa');
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

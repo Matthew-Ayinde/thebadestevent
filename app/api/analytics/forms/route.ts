@@ -7,7 +7,7 @@ import { HomecomingStory } from '@/models/HomecomingStory';
 import { parseRange, requireAdmin } from '@/lib/analytics/admin-query';
 import { addDays, bucketKeys, daysBetween, startOfDayInZone } from '@/lib/analytics/dates';
 import { sourceFacets, sourceRows } from '@/lib/analytics/breakdowns';
-import { FORMS, isFormId, type FormId } from '@/lib/analytics/forms';
+import { FORMS, formPathFilter, isFormId, type FormId } from '@/lib/analytics/forms';
 import type { AnswerBreakdown, FormAnalyticsData, FormFunnelTotals, FormStepStat } from '@/lib/analytics/types';
 import type { Model } from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
@@ -73,6 +73,7 @@ const SUBMISSIONS: Record<
   feedback: {
     model: HomecomingStory,
     answers: [
+      { id: 'stage', question: 'Where they are right now', value: 'stage' },
       { id: 'movedFrom', question: 'Moved back from', value: 'movedFrom' },
       { id: 'yearReturned', question: 'Year returned', value: { $toString: '$yearReturned' } },
       { id: 'creditAs', question: 'Credited as', value: 'creditAs' },
@@ -98,7 +99,7 @@ type LeanFormEvent = { attemptId: string; visitorId: string; action: string; ste
 async function funnelTotals(formId: FormId, start: Date, end: Date): Promise<FormFunnelTotals & { events: LeanFormEvent[] }> {
   const range = { $gte: start, $lt: end };
   const [pageVisitors, events, savedSubmissions] = await Promise.all([
-    AnalyticsEvent.distinct('visitorId', { createdAt: range, path: FORMS[formId].path }),
+    AnalyticsEvent.distinct('visitorId', { createdAt: range, path: formPathFilter(formId) }),
     AnalyticsFormEvent.find({ form: formId, createdAt: range })
       .sort({ createdAt: 1 })
       .limit(MAX_EVENTS)
@@ -264,7 +265,7 @@ export async function GET(request: NextRequest) {
       funnelTotals(formId, start, end),
       funnelTotals(formId, startOfDayInZone(prevFrom, tz), start),
       AnalyticsEvent.aggregate([
-        { $match: { createdAt: { $gte: start, $lt: end }, path: config.path } },
+        { $match: { createdAt: { $gte: start, $lt: end }, path: formPathFilter(formId) } },
         {
           $facet: {
             series: [
