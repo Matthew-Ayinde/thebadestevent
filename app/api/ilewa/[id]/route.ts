@@ -42,6 +42,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'This person did not consent to their story being shared' }, { status: 400 });
     }
 
+    if (featured && story.stage === 'Incoming') {
+      return NextResponse.json({ error: 'The wall is for people who have come home; this person is still abroad' }, { status: 400 });
+    }
+
     let replacedId: string | undefined;
     if (featured && !story.featured) {
       const onWall = await HomecomingStory.countDocuments({ featured: true });

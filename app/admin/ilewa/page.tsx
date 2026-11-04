@@ -34,14 +34,24 @@ function handles(row: any) {
   ].filter(Boolean).join('\n');
 }
 
+/** Why a story can't go on the wall, if it can't. */
+function wallBlock(row: any) {
+  if (!row.contentConsent) return 'No consent to share';
+  if (row.stage === 'Incoming') return 'Incoming stories stay off the wall until they have moved back';
+  return null;
+}
+
 function FeaturedBadge({ row }: { row: any }) {
   if (row.featured) {
-    return <span className="rounded-full border border-teal-300/30 bg-teal-300/15 px-2.5 py-1 text-xs text-teal-100">On the wall</span>;
+    return <span className="inline-block whitespace-nowrap rounded-full border border-teal-300/30 bg-teal-300/15 px-2.5 py-1 text-xs text-teal-100">On the wall</span>;
   }
   if (!row.contentConsent) {
-    return <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/45">Private</span>;
+    return <span className="inline-block whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/45">Private</span>;
   }
-  return <span className="rounded-full border border-white/12 bg-white/6 px-2.5 py-1 text-xs text-white/70">Can share</span>;
+  if (row.stage === 'Incoming') {
+    return <span className="inline-block whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/45">Not for the wall</span>;
+  }
+  return <span className="inline-block whitespace-nowrap rounded-full border border-white/12 bg-white/6 px-2.5 py-1 text-xs text-white/70">Can share</span>;
 }
 
 export default function IlewaAdminPage() {
@@ -142,8 +152,8 @@ export default function IlewaAdminPage() {
     return (
       <button
         onClick={() => toggleFeatured(row)}
-        disabled={!row.contentConsent || togglingId === row._id}
-        title={row.contentConsent ? (row.featured ? 'Remove from the wall' : 'Feature on the wall') : 'No consent to share'}
+        disabled={!!wallBlock(row) || togglingId === row._id}
+        title={wallBlock(row) ?? (row.featured ? 'Remove from the wall' : 'Feature on the wall')}
         className={`p-2 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${
           row.featured ? 'text-teal-200 hover:bg-teal-300/20' : 'text-white/50 hover:bg-white/10 hover:text-white'
         }`}
@@ -286,9 +296,10 @@ export default function IlewaAdminPage() {
                 <p className="text-sm text-white/85">{selected.contentConsent ? 'Consented to sharing' : 'Asked to keep it private'}</p>
                 <p className="text-xs text-white/40 mt-0.5">
                   {selected.contentConsent ? (selected.wantsTag ? 'Happy to be tagged' : 'Do not tag') : 'Cannot be featured'}
+                  {selected.contentConsent && selected.stage === 'Incoming' && ' · Stays off the wall until they have moved back'}
                 </p>
               </div>
-              {selected.contentConsent && (
+              {!wallBlock(selected) && (
                 <AdminButton
                   variant={selected.featured ? 'secondary' : 'primary'}
                   onClick={() => toggleFeatured(selected)}

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown } from "lucide-react";
@@ -21,6 +21,7 @@ const ACCENT = "#7dd3cf";
 export default function CameHome({ stories }: { stories: PublicStory[] }) {
   const reduced = useReducedMotion();
   const formRef = useRef<HTMLDivElement>(null);
+  const [stage, setStage] = useState("");
   const { scrollYProgress } = useScroll();
   const watermarkY = useTransform(scrollYProgress, [0, 1], ["0%", reduced ? "0%" : "-18%"]);
 
@@ -135,13 +136,13 @@ export default function CameHome({ stories }: { stories: PublicStory[] }) {
           <div className="mb-12 text-center">
             <p className="mb-4 text-[0.6rem] uppercase tracking-[0.45em]" style={{ color: `${ACCENT}b3` }}>Your turn</p>
             <h2 className="font-serif text-[clamp(2.1rem,5.5vw,3.4rem)] leading-[1.02] tracking-tight text-white" style={{ fontFamily: "var(--font-serif)" }}>
-              Tell us why you came home.
+              {stage === "Incoming" ? "Tell us what\u2019s calling you home." : "Tell us why you came home."}
             </h2>
             <p className="mx-auto mt-4 max-w-md text-[0.95rem] leading-relaxed text-white/50">
               It takes about five minutes. Share as much or as little as you like.
             </p>
           </div>
-          <StoryForm ref={formRef} />
+          <StoryForm ref={formRef} onStageChange={setStage} />
         </section>
       </div>
     </div>

@@ -130,6 +130,7 @@ async function shrinkPhoto(file: File): Promise<File> {
 }
 
 interface Stamped {
+  incoming: boolean;
   displayName: string;
   fromLabel: string;
   movedFrom: string;
@@ -142,7 +143,7 @@ interface Stamped {
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
-const StoryForm = forwardRef<HTMLDivElement>(function StoryForm(_, ref) {
+const StoryForm = forwardRef<HTMLDivElement, { onStageChange?: (stage: string) => void }>(function StoryForm({ onStageChange }, ref) {
   const reduced = useReducedMotion();
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormData>(BLANK);
@@ -157,6 +158,7 @@ const StoryForm = forwardRef<HTMLDivElement>(function StoryForm(_, ref) {
 
   function set<K extends keyof FormData>(field: K, value: FormData[K]) {
     setData(prev => ({ ...prev, [field]: value }));
+    if (field === "stage") onStageChange?.(value);
   }
 
   const hasHandle = !!(data.instagram.trim() || data.tiktok.trim() || data.twitter.trim() || data.linkedin.trim());
@@ -247,6 +249,7 @@ const StoryForm = forwardRef<HTMLDivElement>(function StoryForm(_, ref) {
       if (!res.ok) throw new Error(json.error || "Submission failed");
 
       setStamped({
+        incoming,
         displayName: data.creditAs === "Anonymous" ? "Anonymous" : data.name.trim(),
         fromLabel: copyFor(data.stage).entryFrom,
         movedFrom: data.movedFrom.trim(),
@@ -599,6 +602,7 @@ const DROP_DURATION = 0.42;
 
 function StampedEntry({ entry }: { entry: Stamped }) {
   const reduced = useReducedMotion();
+  const sealLabel = entry.incoming ? "On the way home" : "Came Home";
   const impact = DROP_DELAY + DROP_DURATION;
 
   useEffect(() => {
@@ -633,7 +637,7 @@ function StampedEntry({ entry }: { entry: Stamped }) {
           <div className="flex items-start justify-between gap-4 border-b pb-4" style={{ borderColor: `${INK}33` }}>
             <div>
               <p className="text-[0.58rem] font-semibold uppercase tracking-[0.36em]" style={{ color: INK }}>RÌNWÁ · Homecoming register</p>
-              <p className="mt-1 font-serif text-2xl" style={{ fontFamily: "var(--font-serif)" }}>Ìlé wa · Came Home</p>
+              <p className="mt-1 font-serif text-2xl" style={{ fontFamily: "var(--font-serif)" }}>Ìlé wa · {entry.incoming ? "On the Way Home" : "Came Home"}</p>
             </div>
             {entry.entryNo && (
               <p className="shrink-0 text-right font-mono text-[0.66rem] uppercase tracking-[0.18em]" style={{ color: `${INK}cc` }}>
@@ -654,7 +658,7 @@ function StampedEntry({ entry }: { entry: Stamped }) {
               </div>
             ) : (
               <div className="h-32 w-24 shrink-0 overflow-hidden rounded-[2px] ring-1 sm:h-36 sm:w-28" style={{ background: "#e6ddcf", ["--tw-ring-color" as any]: `${INK}40` }}>
-                <RinwaStamp size={96} color={`${INK}`} className="m-auto mt-5 opacity-25 sm:mt-7" />
+                <RinwaStamp size={96} color={`${INK}`} label={sealLabel} className="m-auto mt-5 opacity-25 sm:mt-7" />
               </div>
             )}
             <dl className="grid min-w-0 flex-1 gap-3.5 text-sm">
@@ -699,7 +703,7 @@ function StampedEntry({ entry }: { entry: Stamped }) {
               ? { delay: 0.3, duration: 0.4 }
               : { delay: DROP_DELAY, duration: DROP_DURATION + 0.18, times: [0, 0.7, 1], ease: [0.55, 0, 0.9, 0.35] }}
           >
-            <RinwaStamp size={208} color={INK} worn className="h-full w-full" />
+            <RinwaStamp size={208} color={INK} worn label={sealLabel} className="h-full w-full" />
           </motion.div>
         </div>
       </motion.div>

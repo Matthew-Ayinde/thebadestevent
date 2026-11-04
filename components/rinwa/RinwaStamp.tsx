@@ -10,9 +10,11 @@ import { useId } from "react";
 // real rubber stamp.
 
 export function RinwaStamp({
-  size = 240, color = "#0f6e6a", worn = false, className, style,
+  size = 240, color = "#0f6e6a", worn = false, label = "Came Home", className, style,
 }: {
   size?: number; color?: string; worn?: boolean;
+  /** The words under the leaf. */
+  label?: string;
   className?: string; style?: React.CSSProperties;
 }) {
   // useId can contain characters that break url(#…) references.
@@ -25,7 +27,7 @@ export function RinwaStamp({
     <svg
       width={size} height={size} viewBox="0 0 400 400"
       className={className} style={style}
-      role="img" aria-label="ÌLÉ WA by RÌNWÁ, Came Home"
+      role="img" aria-label={`ÌLÉ WA by RÌNWÁ, ${label}`}
     >
       <defs>
         {/* Top text runs clockwise over the top; bottom text runs left to right under the bottom so it reads upright. */}
@@ -57,10 +59,10 @@ export function RinwaStamp({
           <textPath href={`#${top}`} startOffset="50%" textAnchor="middle">ÌLÉ WA BY RÌNWÁ</textPath>
         </text>
         <text
-          fontSize="30" fontWeight="500" letterSpacing="20" stroke="none"
+          fontSize="30" fontWeight="500" letterSpacing={label.length > 10 ? 8 : 20} stroke="none"
           style={{ fontFamily: "var(--font-geist-sans), Arial, sans-serif" }}
         >
-          <textPath href={`#${bottom}`} startOffset="50%" textAnchor="middle">CAME HOME</textPath>
+          <textPath href={`#${bottom}`} startOffset="50%" textAnchor="middle">{label.toUpperCase()}</textPath>
         </text>
 
         <circle cx="38" cy="200" r="7" stroke="none" />
