@@ -86,7 +86,7 @@ export default function CameHome({ stories }: { stories: PublicStory[] }) {
               className="relative max-w-3xl"
             >
               <p className="mb-6 text-[0.62rem] uppercase tracking-[0.5em]" style={{ color: `${ACCENT}b3` }}>
-                Ìlé wa · Came Home
+                Ìlé wa · Our House
               </p>
               <h1
                 className="font-serif text-[clamp(2.9rem,8vw,5.75rem)] leading-[0.92] tracking-tight text-white"
