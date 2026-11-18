@@ -6,9 +6,9 @@ import { CONSENT_EVENT, type ConsentChoice } from '@/lib/consent';
 
 const ENDPOINT = '/api/analytics/collect';
 // Staff-only surfaces are not audience traffic.
-const EXCLUDED = [/^\/admin(\/|$)/, /^\/hotel-medallion\/scan(\/|$)/];
+const EXCLUDED = [/^\/admin(\/|$)/, /^\/[^/]+\/scan(\/|$)/];
 // Paths that embed a secret (ticket links work as bearer tokens) are recorded as a pattern.
-const REDACTED: [RegExp, string][] = [[/^\/hotel-medallion\/ticket\/[^/]+/, '/hotel-medallion/ticket/[token]']];
+const REDACTED: [RegExp, string][] = [[/^\/([^/]+)\/ticket\/[^/]+/, '/$1/ticket/[token]']];
 const SOCIAL_HOSTS = /(^|\.)(instagram|facebook|tiktok|x|twitter|youtube|linkedin|threads|snapchat|pinterest)\.com$|^youtu\.be$/;
 
 function redact(pathname: string) {

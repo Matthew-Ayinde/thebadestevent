@@ -270,7 +270,7 @@ export const CONVERSION_LABELS: Record<ConversionSource, string> = {
   questionnaire: 'Questionnaire',
   meeting_request: 'Meeting request',
   job_application: 'Job application',
-  medallion_rsvp: 'Medallion RSVP',
+  medallion_rsvp: 'Event page RSVP',
   talent_circle: 'Talent circle',
   contact: 'Contact form',
 };

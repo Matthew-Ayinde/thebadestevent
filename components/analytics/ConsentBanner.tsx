@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { OPEN_CONSENT_EVENT, readConsent, writeConsent, type ConsentChoice } from '@/lib/consent';
 
 // Staff-only surfaces never show the banner.
-const HIDDEN = [/^\/admin(\/|$)/, /^\/hotel-medallion\/scan(\/|$)/];
+const HIDDEN = [/^\/admin(\/|$)/, /^\/[^/]+\/scan(\/|$)/];
 
 export function ConsentBanner() {
   const pathname = usePathname();

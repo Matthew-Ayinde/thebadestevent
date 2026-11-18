@@ -12,6 +12,8 @@ export interface FormConfig {
   label: string;
   /** Where the form lives; a trailing "*" matches every page under that prefix. */
   path: string;
+  /** Overrides `path` for matching page views when the form lives on many pages. */
+  pathPattern?: string;
   /** Step names, in order; step numbers are 1-based. Single-page forms have one step. */
   steps: string[];
   /** What "started" means, shown in the dashboard. */
@@ -49,8 +51,10 @@ export const FORMS: Record<FormId, FormConfig> = {
   },
   medallion_rsvp: {
     id: 'medallion_rsvp',
-    label: 'Medallion RSVP',
-    path: '/hotel-medallion',
+    label: 'Event page RSVP',
+    path: '/{event page}',
+    // Event pages are single-segment URLs; exclude the site's own top-level routes.
+    pathPattern: '^/(?!(admin|careers|privacy|api)(/|$))[a-z0-9-]+/?$',
     steps: ['RSVP form'],
     startedMeans: 'Started filling in the RSVP',
   },
@@ -62,6 +66,7 @@ export function isFormId(value: string | null | undefined): value is FormId {
 
 /** Mongo filter for page views on a form's page(s). */
 export function formPathFilter(form: FormConfig) {
+  if (form.pathPattern) return { $regex: form.pathPattern };
   if (form.path.endsWith('*')) {
     const prefix = form.path.slice(0, -1).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return { $regex: `^${prefix}` };

@@ -8,7 +8,7 @@ import { AnalyticsFormEvent } from '@/models/AnalyticsFormEvent';
 import { QuestionnaireSubmission } from '@/models/QuestionnaireSubmission';
 import { MeetingRequest } from '@/models/MeetingRequest';
 import { JobApplication } from '@/models/JobApplication';
-import { MedallionGuest } from '@/models/MedallionGuest';
+import { EventGuest } from '@/models/EventGuest';
 import { TalentCircleMember } from '@/models/TalentCircleMember';
 import {
   bucketKeys,
@@ -112,7 +112,7 @@ const SUBMISSIONS: Record<FormId, { model: Model<any>; answers: AnswerSpec[]; co
     ],
   },
   medallion_rsvp: {
-    model: MedallionGuest,
+    model: EventGuest,
     answers: [
       { id: 'checkedIn', question: 'Checked in at the door', value: { $cond: [{ $ifNull: ['$checkedInAt', false] }, 'Checked in', 'Not yet'] } },
       {

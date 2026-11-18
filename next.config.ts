@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // Events from the old Hotel Medallion microsite now live at /{slug} (see scripts/migrate-hotel-medallion.ts).
+      { source: "/hotel-medallion/events/:slug", destination: "/:slug", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
