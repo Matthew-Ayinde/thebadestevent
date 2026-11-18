@@ -138,3 +138,10 @@ export function medallionIcs(ticketUrl?: string) {
   ];
   return lines.map(icsFold).join('\r\n') + '\r\n';
 }
+
+// ─── Lifecycle ───────────────────────────────────────────────────────────────
+
+/** True once the relaunch has ended — the microsite switches from RSVP mode to recap mode. */
+export function isMedallionRelaunchOver(now: Date = new Date()) {
+  return now.getTime() >= new Date(MEDALLION_EVENT.endsAt).getTime();
+}

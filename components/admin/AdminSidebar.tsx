@@ -22,6 +22,7 @@ import {
   UserRoundCheck,
   BarChart3,
   Sparkles,
+  Hotel,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -37,6 +38,7 @@ const navItems = [
   { href: '/admin/job-postings', label: 'Job Postings', icon: Briefcase },
   { href: '/admin/applications', label: 'Applications', icon: UserRoundCheck },
   { href: '/admin/talent-circle', label: 'Talent Circle', icon: Sparkles },
+  { href: '/admin/hotel-medallion', label: 'Hotel Medallion', icon: Hotel },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   // { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
   // { href: '/admin/settings', label: 'Settings', icon: Settings2 },

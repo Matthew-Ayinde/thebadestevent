@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { CalendarDays, MapPin } from 'lucide-react';
+import { ArrowRight, CalendarDays, MapPin } from 'lucide-react';
 import { connectDB } from '@/lib/mongodb';
 import { MedallionGuest } from '@/models/MedallionGuest';
-import { MEDALLION_EVENT } from '@/lib/hotel-medallion';
+import Link from 'next/link';
+import { MEDALLION_BASE_PATH, MEDALLION_EVENT, isMedallionRelaunchOver } from '@/lib/hotel-medallion';
 import { ticketQrSvg, ticketUrl } from '@/lib/hotel-medallion-server';
 import { AccentRule, MedallionWordmark, PrContact, VenueAddress, VenueMap } from '@/components/hotel-medallion/MedallionBrand';
 import { TicketActions } from '@/components/hotel-medallion/TicketActions';
@@ -28,6 +29,9 @@ export default async function TicketPage({ params }: { params: Promise<{ token: 
   const name = `${guest.firstName} ${guest.lastName}`;
   const when = e.timeLabel ? `${e.dateLabel} · ${e.timeLabel}` : e.dateLabel;
   const qrSvg = await ticketQrSvg(token);
+  // After the relaunch the pass becomes a keepsake: no entry instructions, no calendar prompts.
+  const over = isMedallionRelaunchOver();
+  const attended = Boolean(guest.checkedInAt);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-10 sm:py-14">
@@ -35,14 +39,18 @@ export default async function TicketPage({ params }: { params: Promise<{ token: 
 
       <article className="mt-8 overflow-hidden rounded-3xl border border-(--hm-line) bg-(--hm-navy)/80 shadow-[0_30px_80px_rgba(2,6,20,0.6)]">
         <div className="px-6 pt-7 text-center sm:px-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-(--hm-accent)">You’re on the list</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-(--hm-accent)">
+            {over ? (attended ? 'Thank you for joining us' : 'This event has concluded') : 'You’re on the list'}
+          </p>
           <h1 className="mt-3 font-serif text-3xl text-(--hm-cream)">{name}</h1>
           <p className="mt-3 text-sm leading-relaxed text-(--hm-mist)">{e.invitationLine}</p>
           <AccentRule className="mt-6" />
         </div>
 
         <div className="px-6 py-7 sm:px-8">
-          <div className="mx-auto w-full max-w-[260px] rounded-2xl bg-white p-4 shadow-[0_0_0_6px_rgba(0,174,241,0.15)]">
+          <div
+            className={`mx-auto w-full max-w-[260px] rounded-2xl bg-white p-4 shadow-[0_0_0_6px_rgba(0,174,241,0.15)] ${over ? 'opacity-40 grayscale' : ''}`}
+          >
             <div
               role="img"
               aria-label={`Entry QR code for ${name}`}
@@ -52,7 +60,9 @@ export default async function TicketPage({ params }: { params: Promise<{ token: 
           </div>
           <p className="mt-4 text-center font-mono text-sm tracking-[0.28em] text-(--hm-mist)">{guest.code}</p>
           <p className="mt-2 text-center text-xs text-(--hm-dim)">
-            Present this code at the entrance. It admits one guest.
+            {over
+              ? 'This pass is no longer valid for entry. Keep it as a memento of the night.'
+              : 'Present this code at the entrance. It admits one guest.'}
           </p>
         </div>
 
@@ -70,15 +80,27 @@ export default async function TicketPage({ params }: { params: Promise<{ token: 
         </dl>
       </article>
 
-      <TicketActions token={token} code={guest.code} name={name} />
+      {over ? (
+        <Link
+          href={`${MEDALLION_BASE_PATH}#whats-next`}
+          className="mt-8 flex items-center justify-center gap-2 rounded-full bg-(--hm-accent) px-6 py-4 text-sm font-semibold text-(--hm-navy) transition hover:bg-(--hm-accent-soft) active:scale-[0.98]"
+        >
+          See what’s next at {e.hotel}
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
+      ) : (
+        <>
+          <TicketActions token={token} code={guest.code} name={name} />
 
-      <AddToCalendar token={token} ticketUrl={ticketUrl(token)} className="mt-8" />
+          <AddToCalendar token={token} ticketUrl={ticketUrl(token)} className="mt-8" />
 
-      <p className="mt-6 text-center text-xs text-(--hm-dim)">
-        A copy of this pass has also been sent to your email.
-      </p>
+          <p className="mt-6 text-center text-xs text-(--hm-dim)">
+            A copy of this pass has also been sent to your email.
+          </p>
 
-      <VenueMap className="mt-10" />
+          <VenueMap className="mt-10" />
+        </>
+      )}
 
       <footer className="mt-8">
         <PrContact />

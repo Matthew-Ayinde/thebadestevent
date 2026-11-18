@@ -69,30 +69,46 @@ export function VenueAddress({ className = '' }: { className?: string }) {
   );
 }
 
-/** Embedded Google Map of the venue with a one-tap directions button. */
-export function VenueMap({ className = '' }: { className?: string }) {
+type VenueOverride = { name: string; addressLines: readonly string[]; directionsUrl: string; embedUrl: string };
+
+/** Embedded Google Map of the venue with a one-tap directions button. Defaults to the hotel. */
+export function VenueMap({
+  className = '',
+  heading = 'Getting there',
+  venue,
+}: {
+  className?: string;
+  heading?: string;
+  venue?: VenueOverride;
+}) {
+  const v: VenueOverride = venue ?? {
+    name: MEDALLION_EVENT.hotel,
+    addressLines: MEDALLION_EVENT.venueAddressLines,
+    directionsUrl: MEDALLION_DIRECTIONS_URL,
+    embedUrl: MEDALLION_MAP_EMBED_URL,
+  };
   return (
     <section aria-labelledby="venue-heading" className={className}>
       <h2 id="venue-heading" className="text-center text-xs uppercase tracking-[0.3em] text-(--hm-mist)">
-        Getting there
+        {heading}
       </h2>
       <div className="mt-4 overflow-hidden rounded-3xl border border-(--hm-line) bg-(--hm-navy)/70">
         <iframe
-          src={MEDALLION_MAP_EMBED_URL}
-          title={`Map showing ${MEDALLION_EVENT.hotel}`}
+          src={v.embedUrl}
+          title={`Map showing ${v.name}`}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
           className="block aspect-4/3 w-full border-0"
         />
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-(--hm-mist)">
-            <span className="block font-medium text-(--hm-cream)">{MEDALLION_EVENT.hotel}</span>
-            {MEDALLION_EVENT.venueAddressLines.map((line) => (
+            <span className="block font-medium text-(--hm-cream)">{v.name}</span>
+            {v.addressLines.map((line) => (
               <span key={line} className="block">{line}</span>
             ))}
           </p>
           <a
-            href={MEDALLION_DIRECTIONS_URL}
+            href={v.directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-(--hm-accent) px-5 py-3 text-sm font-semibold text-(--hm-navy) transition hover:bg-(--hm-accent-soft) active:scale-[0.98]"

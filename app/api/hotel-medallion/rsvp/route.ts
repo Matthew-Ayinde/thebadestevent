@@ -6,6 +6,7 @@ import { MedallionGuest, type IMedallionGuest } from '@/models/MedallionGuest';
 import { generateTicketCode, generateTicketToken, sendMedallionInvitation } from '@/lib/hotel-medallion-server';
 import { rateLimit, RATE_LIMITS, tooManyRequests } from '@/lib/rate-limit';
 import { rateLimitKey } from '@/lib/client-ip';
+import { isMedallionRelaunchOver } from '@/lib/hotel-medallion';
 
 export const runtime = 'nodejs';
 
@@ -45,6 +46,10 @@ async function resendToExisting(email: string) {
 }
 
 export async function POST(request: NextRequest) {
+  if (isMedallionRelaunchOver()) {
+    return NextResponse.json({ error: 'RSVPs for the relaunch have closed. Thank you for your interest.' }, { status: 410 });
+  }
+
   try {
     const limited = await rateLimit(RATE_LIMITS.rsvpSubmit, rateLimitKey(request.headers));
     if (!limited.ok) return tooManyRequests(limited, 'Too many submissions. Please wait a few minutes and try again.');

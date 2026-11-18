@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const limit = Math.max(1, parseInt(searchParams.get('limit') || '20', 10) || 20);
+    const limit = Math.min(10000, Math.max(1, parseInt(searchParams.get('limit') || '20', 10) || 20));
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
     const skip = searchParams.has('skip')
       ? Math.max(0, parseInt(searchParams.get('skip') || '0', 10) || 0)
